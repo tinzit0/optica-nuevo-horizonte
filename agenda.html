@@ -251,7 +251,7 @@
                 const fecha = new Date(mesVisible.getFullYear(), mesVisible.getMonth(), i);
                 const fechaStr = fechaISO(fecha);
                 const disponible = fecha >= new Date(hoy.getFullYear(),hoy.getMonth(),hoy.getDate()) && fecha.getDay() !== 0;
-                if (disponible && !horariosMap[fechaStr]) horariosMap[fechaStr] = horariosCadaMediaHora();
+                if (disponible) horariosMap[fechaStr] = [...new Set([...horariosCadaMediaHora(), ...(horariosMap[fechaStr] || [])])].sort();
                 html += `<button type="button" class="cal-day ${disponible ? 'available' : ''}" ${disponible ? `onclick="seleccionarFecha('${fechaStr}',this)"` : 'disabled'}>${i}</button>`;
             }
             cal.innerHTML = html;
