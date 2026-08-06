@@ -1,0 +1,25 @@
+backend:
+  name: git-gateway
+  branch: main # o master, según tu rama principal en GitHub
+
+media_folder: "uploads" # Dónde se guardan las fotos de los lentes
+public_folder: "/uploads"
+
+collections:
+  - name: "productos"
+    label: "Armazones y Lentes"
+    folder: "content/productos"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "ID Único", name: "id", widget: "string" }
+      - { label: "Nombre del Producto", name: "title", widget: "string" }
+      - { label: "Marca", name: "brand", widget: "select", options: ["Ray-Ban", "Oakley", "Vogue", "Prada", "Guess", "Armani Exchange"] }
+      - { label: "Precio ($ CLP)", name: "price", widget: "number", value_node: "int" }
+      - { label: "Precio Anterior / Oferta ($ CLP)", name: "price_old", widget: "number", required: false }
+      - { label: "Imagen Principal", name: "image", widget: "image" }
+      - { label: "Tipo de Anteojo", name: "category", widget: "select", options: ["optico", "sol"] }
+      - { label: "Forma del Marco", name: "shape", widget: "select", options: ["rectangular", "redondo", "aviador", "cat-eye", "hexagonal"] }
+      - { label: "Material", name: "material", widget: "string", default: "Acetato" }
+      - { label: "Stock Disponible", name: "stock", widget: "number", default: 1 }
+      - { label: "Destacado en Home", name: "featured", widget: "boolean", default: false }

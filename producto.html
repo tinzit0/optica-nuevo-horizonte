@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle de Armazón | Óptica Nuevo Horizonte</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23080E21'/%3E%3Cpath d='M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z' fill='none' stroke='%23C5A059' stroke-width='1.8'/%3E%3Ccircle cx='12' cy='12' r='3' fill='none' stroke='%23C5A059' stroke-width='1.8'/%3E%3C/svg%3E">
+    <meta name="description" content="Ficha técnica y compra de armazones ópticos y de sol en Óptica Nuevo Horizonte, Tomé.">
+    <meta name="theme-color" content="#080E21">
+    <meta property="og:title" content="Detalle de Armazón | Óptica Nuevo Horizonte">
+    <meta property="og:description" content="Ficha técnica y compra de armazones ópticos y de sol en Óptica Nuevo Horizonte, Tomé.">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="es_CL">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1511499767150-a48a237f0083?q=80&w=1200&auto=format&fit=crop">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #17352a; --gold: #b99350; --gray-border: rgba(16,23,19,.13); --text-dark: #101713; --text-muted: #66706a; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; color: var(--text-dark); background-color: #fbfaf7; }
+        a { text-decoration: none; color: inherit; }
+
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 22px 8%; background: #FFF; border-bottom: 1px solid var(--gray-border); }
+        .logo-text { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: var(--primary); text-transform: uppercase; }
+
+        .product-detail { display: flex; gap: 60px; padding: 60px 8%; max-width: 1200px; margin: 0 auto; }
+        .gallery { flex: 1; }
+        .main-img { width: 100%; min-height:460px; object-fit:cover; border: 1px solid var(--gray-border); padding: 12px; background: #f3efe6; }
+
+        .info { flex: 1; }
+        .brand { font-size: 11px; color: var(--gold); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+        .title { font-size: 28px; font-family: 'Playfair Display', serif; margin: 6px 0 16px; color: var(--primary); }
+        .price-box { font-size: 24px; font-weight: 700; color: var(--primary); margin-bottom: 28px; }
+
+        .btn-add { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; background: var(--gold); color: white; padding: 18px; font-weight: 700; border-radius: 0; border: none; font-size: 13px; letter-spacing: 1px; cursor: pointer; transition: background 0.25s; }
+        .btn-add:hover { background: var(--primary); }
+        @media(max-width:760px){.header{padding:18px 5%}.product-detail{flex-direction:column;padding:35px 5%;gap:30px}.main-img{min-height:320px}.title{font-size:25px}}
+    </style>
+</head>
+<body>
+    <header class="header">
+        <a href="index.html" class="logo-text">NUEVO HORIZONTE</a>
+        <a href="catalogo.html" style="font-size:12px; font-weight:600;">← VOLVER AL CATÁLOGO</a>
+    </header>
+
+    <div class="product-detail">
+        <div class="gallery">
+            <img class="main-img" src="https://images.unsplash.com/photo-1572635196237-14b3f281503f?q=80&w=500&auto=format&fit=crop" alt="Ray-Ban">
+        </div>
+        <div class="info">
+            <div class="brand">Ray-Ban</div>
+            <h1 class="title">Wayfarer Classic Acetato</h1>
+            <div class="price-box"><span>$60.000</span></div>
+
+            <button class="btn-add" data-id="wayfarer-classic">AÑADIR A MI BOLSA DE COMPRAS</button>
+
+            <div style="margin-top: 30px; border-top: 1px solid var(--gray-border); padding-top: 20px; font-size: 13px; color: var(--text-muted);">
+                <p><strong>Material:</strong> Acetato Inyectado de Alta Densidad</p>
+                <p><strong>Calibre:</strong> 50 mm | <strong>Puente:</strong> 22 mm</p>
+                <p><strong>Incluye:</strong> Estuche rígido + Paño microfibra + Garantía Oficial</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

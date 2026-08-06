@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finalizar Compra | Óptica Nuevo Horizonte</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23080E21'/%3E%3Cpath d='M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z' fill='none' stroke='%23C5A059' stroke-width='1.8'/%3E%3Ccircle cx='12' cy='12' r='3' fill='none' stroke='%23C5A059' stroke-width='1.8'/%3E%3C/svg%3E">
+    <meta name="description" content="Completa tus datos, elige el despacho y paga de forma segura tu pedido en Óptica Nuevo Horizonte.">
+    <meta name="theme-color" content="#080E21">
+    <meta property="og:title" content="Finalizar Compra | Óptica Nuevo Horizonte">
+    <meta property="og:description" content="Completa tus datos, elige el despacho y paga de forma segura tu pedido en Óptica Nuevo Horizonte.">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="es_CL">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1511499767150-a48a237f0083?q=80&w=1200&auto=format&fit=crop">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #080E21;
+            --gold: #C5A059;
+            --gold-light: #F4EBE1;
+            --bg-body: #FAFAFC;
+            --card-bg: #FFFFFF;
+            --gray-border: #E8ECEF;
+            --text-dark: #121826;
+            --text-muted: #626D7D;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; color: var(--text-dark); background-color: var(--bg-body); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+        a { text-decoration: none; color: inherit; transition: all 0.25s ease; }
+        h1, h2, h3, h4, .brand-font { font-family: 'Playfair Display', serif; }
+
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 20px 8%; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--gray-border); position: sticky; top:0; z-index:100; }
+        .logo-container { display: flex; align-items: center; gap: 12px; }
+        .logo-svg { width: 32px; height: 32px; stroke: var(--primary); fill: none; stroke-width: 1.5; }
+        .logo-text { font-size: 19px; font-weight: 700; color: var(--primary); letter-spacing: -0.2px; text-transform: uppercase; }
+        .logo-text span { font-size: 9px; font-family: 'Inter', sans-serif; display: block; letter-spacing: 3px; color: var(--gold); font-weight: 600; margin-top: -2px; }
+        
+        .secure-badge { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: #22C55E; text-transform: uppercase; letter-spacing: 0.5px; }
+        .secure-badge svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; }
+
+        .checkout-container { padding: 40px 8%; max-width: 1280px; margin: 0 auto; }
+        .checkout-grid { display: grid; grid-template-columns: 1fr 420px; gap: 50px; }
+
+        .checkout-step { background: var(--card-bg); border: 1px solid var(--gray-border); border-radius: 12px; padding: 32px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); }
+        .step-title { font-size: 18px; color: var(--primary); margin-bottom: 20px; display: flex; align-items: center; gap: 12px; }
+        .step-number { width: 28px; height: 28px; background: var(--primary); color: var(--gold-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-family: 'Inter', sans-serif; font-weight: 700; }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .form-group { display: flex; flex-direction: column; }
+        .form-group.full { grid-column: span 2; }
+        .form-group label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; color: var(--primary); }
+        .form-group input, .form-group select { padding: 12px 14px; border: 1px solid var(--gray-border); border-radius: 6px; font-family: inherit; font-size: 13px; outline: none; transition: border-color 0.2s; }
+        .form-group input:focus, .form-group select:focus { border-color: var(--gold); }
+
+        .prescription-upload-box { border: 2px dashed var(--gold); background: var(--gold-light); padding: 24px; border-radius: 8px; text-align: center; cursor: pointer; transition: all 0.2s; }
+        .prescription-upload-box:hover { background: #EFE4D6; }
+        .prescription-upload-box svg { width: 32px; height: 32px; stroke: var(--gold); fill: none; stroke-width: 1.5; margin-bottom: 8px; }
+        .prescription-upload-box p { font-size: 13px; font-weight: 600; color: var(--primary); }
+        .prescription-upload-box small { font-size: 11px; color: var(--text-muted); display: block; margin-top: 4px; }
+
+        /* Tarjetas de Envío Interactivas */
+        .shipping-options { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .shipping-card { border: 1px solid var(--gray-border); border-radius: 8px; padding: 16px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; justify-content: space-between; }
+        .shipping-card.selected { border-color: var(--gold); background: rgba(197, 160, 89, 0.08); box-shadow: 0 0 0 1px var(--gold); }
+        .shipping-card strong { font-size: 13px; color: var(--primary); display: block; }
+        .shipping-card span { font-size: 11px; color: var(--text-muted); }
+        .shipping-card .price { font-size: 13px; font-weight: 700; color: var(--gold); margin-top: 8px; }
+
+        /* Tarjetas de Pago Interactivas */
+        .payment-methods { display: flex; flex-direction: column; gap: 12px; }
+        .payment-option { border: 1px solid var(--gray-border); border-radius: 8px; padding: 16px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: all 0.2s; }
+        .payment-option.selected { border-color: var(--primary); background: #FAFBFD; box-shadow: 0 0 0 1px var(--primary); }
+        .payment-label { display: flex; align-items: center; gap: 12px; font-size: 13px; font-weight: 600; color: var(--primary); }
+        .payment-icons { display: flex; gap: 8px; font-size: 11px; font-weight: 700; color: var(--text-muted); }
+
+        .order-summary-sidebar { background: var(--card-bg); border: 1px solid var(--gray-border); border-radius: 12px; padding: 28px; height: fit-content; position: sticky; top: 100px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); }
+        .order-summary-sidebar h3 { font-size: 18px; color: var(--primary); margin-bottom: 20px; border-bottom: 1px solid var(--gray-border); padding-bottom: 12px; }
+
+        .sidebar-item { display: flex; gap: 16px; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--gray-border); }
+        .sidebar-item img { width: 64px; height: 64px; object-fit: contain; border: 1px solid var(--gray-border); border-radius: 6px; padding: 4px; }
+        .sidebar-item-info { flex: 1; }
+        .sidebar-item-title { font-size: 13px; font-weight: 600; color: var(--primary); }
+        .sidebar-item-subtitle { font-size: 11px; color: var(--text-muted); }
+        .sidebar-item-price { font-size: 13px; font-weight: 700; color: var(--primary); margin-top: 4px; }
+
+        .summary-totals { margin-top: 20px; }
+        .summary-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 10px; color: var(--text-muted); }
+        .summary-row.total { font-size: 18px; font-weight: 700; color: var(--primary); border-top: 1px solid var(--gray-border); padding-top: 14px; margin-top: 14px; }
+
+        .btn-pay-now { display: block; width: 100%; text-align: center; background: var(--gold); color: #FFF; padding: 18px; font-weight: 700; font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase; border-radius: 6px; margin-top: 24px; transition: all 0.3s; border: none; cursor: pointer; box-shadow: 0 6px 20px rgba(197, 160, 89, 0.3); }
+        .btn-pay-now:hover { background: var(--primary); box-shadow: 0 8px 25px rgba(8,14,33,0.3); }
+
+        footer { background: var(--primary); color: #94A3B8; padding: 30px 8%; text-align: center; font-size: 12px; margin-top: 80px; }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <a href="index.html" class="logo-container">
+            <svg class="logo-svg" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+            <div class="logo-text">
+                Nuevo Horizonte
+                <span>HAUTE LUNETTERIE</span>
+            </div>
+        </a>
+
+        <div class="secure-badge">
+            <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+            <span>Pago 100% Seguro y Encriptado</span>
+        </div>
+    </header>
+
+    <div class="checkout-container">
+        <div class="checkout-grid">
+            
+            <div class="checkout-steps">
+                <!-- Paso 1 -->
+                <div class="checkout-step">
+                    <h3 class="step-title"><span class="step-number">1</span> Información del Comprador</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Nombre Completo</label>
+                            <input type="text" placeholder="Ej: Martín Bustamante" required>
+                        </div>
+                        <div class="form-group">
+                            <label>RUT</label>
+                            <input type="text" placeholder="Ej: 19.876.543-2" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Correo Electrónico</label>
+                            <input type="email" placeholder="contacto@ejemplo.cl" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Teléfono Móvil / WhatsApp</label>
+                            <input type="tel" placeholder="+56 9 1234 5678" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Paso 2 -->
+                <div class="checkout-step">
+                    <h3 class="step-title"><span class="step-number">2</span> Confirmación de Receta Médica Óptica</h3>
+                    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">Adjunta tu receta si compras lentes graduados.</p>
+                    
+                    <div class="prescription-upload-box">
+                        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                        <p>Haz clic para adjuntar foto o PDF de tu receta médica</p>
+                        <small>Formatos aceptados: JPG, PNG, PDF (Máx. 10MB)</small>
+                    </div>
+                </div>
+
+                <!-- Paso 3: Método de Entrega Interactivo -->
+                <div class="checkout-step">
+                    <h3 class="step-title"><span class="step-number">3</span> Método de Entrega</h3>
+                    <div class="shipping-options" style="margin-bottom:20px;">
+                        <div class="shipping-card selected" data-shipping-cost="4500">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <input type="radio" name="shipping" checked>
+                                <strong>Despacho a Domicilio</strong>
+                            </div>
+                            <span>Envío con número de seguimiento online</span>
+                            <div class="price">$4.500</div>
+                        </div>
+                        <div class="shipping-card" data-shipping-cost="0">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <input type="radio" name="shipping">
+                                <strong>Retiro Presencial en Tienda</strong>
+                            </div>
+                            <span>Manuel Montt 1134B, Local 6, Tomé</span>
+                            <div class="price" style="color:#22C55E;">GRATIS</div>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group full">
+                            <label>Dirección (Calle, Número, Depto/Casa)</label>
+                            <input type="text" placeholder="Ej: Av. Las Heras 450, Depto 302">
+                        </div>
+                        <div class="form-group">
+                            <label>Región</label>
+                            <select>
+                                <option>Región del Bío-Bío</option>
+                                <option>Región Metropolitana</option>
+                                <option>Región de Valparaíso</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Comuna</label>
+                            <input type="text" placeholder="Ej: Concepción / Tomé / Talcahuano">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Paso 4: Pasarela de Pago Interactiva -->
+                <div class="checkout-step">
+                    <h3 class="step-title"><span class="step-number">4</span> Pasarela de Pago Seguro</h3>
+                    <div class="payment-methods">
+                        <label class="payment-option selected">
+                            <div class="payment-label">
+                                <input type="radio" name="payment" checked>
+                                <span>Webpay Plus (Transbank)</span>
+                            </div>
+                            <div class="payment-icons">Débito / Crédito / Cuotas</div>
+                        </label>
+                        <label class="payment-option">
+                            <div class="payment-label">
+                                <input type="radio" name="payment">
+                                <span>Mercado Pago Chile</span>
+                            </div>
+                            <div class="payment-icons">Saldo / Tarjetas</div>
+                        </label>
+                        <label class="payment-option">
+                            <div class="payment-label">
+                                <input type="radio" name="payment">
+                                <span>Transferencia Bancaria Directa</span>
+                            </div>
+                            <div class="payment-icons">Pago Manual</div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resumen Sidebar -->
+            <div class="order-summary-sidebar">
+                <h3>Tu Pedido</h3>
+                
+                <div id="checkout-cart-items">
+                    <!-- Productos del carrito -->
+                </div>
+
+                <div class="summary-totals">
+                    <div class="summary-row">
+                        <span>Subtotal Ítems</span>
+                        <span id="summary-subtotal">$0</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Envío / Despacho</span>
+                        <span id="summary-shipping">$4.500</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>Total a Pagar</span>
+                        <span id="summary-total">$0</span>
+                    </div>
+                </div>
+
+                <button class="btn-pay-now">PAGAR AHORA SEGURO</button>
+            </div>
+
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Óptica Nuevo Horizonte. Haute Lunetterie Standard. Todos los derechos reservados.</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

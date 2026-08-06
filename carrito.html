@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bolsa de Compras | Óptica Nuevo Horizonte</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23080E21'/%3E%3Cpath d='M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z' fill='none' stroke='%23C5A059' stroke-width='1.8'/%3E%3Ccircle cx='12' cy='12' r='3' fill='none' stroke='%23C5A059' stroke-width='1.8'/%3E%3C/svg%3E">
+    <meta name="description" content="Revisa los armazones seleccionados antes de continuar al pago seguro.">
+    <meta name="theme-color" content="#080E21">
+    <meta property="og:title" content="Tu Bolsa de Compras | Óptica Nuevo Horizonte">
+    <meta property="og:description" content="Revisa los armazones seleccionados antes de continuar al pago seguro.">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="es_CL">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1511499767150-a48a237f0083?q=80&w=1200&auto=format&fit=crop">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #080E21; --gold: #C5A059; --gray-border: #E8ECEF; --text-dark: #121826; --text-muted: #626D7D; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; color: var(--text-dark); background-color: #FAFAFC; }
+        a { text-decoration: none; color: inherit; }
+
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 22px 8%; background: #FFF; border-bottom: 1px solid var(--gray-border); }
+        .logo-text { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: var(--primary); text-transform: uppercase; }
+
+        .cart-container { padding: 50px 8%; max-width: 1200px; margin: 0 auto; }
+        .cart-grid { display: grid; grid-template-columns: 1fr 380px; gap: 40px; }
+
+        .cart-items { background: #FFF; border: 1px solid var(--gray-border); border-radius: 12px; padding: 20px 30px; }
+        .cart-item { display: flex; align-items: center; gap: 20px; padding: 20px 0; border-bottom: 1px solid var(--gray-border); }
+        .cart-item:last-child { border-bottom: none; }
+        .item-img { width: 90px; height: 90px; object-fit: contain; border: 1px solid var(--gray-border); border-radius: 8px; padding: 5px; }
+        .item-details { flex: 1; }
+        .item-brand { font-size: 10px; font-weight: 700; color: var(--gold); text-transform: uppercase; }
+        .item-title { font-size: 15px; font-weight: 600; color: var(--primary); }
+
+        .quantity-control { display: flex; align-items: center; border: 1px solid var(--gray-border); border-radius: 20px; width: fit-content; margin-top: 8px; }
+        .qty-btn { background: none; border: none; width: 26px; height: 26px; cursor: pointer; }
+        .qty-val { font-size: 12px; padding: 0 6px; font-weight: 600; }
+
+        .summary-card { background: #FFF; border: 1px solid var(--gray-border); border-radius: 12px; padding: 28px; height: fit-content; }
+        .summary-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 12px; color: var(--text-muted); }
+        .summary-row.total { font-size: 18px; font-weight: 700; color: var(--primary); border-top: 1px solid var(--gray-border); padding-top: 16px; }
+
+        .btn-checkout { display: block; width: 100%; text-align: center; background: var(--gold); color: #FFF; padding: 16px; font-weight: 700; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; border-radius: 6px; margin-top: 20px; transition: background 0.3s; }
+        .btn-checkout:hover { background: var(--primary); }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <a href="index.html" class="logo-text">NUEVO HORIZONTE</a>
+        <a href="catalogo.html" style="font-size:12px; font-weight:600;">← SEGUIR COMPRANDO</a>
+    </header>
+
+    <div class="cart-container">
+        <h1 style="font-family: 'Playfair Display', serif; font-size: 28px; margin-bottom: 30px;">Tu Bolsa de Selección</h1>
+
+        <div class="cart-grid">
+            <div class="cart-items">
+                <!-- Se renderiza dinámicamente desde app.js -->
+            </div>
+
+            <div class="summary-card">
+                <h3 style="font-family: 'Playfair Display', serif; font-size: 18px; margin-bottom: 16px;">Resumen</h3>
+                <div class="summary-row">
+                    <span>Subtotal</span>
+                    <span>$0</span>
+                </div>
+                <div class="summary-row total">
+                    <span>Total Estimado</span>
+                    <span>$0</span>
+                </div>
+
+                <a href="checkout.html" class="btn-checkout">PROCEDER AL PAGO SEGURO</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

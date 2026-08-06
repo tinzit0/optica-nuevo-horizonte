@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reserva tu Examen Visual | Óptica Nuevo Horizonte</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root { --primary: #17352a; --gold: #b99350; --gold-hover: #a47e3e; --bg-body: #fbfaf7; --border: rgba(16,23,19,.13); --text: #101713; --muted: #66706a; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-body); color: var(--text); -webkit-font-smoothing: antialiased; }
+        a { text-decoration: none; color: inherit; }
+
+        .header { background: #FFF; border-bottom: 1px solid var(--border); padding: 20px 6%; display: flex; justify-content: space-between; align-items: center; position: sticky; top:0; z-index: 100; }
+        .logo-text { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--primary); text-transform: uppercase; }
+        .logo-text span { font-size: 9px; font-family: 'Inter', sans-serif; display: block; letter-spacing: 3px; color: var(--gold); }
+
+        .stepper-bar { background: #FFF; border-bottom: 1px solid var(--border); padding: 16px 6%; display: flex; justify-content: center; gap: 40px; font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--muted); }
+        .step-item { cursor: pointer; transition: all 0.25s; padding-bottom: 6px; border-bottom: 2px solid transparent; }
+        .step-item.active { color: var(--primary); border-bottom-color: var(--gold); }
+
+        .main-container { max-width: 1440px; margin: 35px auto; padding: 0 4%; }
+        .page-title { text-align: center; margin-bottom: 35px; }
+        .page-title h1 { font-family: 'Playfair Display', serif; font-size: 30px; color: var(--primary); letter-spacing: -0.5px; }
+        .page-title p { font-size: 13px; color: var(--muted); margin-top: 6px; }
+
+        .booking-grid { display: grid; grid-template-columns: 340px 1fr 360px; gap: 32px; align-items: start; }
+        @media (max-width: 1100px) { .booking-grid { grid-template-columns: 1fr; } }
+
+        .card-box { background: #FFF; border: 1px solid var(--border); border-radius: 14px; padding: 32px; box-shadow: 0 10px 30px rgba(8, 14, 33, 0.03); }
+        
+        .card-box h3 { font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: var(--primary); margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
+        .service-accordion { display: flex; flex-direction: column; gap: 12px; }
+        .service-btn { display: flex; justify-content: space-between; align-items: center; padding: 16px 18px; border: 1px solid var(--border); border-radius: 10px; background: #FAFBFD; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; }
+        .service-btn:hover { border-color: var(--gold); }
+        .service-btn.selected { border-color: var(--gold); background: rgba(197,160,89,0.08); color: var(--primary); font-weight: 700; }
+
+        /* CALENDARIO CLÁSICO */
+        .calendar-header { background: var(--primary); color: #FFF; padding: 14px 20px; display:flex;align-items:center;justify-content:space-between; text-align: center; font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 600; }
+        .calendar-nav{border:1px solid rgba(255,255,255,.35);background:transparent;color:#fff;width:32px;height:32px;cursor:pointer}.calendar-nav:disabled{opacity:.3;cursor:not-allowed}
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; padding: 20px 40px; background: #FFF; border: 1px solid var(--border); border-top: none; }
+        .cal-day-head { font-weight: 700; color: var(--primary); font-size: 11px; margin-bottom: 10px; }
+        .cal-day { padding: 10px 0; font-size: 13px; font-weight: 500; background: #EAECEF; color: #9AA5B1; cursor: not-allowed; text-decoration: line-through; }
+        .cal-day.available { background: #E2E8F0; color: var(--primary); cursor: pointer; text-decoration: none; font-weight: 600; transition: background 0.2s; }
+        .cal-day.available:hover { background: #CBD5E1; }
+        .cal-day.active { background: var(--primary); color: #FFF; font-weight: 700; }
+
+        /* PESTAÑAS MAÑANA / TARDE */
+        .tabs-container { margin-top: 30px; text-align: center; }
+        .tabs-title { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--primary); margin-bottom: 16px; display: block; }
+        .tabs-header { display: flex; justify-content: center; gap: 40px; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+        .tab-btn { background: none; border: none; font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; padding-bottom: 10px; cursor: pointer; border-bottom: 2px solid transparent; letter-spacing: 1px; }
+        .tab-btn.active { color: var(--primary); border-bottom-color: #1B4965; }
+        .tab-subtitle { display: block; font-size: 10px; font-weight: 500; color: var(--muted); margin-top: 4px; text-transform: none; letter-spacing: 0; }
+
+        .time-slots { display: none; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 12px; text-align: left; }
+        .time-slots.active { display: grid; }
+        .time-slot { border: 1px solid var(--primary); padding: 12px; text-align: center; font-size: 14px; color: var(--primary); cursor: pointer; transition: all 0.2s; background: #FFF; }
+        .time-slot:hover { background: #F1F4F8; }
+        .time-slot.selected { background: var(--primary); color: #FFF; font-weight: 600; }
+
+        .form-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 16px; }
+        .form-row.two { grid-template-columns: repeat(2, 1fr); }
+        @media (max-width: 768px) { .form-row, .form-row.two { grid-template-columns: 1fr; } }
+        .field-group label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--primary); margin-bottom: 6px; letter-spacing: 0.5px; }
+        .field-group input, .field-group select { width: 100%; padding: 12px 14px; border: 1px solid var(--border); font-size: 13px; outline: none; background: #FFF; }
+        .field-group input:focus, .field-group select:focus { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold); }
+
+        .store-card { background: #FAFBFD; border: 1px solid var(--border); padding: 20px; margin-bottom: 20px; font-size: 13px; text-align: center; }
+        .store-card strong { font-size: 14px; color: var(--primary); display: block; margin-bottom: 6px; }
+        .store-map{width:100%;height:190px;border:0;margin:14px 0}.directions-link{display:inline-flex;background:var(--primary);color:#fff;padding:10px 14px;font-size:11px;font-weight:700;letter-spacing:.08em}.store-notes{display:grid;gap:6px;margin-top:12px;color:var(--muted);font-size:11px;text-align:left}
+        
+        .summary-header { background: #2A2F3D; color: #FFF; padding: 12px 20px; font-weight: 600; font-size: 12px; }
+        .summary-body { border: 1px solid var(--border); border-top: none; padding: 20px; background: #FFF; font-size: 12px; }
+
+        .btn-continue { width: 100%; background: var(--gold); color: #FFF; border: none; padding: 18px; font-weight: 700; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer; transition: all 0.3s; margin-top: 20px; }
+        .btn-continue:hover { background: var(--primary); }
+
+        footer { background: var(--primary); color: #94A3B8; padding: 40px 8% 20px; font-size: 12px; text-align: center; margin-top: 80px; }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <a href="index.html" class="logo-text">Nuevo Horizonte <span>HAUTE LUNETTERIE</span></a>
+        <a href="index.html" style="font-size:12px; font-weight:700; color:var(--primary);">← VOLVER AL INICIO</a>
+    </header>
+
+    <div class="stepper-bar">
+        <span class="step-item active" id="st-1" onclick="irAlPaso(1)">1. INFORMACIÓN DE LA TIENDA</span>
+        <span class="step-item" id="st-2" onclick="irAlPaso(2)">2. PROGRAMAR EXÁMENES</span>
+        <span class="step-item" id="st-3" onclick="irAlPaso(3)">3. INFORMACIÓN DE CONTACTO</span>
+    </div>
+
+    <div class="main-container">
+        <div class="page-title">
+            <h1 style="font-family: 'Playfair Display', serif;">Seleccione una fecha</h1>
+            <p>Reserve su horario de atención presencial en nuestra sucursal oficial de Tomé</p>
+        </div>
+
+        <div class="booking-grid">
+            
+            <div class="card-box" style="padding: 24px;">
+                <h3 style="font-size:11px; color:var(--muted); margin-bottom:14px; border:none; padding:0;">CONOCE TODOS LOS SERVICIOS<br>DISPONIBLES QUE TENEMOS PARA TI:</h3>
+                <div class="service-accordion">
+                    <div class="service-btn selected" id="srv-1" onclick="seleccionarServicio('Examen visual (tecnólogo médico)', 'srv-1')">
+                        <span>Examen visual<br><small style="font-weight:400;">(tecnólogo médico)</small></span>
+                        <span>›</span>
+                    </div>
+                    <div class="service-btn" id="srv-2" onclick="seleccionarServicio('Control y ajuste de anteojos', 'srv-2')">
+                        <span>Control y ajuste<br><small style="font-weight:400;">de anteojos</small></span>
+                        <span>›</span>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div id="vista-paso-2">
+                    <div class="calendar-header"><button class="calendar-nav" id="mes-anterior" onclick="cambiarMes(-1)" aria-label="Mes anterior">←</button><span id="calendar-month">Mes</span><button class="calendar-nav" onclick="cambiarMes(1)" aria-label="Mes siguiente">→</button></div>
+                    <div class="calendar-grid" id="calendario-dias">
+                        <span class="cal-day-head">Dom.</span>
+                        <span class="cal-day-head">Lun.</span>
+                        <span class="cal-day-head">Mar.</span>
+                        <span class="cal-day-head">Mié.</span>
+                        <span class="cal-day-head">Jue.</span>
+                        <span class="cal-day-head">Vie.</span>
+                        <span class="cal-day-head">Sáb.</span>
+                    </div>
+
+                    <div class="tabs-container">
+                        <span class="tabs-title">Seleccione una cita disponible</span>
+                        
+                        <div class="tabs-header">
+                            <button class="tab-btn active" onclick="cambiarTabHorario('manana')">
+                                MAÑANA <span class="tab-subtitle">10:00 am - 13:00 pm</span>
+                            </button>
+                            <button class="tab-btn" onclick="cambiarTabHorario('tarde')">
+                                TARDE <span class="tab-subtitle">13:00 pm - 18:00 pm</span>
+                            </button>
+                        </div>
+
+                        <div class="time-slots active" id="slots-manana">
+                            <div style="grid-column:1/-1; color:var(--muted); font-size:13px; text-align:center;">Seleccione un día en el calendario.</div>
+                        </div>
+
+                        <div class="time-slots" id="slots-tarde">
+                            <div style="grid-column:1/-1; color:var(--muted); font-size:13px; text-align:center;">Seleccione un día en el calendario.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Formulario Simplificado -->
+                <div id="vista-paso-3" style="display:none; background:#FFF; border:1px solid var(--border); padding:40px;">
+                    <h2 style="font-family:'Playfair Display',serif; text-align:center; margin-bottom:30px; font-size:24px; color:var(--primary);">¿Para quién es este examen?</h2>
+                    <form id="form-paciente">
+                        <div class="form-row">
+                            <div class="field-group"><input type="text" id="p-nombre" placeholder="Nombre" required></div>
+                            <div class="field-group"><input type="text" id="p-snombre" placeholder="Segundo nombre"></div>
+                            <div class="field-group"><input type="text" id="p-apellido" placeholder="Apellido" required></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="field-group"><input type="text" id="p-sapellido" placeholder="Segundo Apellido"></div>
+                            <div class="field-group"><input type="email" id="p-email" placeholder="Correo Electrónico" required></div>
+                            <div class="field-group"><input type="tel" id="p-tel" placeholder="Teléfono de Contacto" required></div>
+                        </div>
+                        <div class="form-row two">
+                            <div class="field-group">
+                                <select id="p-prev">
+                                    <option value="PARTICULAR">PARTICULAR</option>
+                                </select>
+                            </div>
+                            <div class="field-group"><input type="text" id="p-rut" placeholder="RUT (Ej: 19.876.543-2)" required></div>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+
+            <div>
+                <div class="store-card">
+                    <strong style="font-size:12px;">ÓPTICA NUEVO HORIZONTE</strong>
+                    <p style="color:var(--muted); margin-bottom:8px; line-height:1.4;">Manuel Montt 1134B, Local 6, Tomé</p>
+                    <iframe class="store-map" title="Mapa de Óptica Nuevo Horizonte" loading="lazy" src="https://www.google.com/maps?q=Manuel%20Montt%201134B%2C%20Tom%C3%A9%2C%20Chile&output=embed"></iframe>
+                    <a class="directions-link" href="https://www.google.com/maps/dir/?api=1&destination=Manuel+Montt+1134B%2C+Tom%C3%A9%2C+Chile" target="_blank" rel="noopener">ABRIR RUTA EN GOOGLE MAPS ↗</a>
+                    <div class="store-notes"><span>Horario: lunes a sábado, 10:00–18:00</span><span>Referencia: Local 6, Manuel Montt</span><span>¿Necesitas ayuda? +56 9 1234 5678</span></div>
+                </div>
+
+                <div>
+                    <div class="summary-header">Resumen del examen</div>
+                    <div class="summary-body">
+                        <span style="color:var(--muted); display:block; margin-bottom:4px; text-transform:uppercase;">PROPÓSITO DE LA VISITA</span>
+                        <strong id="resumen-servicio" style="color:var(--primary); font-size:13px; display:block; margin-bottom:16px;">Examen visual (tecnólogo médico)</strong>
+                        
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span style="color:var(--muted); text-transform:uppercase;">FECHA Y HORA</span>
+                            <span style="color:var(--gold); font-size:10px; cursor:pointer;" onclick="irAlPaso(2)">cambiar</span>
+                        </div>
+                        <strong id="resumen-fechahora" style="color:var(--primary); font-size:13px; display:block; margin-top:4px;">Seleccione fecha</strong>
+                    </div>
+
+                    <button class="btn-continue" id="btn-accion-paso" onclick="avanzarPaso()">CONTINUAR</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <footer><p>&copy; 2026 Óptica Nuevo Horizonte. Todos los derechos reservados.</p></footer>
+
+    <script>
+        const SUPABASE_URL = "https://kxldsjodgfonrrlwjbws.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_J5s_2YqtASIYSqu2k00SGA_copdr39x";
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let pasoActual = 2;
+        let reservaState = { servicio: 'Examen visual (tecnólogo médico)', fecha: null, hora: null };
+        let horariosMap = {};
+        const hoy = new Date();
+        let mesVisible = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+        const mesInicial = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await cargarHorariosDesdeSupabase();
+            renderizarCalendario();
+        });
+
+        function fechaISO(fecha) {
+            return `${fecha.getFullYear()}-${String(fecha.getMonth()+1).padStart(2,'0')}-${String(fecha.getDate()).padStart(2,'0')}`;
+        }
+
+        function horariosCadaMediaHora() {
+            const bloques = [];
+            [[10,0,12,30],[13,30,17,30]].forEach(([hi,mi,hf,mf]) => {
+                let actual = hi * 60 + mi;
+                const fin = hf * 60 + mf;
+                while (actual <= fin) { bloques.push(`${String(Math.floor(actual/60)).padStart(2,'0')}:${String(actual%60).padStart(2,'0')}`); actual += 30; }
+            });
+            return bloques;
+        }
+
+        function renderizarCalendario() {
+            const cal = document.getElementById('calendario-dias');
+            document.getElementById('calendar-month').textContent = mesVisible.toLocaleDateString('es-CL',{month:'long',year:'numeric'});
+            document.getElementById('mes-anterior').disabled = mesVisible <= mesInicial;
+            let html = '<span class="cal-day-head">Dom.</span><span class="cal-day-head">Lun.</span><span class="cal-day-head">Mar.</span><span class="cal-day-head">Mié.</span><span class="cal-day-head">Jue.</span><span class="cal-day-head">Vie.</span><span class="cal-day-head">Sáb.</span>';
+            const inicio = new Date(mesVisible.getFullYear(), mesVisible.getMonth(), 1);
+            const total = new Date(mesVisible.getFullYear(), mesVisible.getMonth()+1, 0).getDate();
+            for(let vacio=0; vacio<inicio.getDay(); vacio++) html += '<span></span>';
+            for(let i=1; i<=total; i++) {
+                const fecha = new Date(mesVisible.getFullYear(), mesVisible.getMonth(), i);
+                const fechaStr = fechaISO(fecha);
+                const disponible = fecha >= new Date(hoy.getFullYear(),hoy.getMonth(),hoy.getDate()) && fecha.getDay() !== 0;
+                if (disponible && !horariosMap[fechaStr]) horariosMap[fechaStr] = horariosCadaMediaHora();
+                html += `<button type="button" class="cal-day ${disponible ? 'available' : ''}" ${disponible ? `onclick="seleccionarFecha('${fechaStr}',this)"` : 'disabled'}>${i}</button>`;
+            }
+            cal.innerHTML = html;
+        }
+
+        function cambiarMes(direccion) {
+            const candidato = new Date(mesVisible.getFullYear(), mesVisible.getMonth()+direccion, 1);
+            const limite = new Date(mesInicial.getFullYear(), mesInicial.getMonth()+3, 1);
+            if (candidato < mesInicial || candidato > limite) return;
+            mesVisible = candidato;
+            reservaState.fecha = null; reservaState.hora = null;
+            renderizarCalendario(); actualizarResumen();
+        }
+
+        async function cargarHorariosDesdeSupabase() {
+            try {
+                const { data: bloques } = await _supabase.from('optica_horarios').select('*').eq('disponible', true).order('fecha', { ascending: true });
+                (bloques || []).forEach(b => {
+                    if (!horariosMap[b.fecha]) horariosMap[b.fecha] = [];
+                    if (!horariosMap[b.fecha].includes(b.hora)) horariosMap[b.fecha].push(b.hora);
+                });
+            } catch (error) { horariosMap = {}; }
+        }
+
+        function seleccionarFecha(fechaStr, el) {
+            reservaState.fecha = fechaStr;
+            reservaState.hora = null;
+
+            document.querySelectorAll('.cal-day.available').forEach(d => d.classList.remove('active'));
+            if (el) el.classList.add('active');
+
+            const horas = horariosMap[fechaStr] || [];
+            
+            const horasManana = horas.filter(h => parseInt(h.split(':')[0]) < 13);
+            const horasTarde = horas.filter(h => parseInt(h.split(':')[0]) >= 13);
+
+            const cManana = document.getElementById('slots-manana');
+            const cTarde = document.getElementById('slots-tarde');
+
+            cManana.innerHTML = horasManana.length ? horasManana.map(h => `<div class="time-slot" onclick="seleccionarHora('${h}', this)">${h}</div>`).join('') : '<div style="grid-column:1/-1; text-align:center; color:#999; font-size:12px;">Sin horas en la mañana.</div>';
+            cTarde.innerHTML = horasTarde.length ? horasTarde.map(h => `<div class="time-slot" onclick="seleccionarHora('${h}', this)">${h}</div>`).join('') : '<div style="grid-column:1/-1; text-align:center; color:#999; font-size:12px;">Sin horas en la tarde.</div>';
+
+            cambiarTabHorario('manana');
+            actualizarResumen();
+        }
+
+        function cambiarTabHorario(tipo) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.time-slots').forEach(slot => slot.classList.remove('active'));
+
+            if (tipo === 'manana') {
+                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+                document.getElementById('slots-manana').classList.add('active');
+            } else {
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+                document.getElementById('slots-tarde').classList.add('active');
+            }
+        }
+
+        function seleccionarHora(horaStr, el) {
+            reservaState.hora = horaStr;
+            document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+            if (el) el.classList.add('selected');
+            actualizarResumen();
+        }
+
+        function seleccionarServicio(nombreServicio, elementId) {
+            reservaState.servicio = nombreServicio;
+            document.getElementById('resumen-servicio').textContent = nombreServicio;
+            document.querySelectorAll('.service-btn').forEach(btn => btn.classList.remove('selected'));
+            document.getElementById(elementId).classList.add('selected');
+        }
+
+        function actualizarResumen() {
+            const resumenFH = document.getElementById('resumen-fechahora');
+            if (reservaState.fecha && reservaState.hora) {
+                const diasParts = reservaState.fecha.split('-');
+                resumenFH.textContent = `${new Date(`${reservaState.fecha}T12:00:00`).toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long',year:'numeric'})} · ${reservaState.hora}`;
+            } else if (reservaState.fecha) {
+                resumenFH.textContent = `${new Date(`${reservaState.fecha}T12:00:00`).toLocaleDateString('es-CL',{day:'numeric',month:'long',year:'numeric'})} (falta hora)`;
+            } else {
+                resumenFH.textContent = 'Seleccione fecha';
+            }
+        }
+
+        function irAlPaso(paso) {
+            pasoActual = paso;
+            document.querySelectorAll('.step-item').forEach((el, idx) => el.classList.toggle('active', (idx + 1) === paso));
+
+            const v2 = document.getElementById('vista-paso-2');
+            const v3 = document.getElementById('vista-paso-3');
+            const btn = document.getElementById('btn-accion-paso');
+
+            if (paso === 1 || paso === 2) {
+                v2.style.display = 'block';
+                v3.style.display = 'none';
+                btn.textContent = 'CONTINUAR';
+            } else if (paso === 3) {
+                v2.style.display = 'none';
+                v3.style.display = 'block';
+                btn.textContent = 'RESERVAR EXAMEN';
+            }
+        }
+
+        function avanzarPaso() {
+            if (pasoActual === 1 || pasoActual === 2) {
+                if (!reservaState.fecha || !reservaState.hora) {
+                    alert('Por favor seleccione una fecha disponible y un bloque horario.');
+                    return;
+                }
+                irAlPaso(3);
+            } else if (pasoActual === 3) {
+                confirmarReservaFinal();
+            }
+        }
+
+        async function confirmarReservaFinal() {
+            const nombre = document.getElementById('p-nombre').value.trim();
+            const apellido = document.getElementById('p-apellido').value.trim();
+            const rut = document.getElementById('p-rut').value.trim();
+            const email = document.getElementById('p-email').value.trim();
+            const tel = document.getElementById('p-tel').value.trim();
+
+            if (!nombre || !apellido || !rut || !email || !tel) {
+                alert('Complete todos los campos del paciente.');
+                return;
+            }
+
+            const { error } = await _supabase.from('optica_citas').insert([{
+                nombre: `${nombre} ${apellido}`,
+                rut: rut,
+                telefono: tel,
+                tipo: reservaState.servicio,
+                fecha: `${reservaState.fecha} ${reservaState.hora}`
+            }]);
+
+            if (error) {
+                alert('Error al procesar reserva: ' + error.message);
+            } else {
+                alert(`¡Examen reservado con éxito para el ${reservaState.fecha} a las ${reservaState.hora}!`);
+                window.location.href = 'index.html';
+            }
+        }
+    </script>
+</body>
+</html>

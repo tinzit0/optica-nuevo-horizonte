@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel de Administración | Óptica Nuevo Horizonte</title>
+<meta name="robots" content="noindex, nofollow">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<style>
+    :root { --primary:#080E21; --gold:#C5A059; --gold-light:#F4EBE1; --bg:#F5F6F9; --border:#E4E8EE; --text:#121826; --muted:#6B7385; --danger:#E53E3E; --ok:#22C55E; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); }
+    h1,h2,h3 { font-family:'Playfair Display', serif; }
+
+    .login-screen { min-height:100vh; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle at top, #101a3a, var(--primary)); }
+    .login-card { background:#fff; width:100%; max-width:380px; padding:44px 36px; border-radius:16px; box-shadow:0 30px 60px rgba(0,0,0,0.3); text-align:center; }
+    .login-card h1 { font-size:22px; color:var(--primary); margin-bottom:4px; }
+    .login-card p { font-size:12px; color:var(--muted); margin-bottom:26px; }
+    .login-card input { width:100%; padding:13px 16px; margin-bottom:14px; border:1px solid var(--border); border-radius:8px; font-size:13px; outline:none; }
+    .login-card button { width:100%; background:var(--primary); color:var(--gold); border:none; padding:14px; border-radius:8px; font-weight:700; font-size:12px; letter-spacing:1px; text-transform:uppercase; cursor:pointer; }
+
+    .app-shell { display:none; min-height:100vh; grid-template-columns:240px 1fr; }
+    .app-shell.activo { display:grid; }
+    .sidebar { background:var(--primary); color:#E2E8F0; padding:26px 20px; }
+    .sidebar nav { margin-top:34px; display:flex; flex-direction:column; gap:4px; }
+    .sidebar nav button { text-align:left; background:none; border:none; color:#CBD3E1; padding:11px 14px; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; }
+    .sidebar nav button.activo { background:var(--gold); color:var(--primary); }
+
+    .main { padding:36px 44px; overflow-y:auto; }
+    .panel-section { display:none; }
+    .panel-section.activo { display:block; }
+
+    .card { background:#fff; border:1px solid var(--border); border-radius:12px; padding:26px; margin-bottom:24px; box-shadow:0 4px 16px rgba(8,14,33,0.03); }
+    .grid-form { display:grid; grid-template-columns:repeat(3, 1fr); gap:14px; }
+    .grid-form .full { grid-column:1 / -1; }
+    .field label { display:block; font-size:11px; font-weight:700; text-transform:uppercase; color:var(--primary); margin-bottom:6px; }
+    .field input, .field select { width:100%; padding:11px 13px; border:1px solid var(--border); border-radius:7px; font-size:13px; outline:none; }
+
+    .btn { display:inline-flex; align-items:center; gap:8px; background:var(--primary); color:#fff; border:none; padding:12px 22px; border-radius:7px; font-size:12px; font-weight:700; cursor:pointer; }
+    .btn-gold { background:var(--gold); }
+    
+    table { width:100%; border-collapse:collapse; font-size:13px; }
+    th { text-align:left; font-size:11px; color:var(--muted); padding:10px 12px; border-bottom:2px solid var(--border); text-transform:uppercase; }
+    td { padding:12px; border-bottom:1px solid var(--border); vertical-align:middle; }
+    .thumb { width:40px; height:40px; object-fit:contain; border:1px solid var(--border); border-radius:6px; padding:2px; }
+</style>
+</head>
+<body>
+
+    <!-- LOGIN -->
+    <div class="login-screen" id="login-screen">
+        <div class="login-card">
+            <h1>Nuevo Horizonte</h1>
+            <p>Panel de Administración · Acceso Restringido</p>
+            <form id="form-login">
+                <input type="email" id="login-email" placeholder="Correo" required>
+                <input type="password" id="login-pass" placeholder="Contraseña" required>
+                <button type="submit">Ingresar</button>
+            </form>
+            <p id="login-error" style="color:var(--danger); font-size:12px; margin-top:10px; display:none;">Credenciales incorrectas.</p>
+        </div>
+    </div>
+
+    <!-- PANEL ADMIN -->
+    <div class="app-shell" id="app-shell">
+        <aside class="sidebar">
+            <h2 style="color:#FFF; font-size:16px;">Nuevo Horizonte</h2>
+            <nav>
+                <button data-panel="resumen" class="activo">📊 Resumen</button>
+                <button data-panel="productos">👓 Productos y Marcas</button>
+                <button data-panel="horarios">🗓️ Horarios Atención</button>
+                <button data-panel="citas">📋 Citas Médicas</button>
+                <button data-panel="pedidos">🛍️ Pedidos y Recetas</button>
+            </nav>
+            <button id="btn-logout" class="btn" style="margin-top:30px; width:100%;">Cerrar Sesión</button>
+        </aside>
+
+        <main class="main">
+            <!-- PRODUCTOS -->
+            <section class="panel-section activo" id="panel-productos">
+                <div class="card">
+                    <h3 id="form-producto-titulo">Añadir Nuevo Armazón</h3>
+                    <form id="form-producto" style="margin-top:16px;">
+                        <input type="hidden" id="p-id-editando">
+                        <div class="grid-form">
+                            <div class="field"><label>Nombre del Armazón</label><input type="text" id="p-title" required placeholder="Ej: Wayfarer Classic"></div>
+                            <div class="field"><label>Marca</label><input type="text" id="p-brand" required placeholder="Ej: Ray-Ban, Oakley..."></div>
+                            <div class="field"><label>Precio ($ CLP)</label><input type="number" id="p-price" required placeholder="Ej: 60000"></div>
+                            <div class="field"><label>Categoría</label>
+                                <select id="p-category"><option value="optico">Óptico</option><option value="sol">Sol</option></select>
+                            </div>
+                            <div class="field"><label>Género</label>
+                                <select id="p-gender"><option value="hombre">Hombre</option><option value="mujer">Mujer</option><option value="infantil">Infantil</option></select>
+                            </div>
+                            <div class="field full">
+                                <label>Imagen del Armazón (Subir Foto o URL)</label>
+                                <div style="display:flex; gap:10px;">
+                                    <input type="file" id="p-image-file" accept="image/*">
+                                    <input type="url" id="p-image-url" placeholder="O pega enlace: https://...">
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-gold" style="margin-top:16px;">Guardar Producto</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h3>Catálogo Actual de Armazones</h3>
+                    <table>
+                        <thead><tr><th>Imagen</th><th>Nombre</th><th>Marca</th><th>Precio</th><th>Categoría</th><th>Género</th><th>Acciones</th></tr></thead>
+                        <tbody id="tabla-productos"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- HORARIOS -->
+            <section class="panel-section" id="panel-horarios">
+                <div class="card">
+                    <h3>Habilitar Bloque de Atención Presencial</h3>
+                    <form id="form-horario" style="margin-top:16px;">
+                        <div class="grid-form">
+                            <div class="field"><label>Fecha</label><input type="date" id="h-fecha" required></div>
+                            <div class="field"><label>Hora Bloque</label><input type="text" id="h-hora" placeholder="Ej: 10:30 hrs" required></div>
+                        </div>
+                        <button type="submit" class="btn btn-gold" style="margin-top:16px;">Habilitar Horario</button>
+                    </form>
+                </div>
+                <div class="card">
+                    <h3>Bloques Habilitados</h3>
+                    <table>
+                        <thead><tr><th>Fecha</th><th>Hora</th><th>Estado</th><th>Acciones</th></tr></thead>
+                        <tbody id="tabla-horarios"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- CITAS -->
+            <section class="panel-section" id="panel-citas">
+                <div class="card">
+                    <h3>Citas Médicas Agendadas</h3>
+                    <table>
+                        <thead><tr><th>Paciente</th><th>RUT</th><th>Teléfono</th><th>Tipo Consulta</th><th>Fecha y Hora</th></tr></thead>
+                        <tbody id="tabla-citas"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- PEDIDOS -->
+            <section class="panel-section" id="panel-pedidos">
+                <div class="card">
+                    <h3>Pedidos Realizados</h3>
+                    <table>
+                        <thead><tr><th>Cliente</th><th>Contacto</th><th>Total</th><th>Envío</th><th>Receta</th></tr></thead>
+                        <tbody id="tabla-pedidos"></tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+<script>
+const SUPABASE_URL = "https://kxldsjodgfonrrlwjbws.supabase.co";
+const SUPABASE_KEY = "sb_publishable_J5s_2YqtASIYSqu2k00SGA_copdr39x";
+const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const { data: { session } } = await _supabase.auth.getSession();
+    if (session) mostrarPanel(); else mostrarLogin();
+
+    document.getElementById('form-login').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-pass').value;
+        const { error } = await _supabase.auth.signInWithPassword({ email, password });
+        if (error) document.getElementById('login-error').style.display = 'block';
+        else mostrarPanel();
+    });
+
+    document.getElementById('btn-logout').addEventListener('click', async () => {
+        await _supabase.auth.signOut();
+        mostrarLogin();
+    });
+
+    document.querySelectorAll('.sidebar nav button').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.sidebar nav button').forEach(b => b.classList.remove('activo'));
+            document.querySelectorAll('.panel-section').forEach(s => s.classList.remove('activo'));
+            btn.classList.add('activo');
+            document.getElementById('panel-' + btn.dataset.panel).classList.add('activo');
+        });
+    });
+
+    document.getElementById('form-producto').addEventListener('submit', guardarProducto);
+    document.getElementById('form-horario').addEventListener('submit', guardarHorario);
+});
+
+function mostrarLogin() {
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('app-shell').classList.remove('activo');
+}
+
+function mostrarPanel() {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app-shell').classList.add('activo');
+    cargarProductos();
+    cargarHorarios();
+    cargarCitas();
+    cargarPedidos();
+}
+
+/* SUBIDA DE FOTOS Y PRODUCTOS */
+async function subirImagenSupabase(file) {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random()}.${fileExt}`;
+    const filePath = `productos/${fileName}`;
+
+    let { error: uploadError } = await _supabase.storage.from('optica_media').upload(filePath, file);
+    if (uploadError) { alert('Error al subir imagen: ' + uploadError.message); return null; }
+
+    const { data } = _supabase.storage.from('optica_media').getPublicUrl(filePath);
+    return data.publicUrl;
+}
+
+async function guardarProducto(e) {
+    e.preventDefault();
+    const id = document.getElementById('p-id-editando').value;
+    const fileInput = document.getElementById('p-image-file');
+    let imageUrl = document.getElementById('p-image-url').value;
+
+    if (fileInput.files.length > 0) {
+        const uploadedUrl = await subirImagenSupabase(fileInput.files[0]);
+        if (uploadedUrl) imageUrl = uploadedUrl;
+    }
+
+    if (!imageUrl) { alert('Sube una imagen o pega una URL.'); return; }
+
+    const payload = {
+        title: document.getElementById('p-title').value,
+        brand: document.getElementById('p-brand').value,
+        price: parseInt(document.getElementById('p-price').value, 10),
+        category: document.getElementById('p-category').value,
+        gender: document.getElementById('p-gender').value,
+        image: imageUrl
+    };
+
+    const { error } = id
+        ? await _supabase.from('optica_productos').update(payload).eq('id', id)
+        : await _supabase.from('optica_productos').insert([payload]);
+
+    if (error) { alert('Error al guardar: ' + error.message); return; }
+    document.getElementById('form-producto').reset();
+    cargarProductos();
+}
+
+async function cargarProductos() {
+    const { data } = await _supabase.from('optica_productos').select('*').order('created_at', { ascending: false });
+    const tbody = document.getElementById('tabla-productos');
+    if (!data || data.length === 0) { tbody.innerHTML = `<tr><td colspan="7">No hay productos cargados.</td></tr>`; return; }
+
+    tbody.innerHTML = data.map(p => `
+        <tr>
+            <td><img class="thumb" src="${p.image}"></td>
+            <td>${p.title}</td>
+            <td>${p.brand}</td>
+            <td>$${parseInt(p.price).toLocaleString('es-CL')}</td>
+            <td>${p.category}</td>
+            <td>${p.gender}</td>
+            <td><button onclick="eliminarProducto('${p.id}')" style="color:red; background:none; border:none; cursor:pointer;">🗑️ Eliminar</button></td>
+        </tr>
+    `).join('');
+}
+
+async function eliminarProducto(id) {
+    if (confirm('¿Eliminar armazón?')) {
+        await _supabase.from('optica_productos').delete().eq('id', id);
+        cargarProductos();
+    }
+}
+
+/* HORARIOS Y CITAS */
+async function guardarHorario(e) {
+    e.preventDefault();
+    const fecha = document.getElementById('h-fecha').value;
+    const hora = document.getElementById('h-hora').value;
+    await _supabase.from('optica_horarios').insert([{ fecha, hora, disponible: true }]);
+    document.getElementById('form-horario').reset();
+    cargarHorarios();
+}
+
+async function cargarHorarios() {
+    const { data } = await _supabase.from('optica_horarios').select('*').order('fecha', { ascending: true });
+    const tbody = document.getElementById('tabla-horarios');
+    if (!data) return;
+    tbody.innerHTML = data.map(h => `
+        <tr>
+            <td>${h.fecha}</td>
+            <td>${h.hora}</td>
+            <td>${h.disponible ? 'Disponible' : 'Ocupado'}</td>
+            <td><button onclick="eliminarHorario(${h.id})" style="color:red; background:none; border:none; cursor:pointer;">🗑️</button></td>
+        </tr>
+    `).join('');
+}
+
+async function eliminarHorario(id) {
+    await _supabase.from('optica_horarios').delete().eq('id', id);
+    cargarHorarios();
+}
+
+async function cargarCitas() {
+    const { data } = await _supabase.from('optica_citas').select('*').order('created_at', { ascending: false });
+    const tbody = document.getElementById('tabla-citas');
+    if (!data) return;
+    tbody.innerHTML = data.map(c => `
+        <tr><td>${c.nombre}</td><td>${c.rut}</td><td>${c.telefono}</td><td>${c.tipo}</td><td>${c.fecha}</td></tr>
+    `).join('');
+}
+
+async function cargarPedidos() {
+    const { data } = await _supabase.from('optica_pedidos').select('*').order('created_at', { ascending: false });
+    const tbody = document.getElementById('tabla-pedidos');
+    if (!data) return;
+    tbody.innerHTML = data.map(p => `
+        <tr>
+            <td>${p.nombre}</td>
+            <td>${p.telefono}</td>
+            <td>$${parseInt(p.total).toLocaleString('es-CL')}</td>
+            <td>${p.metodo_envio}</td>
+            <td>${p.receta_url ? `<a href="${p.receta_url}" target="_blank">📄 Ver Receta</a>` : 'Sin Receta'}</td>
+        </tr>
+    `).join('');
+}
+</script>
+</body>
+</html>
