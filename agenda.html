@@ -380,12 +380,20 @@
                 return;
             }
 
+            const fechaReserva = `${reservaState.fecha} ${reservaState.hora}`;
+            const { data: ocupada } = await _supabase.from('optica_citas').select('fecha').eq('fecha', fechaReserva).limit(1);
+            if (ocupada && ocupada.length) {
+                alert('Ese horario acaba de ser reservado. Por favor selecciona otro bloque.');
+                irAlPaso(2);
+                return;
+            }
+
             const { error } = await _supabase.from('optica_citas').insert([{
                 nombre: `${nombre} ${apellido}`,
                 rut: rut,
                 telefono: tel,
                 tipo: reservaState.servicio,
-                fecha: `${reservaState.fecha} ${reservaState.hora}`
+                fecha: fechaReserva
             }]);
 
             if (error) {

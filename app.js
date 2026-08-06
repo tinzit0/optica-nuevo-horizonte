@@ -297,3 +297,88 @@ window.eliminarProducto = async function(id) {
 
     await cargarProductosConFiltros();
 };
+
+function renderizarVistaCheckout() {
+    const itemsEl = document.querySelector('#checkout-cart-items');
+    const form = document.querySelector('#checkout-form');
+    if (!itemsEl || !form) return;
+    const carrito = obtenerCarrito();
+    const subtotal = carrito.reduce((total, item) => total + Number(item.precio) * Number(item.cantidad), 0);
+    let shipping = 4500;
+
+    itemsEl.innerHTML = carrito.length ? carrito.map(item => `
+        <div class="sidebar-item"><img src="${item.imagen}" alt="${item.nombre}"><div><div class="sidebar-item-title">${item.nombre}</div><div class="sidebar-item-subtitle">${item.marca} · Cantidad ${item.cantidad}</div><div class="sidebar-item-price">$${(item.precio * item.cantidad).toLocaleString('es-CL')}</div></div></div>
+    `).join('') : '<div class="checkout-empty">No hay productos en tu bolsa.</div>';
+
+    const actualizarTotales = () => {
+        document.querySelector('#summary-subtotal').textContent = `$${subtotal.toLocaleString('es-CL')}`;
+        document.querySelector('#summary-shipping').textContent = shipping ? `$${shipping.toLocaleString('es-CL')}` : 'Gratis';
+        document.querySelector('#summary-total').textContent = `$${(subtotal + shipping).toLocaleString('es-CL')}`;
+    };
+    actualizarTotales();
+
+    const payButton = document.querySelector('.btn-pay-now');
+    if (!carrito.length) { payButton.disabled = true; payButton.textContent = 'Tu bolsa está vacía'; }
+
+    document.querySelectorAll('.shipping-card').forEach(card => card.addEventListener('click', () => {
+        document.querySelectorAll('.shipping-card').forEach(option => option.classList.remove('selected'));
+        card.classList.add('selected');
+        card.querySelector('input').checked = true;
+        shipping = Number(card.dataset.shippingCost);
+        const retiro = card.querySelector('input').value === 'retiro';
+        const addressFields = document.querySelector('#address-fields');
+        addressFields.style.display = retiro ? 'none' : 'grid';
+        addressFields.querySelectorAll('[required]').forEach(field => field.required = !retiro);
+        actualizarTotales();
+    }));
+
+    document.querySelector('#prescription-file')?.addEventListener('change', event => {
+        const file = event.target.files[0];
+        const label = document.querySelector('#prescription-label');
+        if (!file) return;
+        if (file.size > 10 * 1024 * 1024) { event.target.value = ''; label.textContent = 'El archivo supera los 10 MB'; return; }
+        label.textContent = `Archivo seleccionado: ${file.name}`;
+    });
+
+    form.addEventListener('submit', async event => {
+        event.preventDefault();
+        const status = document.querySelector('#checkout-status');
+        if (!form.checkValidity()) { form.reportValidity(); return; }
+        if (!carrito.length) return;
+        payButton.disabled = true;
+        payButton.textContent = 'Preparando pedido…';
+        status.className = 'status-message';
+
+        const fields = new FormData(form);
+        const payload = {
+            nombre: fields.get('nombre'),
+            telefono: fields.get('telefono'),
+            total: subtotal + shipping,
+            metodo_envio: fields.get('shipping') === 'retiro' ? 'Retiro en tienda' : 'Despacho a domicilio',
+            receta_url: null
+        };
+        try {
+            const receta = document.querySelector('#prescription-file')?.files[0];
+            if (receta) {
+                const extension = receta.name.split('.').pop().toLowerCase();
+                const ruta = `recetas/${Date.now()}-${Math.random().toString(36).slice(2)}.${extension}`;
+                const { error: uploadError } = await _supabase.storage.from('optica_media').upload(ruta, receta);
+                if (uploadError) throw uploadError;
+                payload.receta_url = _supabase.storage.from('optica_media').getPublicUrl(ruta).data.publicUrl;
+            }
+            const { error } = await _supabase.from('optica_pedidos').insert([payload]);
+            if (error) throw error;
+            localStorage.setItem('ultimo_pedido_optica', JSON.stringify({ ...payload, email: fields.get('email'), carrito, creado: new Date().toISOString() }));
+            status.textContent = 'Pedido registrado. La tienda te enviará el cobro protegido de Mercado Pago al correo o WhatsApp indicado.';
+            status.classList.add('visible');
+            localStorage.removeItem('cart_optica');
+            actualizarContadorHeader();
+            payButton.textContent = 'Pedido registrado';
+        } catch (error) {
+            status.textContent = 'No pudimos registrar el pedido. Revisa tu conexión e inténtalo nuevamente.';
+            status.classList.add('visible');
+            payButton.disabled = false;
+            payButton.textContent = 'Solicitar pago con Mercado Pago';
+        }
+    });
+}
