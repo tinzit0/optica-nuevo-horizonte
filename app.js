@@ -25,6 +25,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     leerParametrosURLYMarcarCheckbox();
     initCatalogoInteractivo();
     cargarProductosConFiltros();
+    initNotificaciones();
     initCarrito();
     // Cloudflare Pages puede servir rutas limpias (/carrito, /checkout, /producto).
     // Detectar la vista por su contenido evita depender del nombre físico del archivo.
@@ -247,13 +248,60 @@ function actualizarContadorHeader() {
 
 function initCarrito() { actualizarContadorHeader(); }
 
+function initNotificaciones() {
+    if (document.querySelector('#toast-optica-styles')) return;
+    const styles = document.createElement('style');
+    styles.id = 'toast-optica-styles';
+    styles.textContent = `
+        .toast-region{position:fixed;right:24px;top:24px;z-index:10000;display:grid;gap:12px;width:min(390px,calc(100vw - 28px));pointer-events:none}
+        .luxury-toast{position:relative;overflow:hidden;display:grid;grid-template-columns:48px 1fr auto;gap:14px;align-items:start;background:#101713;color:#fff;border:1px solid rgba(185,147,80,.45);padding:20px;box-shadow:0 24px 70px rgba(10,18,13,.3);pointer-events:auto;opacity:0;transform:translateY(-14px) scale(.98);transition:opacity .32s ease,transform .32s ease}
+        .luxury-toast.visible{opacity:1;transform:none}.luxury-toast.leaving{opacity:0;transform:translateY(-8px) scale(.98)}
+        .toast-icon{display:grid;place-items:center;width:48px;height:48px;border:1px solid rgba(185,147,80,.5);border-radius:50%;color:#d9bd82}.toast-icon svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+        .toast-kicker{display:block;margin-bottom:3px;color:#d9bd82;font:700 9px 'DM Sans',sans-serif;letter-spacing:.17em;text-transform:uppercase}.toast-title{display:block;color:#fff;font:500 17px 'Playfair Display',serif;line-height:1.25}.toast-detail{display:block;margin-top:4px;color:rgba(255,255,255,.62);font:400 11px 'DM Sans',sans-serif}
+        .toast-actions{grid-column:2/-1;display:flex;align-items:center;gap:18px;margin-top:3px}.toast-cart-link{color:#d9bd82;border-bottom:1px solid currentColor;padding-bottom:2px;font:700 9px 'DM Sans',sans-serif;letter-spacing:.12em;text-transform:uppercase}.toast-continue{border:0;background:none;color:rgba(255,255,255,.55);padding:0;cursor:pointer;font:600 9px 'DM Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase}
+        .toast-close{border:0;background:none;color:rgba(255,255,255,.55);font-size:19px;line-height:1;cursor:pointer}.toast-progress{position:absolute;right:0;bottom:0;left:0;height:2px;background:rgba(255,255,255,.1)}.toast-progress:after{content:'';display:block;width:100%;height:100%;background:#b99350;transform-origin:left;animation:toast-countdown 5s linear forwards}@keyframes toast-countdown{to{transform:scaleX(0)}}
+        @media(max-width:600px){.toast-region{top:auto;right:14px;bottom:14px;left:14px;width:auto}.luxury-toast{grid-template-columns:40px 1fr auto;padding:17px}.toast-icon{width:40px;height:40px}}
+        @media(prefers-reduced-motion:reduce){.luxury-toast{transition:none}.toast-progress:after{animation:none}}
+    `;
+    document.head.appendChild(styles);
+    const region = document.createElement('div');
+    region.className = 'toast-region';
+    region.setAttribute('aria-live', 'polite');
+    region.setAttribute('aria-atomic', 'true');
+    document.body.appendChild(region);
+}
+
+function mostrarProductoAgregado(nombre, marca) {
+    let region = document.querySelector('.toast-region');
+    if (!region) { initNotificaciones(); region = document.querySelector('.toast-region'); }
+    region.querySelectorAll('.luxury-toast').forEach(toast => toast.remove());
+    const toast = document.createElement('div');
+    toast.className = 'luxury-toast';
+    toast.setAttribute('role', 'status');
+    toast.innerHTML = `
+        <div class="toast-icon"><svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg></div>
+        <div><span class="toast-kicker">Añadido correctamente</span><strong class="toast-title"></strong><span class="toast-detail"></span></div>
+        <button class="toast-close" type="button" aria-label="Cerrar notificación">×</button>
+        <div class="toast-actions"><a class="toast-cart-link" href="carrito.html">Ver mi bolsa →</a><button class="toast-continue" type="button">Seguir explorando</button></div>
+        <div class="toast-progress"></div>`;
+    toast.querySelector('.toast-title').textContent = nombre;
+    toast.querySelector('.toast-detail').textContent = `${marca} · Tu selección se guardó en la bolsa`;
+    region.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add('visible'));
+    let timeout;
+    const cerrar = () => { clearTimeout(timeout); toast.classList.add('leaving'); setTimeout(() => toast.remove(), 320); };
+    toast.querySelector('.toast-close').addEventListener('click', cerrar);
+    toast.querySelector('.toast-continue').addEventListener('click', cerrar);
+    timeout = setTimeout(cerrar, 5000);
+}
+
 window.agregarAlCarritoDirecto = function(id, nombre, marca, precio, imagen) {
     let carrito = obtenerCarrito();
     const index = carrito.findIndex(item => String(item.id) === String(id));
     if (index !== -1) carrito[index].cantidad += 1;
     else carrito.push({ id: String(id), nombre, marca, precio: parseInt(precio), imagen, cantidad: 1 });
     guardarCarrito(carrito);
-    alert('¡Armazón añadido a tu bolsa de compras!');
+    mostrarProductoAgregado(nombre, marca);
 };
 
 window.comprarAhora = function(id, nombre, marca, precio, imagen) {
