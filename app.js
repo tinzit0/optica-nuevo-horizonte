@@ -18,7 +18,6 @@ const PRODUCTOS_BASE = [
 ];
 
 document.addEventListener('DOMContentLoaded', async () => {
-    await initBarraAdmin();
     leerParametrosURLYMarcarCheckbox();
     initCatalogoInteractivo();
     cargarProductosConFiltros();
@@ -26,6 +25,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (window.location.pathname.includes('producto.html')) cargarDetalleProducto();
     if (window.location.pathname.includes('carrito.html')) renderizarVistaCarrito();
     if (window.location.pathname.includes('checkout.html')) renderizarVistaCheckout();
+    try { await initBarraAdmin(); } catch (error) { console.warn('Panel administrativo no disponible:', error); }
 });
 
 function leerParametrosURLYMarcarCheckbox() {
@@ -178,24 +178,29 @@ window.toggleFavorito = function(id, button) {
 async function cargarDetalleProducto() {
     const id = new URLSearchParams(location.search).get('id') || '1';
     let producto = PRODUCTOS_BASE.find(p => String(p.id) === String(id));
-    try {
-        const { data } = await _supabase.from('optica_productos').select('*').eq('id', id).maybeSingle();
-        if (data) producto = { ...producto, ...data };
-    } catch (error) { /* La ficha base mantiene disponible la página sin conexión. */ }
     if (!producto) producto = PRODUCTOS_BASE[0];
 
-    const image = document.querySelector('.main-img');
-    const brand = document.querySelector('.info .brand');
-    const title = document.querySelector('.info .title');
-    const price = document.querySelector('.price-box span');
-    if (image) { image.src = producto.image; image.alt = `${producto.brand} ${producto.title}`; }
-    if (brand) brand.textContent = producto.brand;
-    if (title) title.textContent = producto.title;
-    if (price) price.textContent = `$${Number(producto.price).toLocaleString('es-CL')}`;
-    document.title = `${producto.title} | Óptica Nuevo Horizonte`;
+    const aplicarProducto = item => {
+        const image = document.querySelector('.main-img');
+        const brand = document.querySelector('.info .brand');
+        const title = document.querySelector('.info .title');
+        const price = document.querySelector('.price-box span');
+        if (image) { image.src = item.image; image.alt = `${item.brand} ${item.title}`; }
+        if (brand) brand.textContent = item.brand;
+        if (title) title.textContent = item.title;
+        if (price) price.textContent = `$${Number(item.price).toLocaleString('es-CL')}`;
+        document.title = `${item.title} | Óptica Nuevo Horizonte`;
+        const addButton = document.querySelector('.btn-add');
+        const buyButton = document.querySelector('.btn-buy-now');
+        if (addButton) addButton.onclick = () => agregarAlCarritoDirecto(String(item.id), item.title, item.brand, item.price, item.image);
+        if (buyButton) buyButton.onclick = () => comprarAhora(String(item.id), item.title, item.brand, item.price, item.image);
+    };
+    aplicarProducto(producto);
 
-    const addButton = document.querySelector('.btn-add');
-    if (addButton) addButton.onclick = () => agregarAlCarritoDirecto(String(producto.id), producto.title, producto.brand, producto.price, producto.image);
+    try {
+        const { data } = await _supabase.from('optica_productos').select('*').eq('id', id).maybeSingle();
+        if (data) { producto = { ...producto, ...data }; aplicarProducto(producto); }
+    } catch (error) { /* La ficha base mantiene disponible la página sin conexión. */ }
 }
 
 window.toggleDrawer = function(open) {
@@ -207,8 +212,20 @@ window.toggleDrawer = function(open) {
     }
 };
 
-function obtenerCarrito() { return JSON.parse(localStorage.getItem('cart_optica')) || []; }
-function guardarCarrito(c) { localStorage.setItem('cart_optica', JSON.stringify(c)); actualizarContadorHeader(); }
+function obtenerCarrito() {
+    try {
+        const principal = JSON.parse(localStorage.getItem('cart_optica') || '[]');
+        if (Array.isArray(principal) && principal.length) return principal;
+        const respaldo = JSON.parse(sessionStorage.getItem('cart_checkout_optica') || '[]');
+        return Array.isArray(respaldo) ? respaldo : [];
+    } catch (error) { return []; }
+}
+function guardarCarrito(c) {
+    const limpio = Array.isArray(c) ? c : [];
+    localStorage.setItem('cart_optica', JSON.stringify(limpio));
+    sessionStorage.setItem('cart_checkout_optica', JSON.stringify(limpio));
+    actualizarContadorHeader();
+}
 
 function actualizarContadorHeader() {
     const totalItems = obtenerCarrito().reduce((acc, item) => acc + item.cantidad, 0);
@@ -219,11 +236,20 @@ function initCarrito() { actualizarContadorHeader(); }
 
 window.agregarAlCarritoDirecto = function(id, nombre, marca, precio, imagen) {
     let carrito = obtenerCarrito();
-    const index = carrito.findIndex(item => item.id === id);
+    const index = carrito.findIndex(item => String(item.id) === String(id));
     if (index !== -1) carrito[index].cantidad += 1;
-    else carrito.push({ id, nombre, marca, precio: parseInt(precio), imagen, cantidad: 1 });
+    else carrito.push({ id: String(id), nombre, marca, precio: parseInt(precio), imagen, cantidad: 1 });
     guardarCarrito(carrito);
     alert('¡Armazón añadido a tu bolsa de compras!');
+};
+
+window.comprarAhora = function(id, nombre, marca, precio, imagen) {
+    let carrito = obtenerCarrito();
+    const index = carrito.findIndex(item => String(item.id) === String(id));
+    if (index !== -1) carrito[index].cantidad += 1;
+    else carrito.push({ id: String(id), nombre, marca, precio: Number(precio), imagen, cantidad: 1 });
+    guardarCarrito(carrito);
+    window.location.href = 'checkout.html';
 };
 
 function renderizarVistaCarrito() {
@@ -372,6 +398,7 @@ function renderizarVistaCheckout() {
             status.textContent = 'Pedido registrado. La tienda te enviará el cobro protegido de Mercado Pago al correo o WhatsApp indicado.';
             status.classList.add('visible');
             localStorage.removeItem('cart_optica');
+            sessionStorage.removeItem('cart_checkout_optica');
             actualizarContadorHeader();
             payButton.textContent = 'Pedido registrado';
         } catch (error) {
