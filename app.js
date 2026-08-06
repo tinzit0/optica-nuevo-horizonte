@@ -1,6 +1,10 @@
 const SUPABASE_URL = "https://kxldsjodgfonrrlwjbws.supabase.co";
 const SUPABASE_KEY = "sb_publishable_J5s_2YqtASIYSqu2k00SGA_copdr39x";
-const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// Mantener operativas la tienda y la bolsa aunque el CDN de Supabase sea
+// bloqueado, reordenado o tarde en responder en el hosting.
+const _supabase = window.supabase?.createClient
+    ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+    : null;
 
 const PRODUCTOS_BASE = [
     { id:'1', title:'Wayfarer Classic', brand:'Ray-Ban', price:119900, category:'optico', gender:'unisex', shape:'rectangular', color:'negro', material:'acetato', features:['nuevo'], image:'https://images.unsplash.com/photo-1572635196237-14b3f281503f?q=80&w=700&auto=format&fit=crop' },
@@ -22,9 +26,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     initCatalogoInteractivo();
     cargarProductosConFiltros();
     initCarrito();
-    if (window.location.pathname.includes('producto.html')) cargarDetalleProducto();
-    if (window.location.pathname.includes('carrito.html')) renderizarVistaCarrito();
-    if (window.location.pathname.includes('checkout.html')) renderizarVistaCheckout();
+    // Cloudflare Pages puede servir rutas limpias (/carrito, /checkout, /producto).
+    // Detectar la vista por su contenido evita depender del nombre físico del archivo.
+    if (document.querySelector('.product-detail')) cargarDetalleProducto();
+    if (document.querySelector('.cart-items')) renderizarVistaCarrito();
+    if (document.querySelector('#checkout-form')) renderizarVistaCheckout();
     try { await initBarraAdmin(); } catch (error) { console.warn('Panel administrativo no disponible:', error); }
 });
 
@@ -42,6 +48,7 @@ function leerParametrosURLYMarcarCheckbox() {
 }
 
 async function initBarraAdmin() {
+    if (!_supabase) return;
     const { data: { session } } = await _supabase.auth.getSession();
 
     const adminBar = document.createElement('div');
@@ -68,11 +75,17 @@ async function cargarProductosConFiltros() {
     const grid = document.querySelector('#catalog-grid, .products-grid');
     if (!grid) return;
 
-    const { data: { session } } = await _supabase.auth.getSession();
-    const esAdmin = !!session;
+    let esAdmin = false;
+    if (_supabase) {
+        try {
+            const { data: { session } } = await _supabase.auth.getSession();
+            esAdmin = !!session;
+        } catch (error) { esAdmin = false; }
+    }
 
     let productos = [];
     try {
+        if (!_supabase) throw new Error('Supabase no disponible');
         const { data, error } = await _supabase.from('optica_productos').select('*').order('created_at', { ascending: false });
         if (!error && data && data.length > 0) productos = data;
         else productos = PRODUCTOS_BASE;
