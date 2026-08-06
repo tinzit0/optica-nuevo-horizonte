@@ -235,9 +235,11 @@ function renderizarVistaCarrito() {
     if (!contenedor) return;
 
     if (carrito.length === 0) {
-        contenedor.innerHTML = `<div style="padding: 40px; text-align: center; color: #64748b;">Tu bolsa de compras está vacía.</div>`;
+        contenedor.innerHTML = `<div class="empty-cart"><h2>Tu bolsa está vacía</h2><p>Descubre nuestra selección de anteojos ópticos y de sol.</p><a href="catalogo.html">Explorar colección</a></div>`;
         if (totalEl) totalEl.textContent = '$0';
         if (subtotalEl) subtotalEl.textContent = '$0';
+        const checkout = document.querySelector('.btn-checkout');
+        if (checkout) { checkout.style.pointerEvents = 'none'; checkout.style.opacity = '.45'; checkout.setAttribute('aria-disabled', 'true'); }
         return;
     }
 
@@ -257,9 +259,9 @@ function renderizarVistaCarrito() {
                         <button class="qty-btn" onclick="cambiarCantidad(${index}, 1)">+</button>
                     </div>
                 </div>
-                <div style="text-align:right;">
-                    <div style="font-weight:700; font-size:15px;">$${totalItem.toLocaleString('es-CL')}</div>
-                    <button onclick="eliminarDelCarrito(${index})" style="background:none; border:none; color:#E53E3E; font-size:11px; cursor:pointer; margin-top:8px;">Eliminar</button>
+                <div class="item-total">
+                    <div>$${totalItem.toLocaleString('es-CL')}</div>
+                    <button class="remove-btn" onclick="eliminarDelCarrito(${index})">Eliminar</button>
                 </div>
             </div>
         `;
