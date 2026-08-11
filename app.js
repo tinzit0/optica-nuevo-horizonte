@@ -20,8 +20,23 @@ const PRODUCTOS_BASE = [
     { id:'11', title:'Havana Signature', brand:'Armani', price:134900, category:'optico', gender:'unisex', shape:'redondo', color:'habano', material:'acetato', features:['nuevo'], image:'https://images.unsplash.com/photo-1591076482161-42ce6da69f67?q=80&w=700&auto=format&fit=crop' },
     { id:'12', title:'Palazzo Edition', brand:'Versace', price:189900, category:'sol', gender:'mujer', shape:'geométrico', color:'habano', material:'acetato', features:['polarizado'], image:'https://images.unsplash.com/photo-1577803645773-f96470509666?q=80&w=700&auto=format&fit=crop' }
 ];
+let PRODUCTOS_LOCALES = [];
+
+async function cargarCatalogoLocal() {
+    try {
+        const respuesta = await fetch('data/productos.json', { cache: 'no-store' });
+        if (!respuesta.ok) throw new Error(`Catálogo local: ${respuesta.status}`);
+        const datos = await respuesta.json();
+        PRODUCTOS_LOCALES = Array.isArray(datos) ? datos : [];
+    } catch (error) {
+        console.warn('No fue posible cargar el catálogo FOOSE:', error);
+        PRODUCTOS_LOCALES = [];
+    }
+}
 
 document.addEventListener('DOMContentLoaded', async () => {
+    await cargarCatalogoLocal();
+    initNavegacionMovil();
     leerParametrosURLYMarcarCheckbox();
     initCatalogoInteractivo();
     cargarProductosConFiltros();
@@ -34,6 +49,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (document.querySelector('#checkout-form')) renderizarVistaCheckout();
     try { await initBarraAdmin(); } catch (error) { console.warn('Panel administrativo no disponible:', error); }
 });
+
+function initNavegacionMovil() {
+    const page = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+    if (page === 'index.html' || document.querySelector('.mobile-bottom-nav')) return;
+    const links = [['index.html','Inicio','⌂'],['catalogo.html','Catálogo','◫'],['agenda.html','Agenda','○'],['carrito.html','Bolsa','▢']];
+    const nav = document.createElement('nav');
+    nav.className = 'mobile-bottom-nav';
+    nav.setAttribute('aria-label', 'Navegación móvil');
+    nav.innerHTML = links.map(([href,label,icon]) => {
+        const active = page === href || (page === 'producto.html' && href === 'catalogo.html') || (page === 'checkout.html' && href === 'carrito.html');
+        return `<a href="${href}" ${active ? 'aria-current="page"' : ''}><span aria-hidden="true">${icon}</span><small>${label}</small></a>`;
+    }).join('');
+    document.body.appendChild(nav);
+    const style = document.createElement('style');
+    style.textContent = `.mobile-bottom-nav{display:none}@media(max-width:760px){body{padding-bottom:76px}button,a,input,select{touch-action:manipulation}button,.btn-gold,.detail-btn,.btn-add,.btn-buy-now,.btn-checkout,.btn-pay-now{min-height:44px}.mobile-bottom-nav{position:fixed;z-index:1000;right:10px;bottom:8px;left:10px;display:grid;grid-template-columns:repeat(4,1fr);padding:7px;background:rgba(16,23,19,.96);border:1px solid rgba(255,255,255,.12);border-radius:16px;box-shadow:0 12px 35px rgba(0,0,0,.28);backdrop-filter:blur(14px)}.mobile-bottom-nav a{display:flex;min-width:0;min-height:50px;align-items:center;justify-content:center;flex-direction:column;gap:2px;border-radius:11px;color:rgba(255,255,255,.7);text-decoration:none}.mobile-bottom-nav a[aria-current="page"]{background:#b99350;color:#fff}.mobile-bottom-nav a>span{font-size:1.15rem;line-height:1}.mobile-bottom-nav small{font:600 .61rem 'DM Sans',sans-serif}}`;
+    style.textContent += '.item-img,.sidebar-item img{object-fit:contain!important;background:#fff}';
+    document.head.appendChild(style);
+}
 
 function leerParametrosURLYMarcarCheckbox() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -88,10 +121,10 @@ async function cargarProductosConFiltros() {
     try {
         if (!_supabase) throw new Error('Supabase no disponible');
         const { data, error } = await _supabase.from('optica_productos').select('*').order('created_at', { ascending: false });
-        if (!error && data && data.length > 0) productos = data;
-        else productos = PRODUCTOS_BASE;
+        if (!error && data && data.length > 0) productos = [...data, ...PRODUCTOS_LOCALES];
+        else productos = PRODUCTOS_LOCALES.length ? PRODUCTOS_LOCALES : PRODUCTOS_BASE;
     } catch (e) {
-        productos = PRODUCTOS_BASE;
+        productos = PRODUCTOS_LOCALES.length ? PRODUCTOS_LOCALES : PRODUCTOS_BASE;
     }
 
     const valores = selector => Array.from(document.querySelectorAll(`${selector}:checked`)).map(cb => cb.value);
@@ -142,7 +175,11 @@ async function cargarProductosConFiltros() {
         const features = Array.isArray(p.features) ? p.features : [];
         const badge = features.includes('oferta') ? 'Oferta' : features.includes('nuevo') ? 'Nuevo' : '';
         const meta = [p.shape, p.color, p.material].filter(Boolean).join(' · ');
-        return `<article class="product-card"><div class="product-media">${badge ? `<span class="product-badge">${badge}</span>` : ''}<img src="${p.image}" alt="${p.brand} ${p.title}" loading="lazy">${esCatalogo ? `<button class="favorite-btn ${favoritos.includes(String(p.id)) ? 'active' : ''}" onclick="toggleFavorito('${p.id}',this)" aria-label="Guardar ${p.title} en favoritos" aria-pressed="${favoritos.includes(String(p.id))}"><svg class="icon" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/></svg></button>` : ''}</div><div class="product-info"><div class="brand">${p.brand}</div><div class="p-name">${p.title}</div>${meta ? `<div class="product-meta">${meta}</div>` : ''}<div class="price">$${parseInt(p.price).toLocaleString('es-CL')}</div><div class="product-actions"><button onclick="agregarAlCarritoDirecto('${p.id}', '${p.title}', '${p.brand}', ${p.price}, '${p.image}')" class="btn-gold">AÑADIR A LA BOLSA</button>${esCatalogo ? `<a class="detail-btn" href="producto.html?id=${encodeURIComponent(p.id)}" aria-label="Ver detalle de ${p.title}">→</a>` : ''}</div>${esAdmin ? `<button onclick="eliminarProducto('${p.id}')" style="margin-top:8px;background:#a43d3d;color:#fff;border:0;padding:7px;cursor:pointer">ELIMINAR</button>` : ''}</div></article>`;
+        const tienePrecio = Number(p.price) > 0;
+        const precio = tienePrecio ? `$${Number(p.price).toLocaleString('es-CL')}` : 'Consultar precio';
+        const descripcion = p.description ? `<p class="product-description">${p.description}</p>` : '';
+        const accion = tienePrecio ? `<button onclick="agregarAlCarritoDirecto('${p.id}', '${p.title}', '${p.brand}', ${p.price}, '${p.image}')" class="btn-gold">AÑADIR A LA BOLSA</button>` : `<a class="btn-gold" href="producto.html?id=${encodeURIComponent(p.id)}">VER DISPONIBILIDAD</a>`;
+        return `<article class="product-card"><div class="product-media">${badge ? `<span class="product-badge">${badge}</span>` : ''}<img src="${p.image}" alt="${p.brand} ${p.title}" loading="lazy">${esCatalogo ? `<button class="favorite-btn ${favoritos.includes(String(p.id)) ? 'active' : ''}" onclick="toggleFavorito('${p.id}',this)" aria-label="Guardar ${p.title} en favoritos" aria-pressed="${favoritos.includes(String(p.id))}"><svg class="icon" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/></svg></button>` : ''}</div><div class="product-info"><div class="brand">${p.brand}</div><div class="p-name">${p.title}</div>${meta ? `<div class="product-meta">${meta}</div>` : ''}${descripcion}<div class="price">${precio}</div><div class="product-actions">${accion}${esCatalogo ? `<a class="detail-btn" href="producto.html?id=${encodeURIComponent(p.id)}" aria-label="Ver detalle de ${p.title}">→</a>` : ''}</div>${esAdmin ? `<button onclick="eliminarProducto('${p.id}')" style="margin-top:8px;background:#a43d3d;color:#fff;border:0;padding:7px;cursor:pointer">ELIMINAR</button>` : ''}</div></article>`;
     }).join('');
 }
 
@@ -191,7 +228,7 @@ window.toggleFavorito = function(id, button) {
 
 async function cargarDetalleProducto() {
     const id = new URLSearchParams(location.search).get('id') || '1';
-    let producto = PRODUCTOS_BASE.find(p => String(p.id) === String(id));
+    let producto = [...PRODUCTOS_LOCALES, ...PRODUCTOS_BASE].find(p => String(p.id) === String(id));
     if (!producto) producto = PRODUCTOS_BASE[0];
 
     const aplicarProducto = item => {
@@ -199,15 +236,24 @@ async function cargarDetalleProducto() {
         const brand = document.querySelector('.info .brand');
         const title = document.querySelector('.info .title');
         const price = document.querySelector('.price-box span');
+        const description = document.querySelector('.product-copy');
         if (image) { image.src = item.image; image.alt = `${item.brand} ${item.title}`; }
         if (brand) brand.textContent = item.brand;
         if (title) title.textContent = item.title;
-        if (price) price.textContent = `$${Number(item.price).toLocaleString('es-CL')}`;
+        if (price) price.textContent = Number(item.price) > 0 ? `$${Number(item.price).toLocaleString('es-CL')}` : 'Consultar precio';
+        if (description && item.description) description.textContent = item.description;
         document.title = `${item.title} | Óptica Nuevo Horizonte`;
         const addButton = document.querySelector('.btn-add');
         const buyButton = document.querySelector('.btn-buy-now');
-        if (addButton) addButton.onclick = () => agregarAlCarritoDirecto(String(item.id), item.title, item.brand, item.price, item.image);
-        if (buyButton) buyButton.onclick = () => comprarAhora(String(item.id), item.title, item.brand, item.price, item.image);
+        if (addButton) {
+            addButton.disabled = !(Number(item.price) > 0);
+            addButton.textContent = Number(item.price) > 0 ? 'AÑADIR A MI BOLSA DE COMPRAS' : 'PRECIO POR CONFIRMAR';
+            addButton.onclick = () => agregarAlCarritoDirecto(String(item.id), item.title, item.brand, item.price, item.image);
+        }
+        if (buyButton) {
+            buyButton.disabled = !(Number(item.price) > 0);
+            buyButton.onclick = () => comprarAhora(String(item.id), item.title, item.brand, item.price, item.image);
+        }
     };
     aplicarProducto(producto);
 

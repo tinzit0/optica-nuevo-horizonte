@@ -1,0 +1,1794 @@
+﻿[
+    {
+        "id":  "foose-dsfo-048-principal",
+        "title":  "DSFO-048 Principal",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "principal",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-048-principal.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-048, variante Principal."
+    },
+    {
+        "id":  "foose-dsfo-048-c-2",
+        "title":  "DSFO-048 C-2",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "c-2",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-048-c-2.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-048, variante C-2."
+    },
+    {
+        "id":  "foose-dsfo-048-c-3",
+        "title":  "DSFO-048 C-3",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "c-3",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-048-c-3.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-048, variante C-3."
+    },
+    {
+        "id":  "foose-dsfo-048-c-6",
+        "title":  "DSFO-048 C-6",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "c-6",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-048-c-6.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-048, variante C-6."
+    },
+    {
+        "id":  "foose-dsfo-048-c-7",
+        "title":  "DSFO-048 C-7",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "c-7",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-048-c-7.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-048, variante C-7."
+    },
+    {
+        "id":  "foose-dsfo-049-c-1",
+        "title":  "DSFO-049 C-1",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "c-1",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-049-c-1.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-049, variante C-1."
+    },
+    {
+        "id":  "foose-dsfo-049-c-2",
+        "title":  "DSFO-049 C-2",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "c-2",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-049-c-2.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-049, variante C-2."
+    },
+    {
+        "id":  "foose-dsfo-049-c-3",
+        "title":  "DSFO-049 C-3",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "c-3",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-049-c-3.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-049, variante C-3."
+    },
+    {
+        "id":  "foose-dsfo-049-c-4",
+        "title":  "DSFO-049 C-4",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "c-4",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-049-c-4.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-049, variante C-4."
+    },
+    {
+        "id":  "foose-dsfo-049-c-5",
+        "title":  "DSFO-049 C-5",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "c-5",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-049-c-5.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-049, variante C-5."
+    },
+    {
+        "id":  "foose-dsfo-049-c-6",
+        "title":  "DSFO-049 C-6",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "c-6",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-049-c-6.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-049, variante C-6."
+    },
+    {
+        "id":  "foose-dsfo-049-principal",
+        "title":  "DSFO-049 Principal",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "principal",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-049-principal.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-049, variante Principal."
+    },
+    {
+        "id":  "foose-dsfo-051-principal",
+        "title":  "DSFO-051 Principal",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "principal",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-051-principal.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-051, variante Principal."
+    },
+    {
+        "id":  "foose-dsfo-051-c-1",
+        "title":  "DSFO-051 C-1",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "c-1",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-051-c-1.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-051, variante C-1."
+    },
+    {
+        "id":  "foose-dsfo-051-c-3",
+        "title":  "DSFO-051 C-3",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "c-3",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-051-c-3.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-051, variante C-3."
+    },
+    {
+        "id":  "foose-dsfo-051-c-4",
+        "title":  "DSFO-051 C-4",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "c-4",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-051-c-4.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-051, variante C-4."
+    },
+    {
+        "id":  "foose-dsfo-051-c-5",
+        "title":  "DSFO-051 C-5",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "c-5",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-051-c-5.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-051, variante C-5."
+    },
+    {
+        "id":  "foose-dsfo-054-c-1",
+        "title":  "DSFO-054 C-1",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "c-1",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-054-c-1.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-054, variante C-1."
+    },
+    {
+        "id":  "foose-dsfo-054-c-2",
+        "title":  "DSFO-054 C-2",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "c-2",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-054-c-2.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-054, variante C-2."
+    },
+    {
+        "id":  "foose-dsfo-054-c-3",
+        "title":  "DSFO-054 C-3",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "c-3",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-054-c-3.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-054, variante C-3."
+    },
+    {
+        "id":  "foose-dsfo-054-c-4",
+        "title":  "DSFO-054 C-4",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "c-4",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-054-c-4.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-054, variante C-4."
+    },
+    {
+        "id":  "foose-dsfo-054-c-6",
+        "title":  "DSFO-054 C-6",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "c-6",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-054-c-6.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-054, variante C-6."
+    },
+    {
+        "id":  "foose-dsfo-054-principal",
+        "title":  "DSFO-054 Principal",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "principal",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-054-principal.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-054, variante Principal."
+    },
+    {
+        "id":  "foose-dsfo-047-principal",
+        "title":  "DSFO-047 Principal",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "principal",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-047-principal.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-047, variante Principal."
+    },
+    {
+        "id":  "foose-dsfo-047-c-1",
+        "title":  "DSFO-047 C-1",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "c-1",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-047-c-1.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-047, variante C-1."
+    },
+    {
+        "id":  "foose-dsfo-047-c-2",
+        "title":  "DSFO-047 C-2",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "c-2",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-047-c-2.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-047, variante C-2."
+    },
+    {
+        "id":  "foose-dsfo-047-c-3",
+        "title":  "DSFO-047 C-3",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "c-3",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-047-c-3.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-047, variante C-3."
+    },
+    {
+        "id":  "foose-dsfo-047-c-4",
+        "title":  "DSFO-047 C-4",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "c-4",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-047-c-4.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-047, variante C-4."
+    },
+    {
+        "id":  "foose-dsfo-047-c-5",
+        "title":  "DSFO-047 C-5",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "c-5",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-047-c-5.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-047, variante C-5."
+    },
+    {
+        "id":  "foose-dsfo-050-c-1",
+        "title":  "DSFO-050 C-1",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "c-1",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-050-c-1.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-050, variante C-1."
+    },
+    {
+        "id":  "foose-dsfo-050-c-4",
+        "title":  "DSFO-050 C-4",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "c-4",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-050-c-4.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-050, variante C-4."
+    },
+    {
+        "id":  "foose-dsfo-050-c-5",
+        "title":  "DSFO-050 C-5",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "c-5",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-050-c-5.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-050, variante C-5."
+    },
+    {
+        "id":  "foose-dsfo-050-c-6",
+        "title":  "DSFO-050 C-6",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "c-6",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-050-c-6.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-050, variante C-6."
+    },
+    {
+        "id":  "foose-dsfo-050-principal",
+        "title":  "DSFO-050 Principal",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "principal",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-050-principal.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-050, variante Principal."
+    },
+    {
+        "id":  "foose-dsfo-052-c-1",
+        "title":  "DSFO-052 C-1",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "c-1",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-052-c-1.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-052, variante C-1."
+    },
+    {
+        "id":  "foose-dsfo-052-c-4",
+        "title":  "DSFO-052 C-4",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "c-4",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-052-c-4.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-052, variante C-4."
+    },
+    {
+        "id":  "foose-dsfo-052-c-5",
+        "title":  "DSFO-052 C-5",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "c-5",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-052-c-5.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-052, variante C-5."
+    },
+    {
+        "id":  "foose-dsfo-052-c-6",
+        "title":  "DSFO-052 C-6",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "c-6",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-052-c-6.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-052, variante C-6."
+    },
+    {
+        "id":  "foose-dsfo-052-principal",
+        "title":  "DSFO-052 Principal",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "principal",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-052-principal.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-052, variante Principal."
+    },
+    {
+        "id":  "foose-dsfo-053-c-1",
+        "title":  "DSFO-053 C-1",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "c-1",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-053-c-1.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-053, variante C-1."
+    },
+    {
+        "id":  "foose-dsfo-053-c-2",
+        "title":  "DSFO-053 C-2",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "c-2",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-053-c-2.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-053, variante C-2."
+    },
+    {
+        "id":  "foose-dsfo-053-c-3",
+        "title":  "DSFO-053 C-3",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "c-3",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-053-c-3.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-053, variante C-3."
+    },
+    {
+        "id":  "foose-dsfo-053-c-4",
+        "title":  "DSFO-053 C-4",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "c-4",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-053-c-4.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-053, variante C-4."
+    },
+    {
+        "id":  "foose-dsfo-053-principal",
+        "title":  "DSFO-053 Principal",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "principal",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-053-principal.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-053, variante Principal."
+    },
+    {
+        "id":  "foose-dsfo-055-c-2",
+        "title":  "DSFO-055 C-2",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "c-2",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-055-c-2.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-055, variante C-2."
+    },
+    {
+        "id":  "foose-dsfo-055-principal",
+        "title":  "DSFO-055 Principal",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "principal",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-055-principal.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-055, variante Principal."
+    },
+    {
+        "id":  "foose-dsfo-055",
+        "title":  "DSFO-055",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-055.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-055."
+    },
+    {
+        "id":  "foose-dsfo-056 (1)",
+        "title":  "DSFO-056 (1)",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-056 (1).jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-056 (1)."
+    },
+    {
+        "id":  "foose-dsfo-056",
+        "title":  "DSFO-056",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-056.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-056."
+    },
+    {
+        "id":  "foose-dsfo-073",
+        "title":  "DSFO-073",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-073.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-073."
+    },
+    {
+        "id":  "foose-dsfo-074",
+        "title":  "DSFO-074",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-074.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-074."
+    },
+    {
+        "id":  "foose-dsfo-075",
+        "title":  "DSFO-075",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-075.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-075."
+    },
+    {
+        "id":  "foose-dsfo-076",
+        "title":  "DSFO-076",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-076.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-076."
+    },
+    {
+        "id":  "foose-dsfo-089",
+        "title":  "DSFO-089",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-089.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-089."
+    },
+    {
+        "id":  "foose-dsfo-090",
+        "title":  "DSFO-090",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-090.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-090."
+    },
+    {
+        "id":  "foose-dsfo-091",
+        "title":  "DSFO-091",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-091.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-091."
+    },
+    {
+        "id":  "foose-dsfo-092",
+        "title":  "DSFO-092",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-092.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-092."
+    },
+    {
+        "id":  "foose-dsfo-093",
+        "title":  "DSFO-093",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-093.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-093."
+    },
+    {
+        "id":  "foose-dsfo-108",
+        "title":  "DSFO-108",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-108.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-108."
+    },
+    {
+        "id":  "foose-dsfo-109",
+        "title":  "DSFO-109",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-109.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-109."
+    },
+    {
+        "id":  "foose-dsfo-110",
+        "title":  "DSFO-110",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-110.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-110."
+    },
+    {
+        "id":  "foose-dsfo-111",
+        "title":  "DSFO-111",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-111.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-111."
+    },
+    {
+        "id":  "foose-dsfo-112",
+        "title":  "DSFO-112",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-112.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-112."
+    },
+    {
+        "id":  "foose-dsfo-113",
+        "title":  "DSFO-113",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-113.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-113."
+    },
+    {
+        "id":  "foose-dsfo-114",
+        "title":  "DSFO-114",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "metal",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/dsfo-114.jpg",
+        "description":  "Armazón óptico FOOSE, modelo DSFO-114."
+    },
+    {
+        "id":  "foose-fxfo-079t",
+        "title":  "FXFO-079T",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/fxfo-079t.jpg",
+        "description":  "Armazón óptico FOOSE, modelo FXFO-079T."
+    },
+    {
+        "id":  "foose-fxfo-080t",
+        "title":  "FXFO-080T",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/fxfo-080t.jpg",
+        "description":  "Armazón óptico FOOSE, modelo FXFO-080T."
+    },
+    {
+        "id":  "foose-fxfo-082t",
+        "title":  "FXFO-082T",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/fxfo-082t.jpg",
+        "description":  "Armazón óptico FOOSE, modelo FXFO-082T."
+    },
+    {
+        "id":  "foose-fxfo-083t",
+        "title":  "FXFO-083T",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/fxfo-083t.jpg",
+        "description":  "Armazón óptico FOOSE, modelo FXFO-083T."
+    },
+    {
+        "id":  "foose-fxfo-084t",
+        "title":  "FXFO-084T",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/fxfo-084t.jpg",
+        "description":  "Armazón óptico FOOSE, modelo FXFO-084T."
+    },
+    {
+        "id":  "foose-fxfo-085t",
+        "title":  "FXFO-085T",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/fxfo-085t.jpg",
+        "description":  "Armazón óptico FOOSE, modelo FXFO-085T."
+    },
+    {
+        "id":  "foose-fxfo-086t",
+        "title":  "FXFO-086T",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/fxfo-086t.jpg",
+        "description":  "Armazón óptico FOOSE, modelo FXFO-086T."
+    },
+    {
+        "id":  "foose-fxfo-088t",
+        "title":  "FXFO-088T",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/fxfo-088t.jpg",
+        "description":  "Armazón óptico FOOSE, modelo FXFO-088T."
+    },
+    {
+        "id":  "foose-fxfo-096",
+        "title":  "FXFO-096",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/fxfo-096.jpg",
+        "description":  "Armazón óptico FOOSE, modelo FXFO-096."
+    },
+    {
+        "id":  "foose-fxfo-115",
+        "title":  "FXFO-115",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/fxfo-115.jpg",
+        "description":  "Armazón óptico FOOSE, modelo FXFO-115."
+    },
+    {
+        "id":  "foose-fxfo-116",
+        "title":  "FXFO-116",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/fxfo-116.jpg",
+        "description":  "Armazón óptico FOOSE, modelo FXFO-116."
+    },
+    {
+        "id":  "foose-fxfo-117",
+        "title":  "FXFO-117",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/fxfo-117.jpg",
+        "description":  "Armazón óptico FOOSE, modelo FXFO-117."
+    },
+    {
+        "id":  "foose-fxfo-118",
+        "title":  "FXFO-118",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/fxfo-118.jpg",
+        "description":  "Armazón óptico FOOSE, modelo FXFO-118."
+    },
+    {
+        "id":  "foose-fxfo-119",
+        "title":  "FXFO-119",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/fxfo-119.jpg",
+        "description":  "Armazón óptico FOOSE, modelo FXFO-119."
+    },
+    {
+        "id":  "foose-fxfo-120",
+        "title":  "FXFO-120",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/fxfo-120.jpg",
+        "description":  "Armazón óptico FOOSE, modelo FXFO-120."
+    },
+    {
+        "id":  "foose-xapfo-057",
+        "title":  "XAPFO-057",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "acetato",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/xapfo-057.jpg",
+        "description":  "Armazón óptico FOOSE, modelo XAPFO-057."
+    },
+    {
+        "id":  "foose-xapfo-058",
+        "title":  "XAPFO-058",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "acetato",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/xapfo-058.jpg",
+        "description":  "Armazón óptico FOOSE, modelo XAPFO-058."
+    },
+    {
+        "id":  "foose-xapfo-059",
+        "title":  "XAPFO-059",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "acetato",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/xapfo-059.jpg",
+        "description":  "Armazón óptico FOOSE, modelo XAPFO-059."
+    },
+    {
+        "id":  "foose-xapfo-060",
+        "title":  "XAPFO-060",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "acetato",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/xapfo-060.jpg",
+        "description":  "Armazón óptico FOOSE, modelo XAPFO-060."
+    },
+    {
+        "id":  "foose-xapfo-061",
+        "title":  "XAPFO-061",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "acetato",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/xapfo-061.jpg",
+        "description":  "Armazón óptico FOOSE, modelo XAPFO-061."
+    },
+    {
+        "id":  "foose-xapfo-062",
+        "title":  "XAPFO-062",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "acetato",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/xapfo-062.jpg",
+        "description":  "Armazón óptico FOOSE, modelo XAPFO-062."
+    },
+    {
+        "id":  "foose-xapfo-063",
+        "title":  "XAPFO-063",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "acetato",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/xapfo-063.jpg",
+        "description":  "Armazón óptico FOOSE, modelo XAPFO-063."
+    },
+    {
+        "id":  "foose-xapfo-064",
+        "title":  "XAPFO-064",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "acetato",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/xapfo-064.jpg",
+        "description":  "Armazón óptico FOOSE, modelo XAPFO-064."
+    },
+    {
+        "id":  "foose-xapfo-065",
+        "title":  "XAPFO-065",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "acetato",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/xapfo-065.jpg",
+        "description":  "Armazón óptico FOOSE, modelo XAPFO-065."
+    },
+    {
+        "id":  "foose-xapfo-066",
+        "title":  "XAPFO-066",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "acetato",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/xapfo-066.jpg",
+        "description":  "Armazón óptico FOOSE, modelo XAPFO-066."
+    },
+    {
+        "id":  "foose-xapfo-067",
+        "title":  "XAPFO-067",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "acetato",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/xapfo-067.jpg",
+        "description":  "Armazón óptico FOOSE, modelo XAPFO-067."
+    },
+    {
+        "id":  "foose-xapfo-068",
+        "title":  "XAPFO-068",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "acetato",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/xapfo-068.jpg",
+        "description":  "Armazón óptico FOOSE, modelo XAPFO-068."
+    },
+    {
+        "id":  "foose-xapfo-069",
+        "title":  "XAPFO-069",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "acetato",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/xapfo-069.jpg",
+        "description":  "Armazón óptico FOOSE, modelo XAPFO-069."
+    },
+    {
+        "id":  "foose-xapfo-070",
+        "title":  "XAPFO-070",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "acetato",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/xapfo-070.jpg",
+        "description":  "Armazón óptico FOOSE, modelo XAPFO-070."
+    },
+    {
+        "id":  "foose-xapfo-121",
+        "title":  "XAPFO-121",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "acetato",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/xapfo-121.jpg",
+        "description":  "Armazón óptico FOOSE, modelo XAPFO-121."
+    },
+    {
+        "id":  "foose-xapfo-123",
+        "title":  "XAPFO-123",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "acetato",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/xapfo-123.jpg",
+        "description":  "Armazón óptico FOOSE, modelo XAPFO-123."
+    },
+    {
+        "id":  "foose-xapfo-124",
+        "title":  "XAPFO-124",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "acetato",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/xapfo-124.jpg",
+        "description":  "Armazón óptico FOOSE, modelo XAPFO-124."
+    },
+    {
+        "id":  "foose-xapfo-125",
+        "title":  "XAPFO-125",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "acetato",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/xapfo-125.jpg",
+        "description":  "Armazón óptico FOOSE, modelo XAPFO-125."
+    },
+    {
+        "id":  "foose-xapfo-126",
+        "title":  "XAPFO-126",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "acetato",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/xapfo-126.jpg",
+        "description":  "Armazón óptico FOOSE, modelo XAPFO-126."
+    },
+    {
+        "id":  "foose-xapfo-127",
+        "title":  "XAPFO-127",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "acetato",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/xapfo-127.jpg",
+        "description":  "Armazón óptico FOOSE, modelo XAPFO-127."
+    },
+    {
+        "id":  "foose-xapfo-128",
+        "title":  "XAPFO-128",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "acetato",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/xapfo-128.jpg",
+        "description":  "Armazón óptico FOOSE, modelo XAPFO-128."
+    },
+    {
+        "id":  "foose-xapfo-129",
+        "title":  "XAPFO-129",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "acetato",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/xapfo-129.jpg",
+        "description":  "Armazón óptico FOOSE, modelo XAPFO-129."
+    },
+    {
+        "id":  "foose-xyfo-098",
+        "title":  "XYFO-098",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/xyfo-098.jpg",
+        "description":  "Armazón óptico FOOSE, modelo XYFO-098."
+    },
+    {
+        "id":  "foose-xyfo-099",
+        "title":  "XYFO-099",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/xyfo-099.jpg",
+        "description":  "Armazón óptico FOOSE, modelo XYFO-099."
+    },
+    {
+        "id":  "foose-xyfo-100",
+        "title":  "XYFO-100",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/xyfo-100.jpg",
+        "description":  "Armazón óptico FOOSE, modelo XYFO-100."
+    },
+    {
+        "id":  "foose-xyfo-101",
+        "title":  "XYFO-101",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/xyfo-101.jpg",
+        "description":  "Armazón óptico FOOSE, modelo XYFO-101."
+    },
+    {
+        "id":  "foose-xyfo-102",
+        "title":  "XYFO-102",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/xyfo-102.jpg",
+        "description":  "Armazón óptico FOOSE, modelo XYFO-102."
+    },
+    {
+        "id":  "foose-xyfo-103",
+        "title":  "XYFO-103",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/xyfo-103.jpg",
+        "description":  "Armazón óptico FOOSE, modelo XYFO-103."
+    },
+    {
+        "id":  "foose-xyfo-104",
+        "title":  "XYFO-104",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/xyfo-104.jpg",
+        "description":  "Armazón óptico FOOSE, modelo XYFO-104."
+    },
+    {
+        "id":  "foose-xyfo-105",
+        "title":  "XYFO-105",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/xyfo-105.jpg",
+        "description":  "Armazón óptico FOOSE, modelo XYFO-105."
+    },
+    {
+        "id":  "foose-xyfo-106",
+        "title":  "XYFO-106",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/xyfo-106.jpg",
+        "description":  "Armazón óptico FOOSE, modelo XYFO-106."
+    },
+    {
+        "id":  "foose-xyfo-107",
+        "title":  "XYFO-107",
+        "brand":  "FOOSE",
+        "price":  null,
+        "category":  "optico",
+        "gender":  "unisex",
+        "shape":  "",
+        "color":  "",
+        "material":  "",
+        "features":  [
+                         "nuevo"
+                     ],
+        "image":  "assets/foose/catalogo/xyfo-107.jpg",
+        "description":  "Armazón óptico FOOSE, modelo XYFO-107."
+    }
+]
