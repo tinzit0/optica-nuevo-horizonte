@@ -32,6 +32,7 @@
     @media(max-width:1000px){.nav{top:84px;right:0;bottom:0;left:auto;display:flex;width:min(390px,100%);padding:48px 34px;align-items:stretch;gap:4px;border-left:1px solid var(--line);box-shadow:-24px 30px 60px rgba(16,23,19,.15);opacity:0;visibility:hidden;transform:translateX(100%);transition:transform .3s ease,opacity .25s,visibility .25s}.nav.open{display:flex;opacity:1;visibility:visible;transform:none}.nav a{padding:16px 4px;border-bottom:1px solid var(--line);font-size:1.65rem}.nav a:after{display:none}}
     @media(max-width:720px){.header-inner{grid-template-columns:minmax(0,1fr) auto;gap:10px}.logo{min-width:0}.logo-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.actions{grid-column:2;gap:7px}.menu-btn,.cart-action-btn{width:44px;height:44px}.nav{top:var(--mobile-nav-top,102px);width:100%;max-height:calc(100dvh - var(--mobile-nav-top,102px));padding:24px 20px calc(28px + env(safe-area-inset-bottom));overflow-y:auto;overscroll-behavior:contain;border-left:0;box-shadow:0 24px 55px rgba(16,23,19,.18)}.nav a{display:flex;min-height:58px;align-items:center;padding:10px 8px;font-size:1.55rem}.hero-slide:nth-child(1) img{object-position:68% center}.hero-slide:nth-child(2) img{object-position:58% center}.hero-slide:nth-child(3) img{object-position:64% center}.product-card .product-media{padding:10px}.product-card .product-description{display:none}}
     @media(max-width:390px){.header .container{width:calc(100% - 20px)}.logo-mark{display:none}.logo-name{font-size:.92rem}.logo-name small{font-size:.4rem;letter-spacing:.18em}.nav a{font-size:1.4rem}}
+    @media(min-width:721px) and (max-width:1000px){.header .container{width:calc(100% - 32px)}.header-inner{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:14px}.nav{position:static;inset:auto;display:flex;width:auto;padding:0;flex-direction:row;align-items:center;gap:clamp(10px,2vw,22px);border:0;box-shadow:none;opacity:1;visibility:visible;transform:none}.nav a{padding:0;border:0;font-family:var(--sans);font-size:clamp(.62rem,1.05vw,.72rem);font-weight:600;letter-spacing:.07em;text-transform:uppercase;white-space:nowrap}.nav a:after{display:block}.logo{justify-self:center}.logo-mark{width:36px;height:36px}.logo-name{font-size:clamp(.96rem,1.7vw,1.15rem)}.actions{grid-column:3}.menu-btn{display:none}.cart-action-btn{padding:0 12px}.cart-action-btn>span:not(.cart-badge){display:none}}
     @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
   </style>
 </head>
@@ -69,7 +70,7 @@
       n.querySelectorAll('a').forEach(a=>a.addEventListener('click',closeMenu));
       document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu()});
       document.addEventListener('click',e=>{if(n.classList.contains('open')&&!n.contains(e.target)&&!b.contains(e.target))closeMenu()});
-      addEventListener('resize',()=>{if(n.classList.contains('open'))updateMenuTop()});
+      addEventListener('resize',()=>{if(innerWidth>720)closeMenu();else if(n.classList.contains('open'))updateMenuTop()});
       addEventListener('orientationchange',()=>setTimeout(updateMenuTop,150));
 
       const hero=document.querySelector('.hero'),slides=[...document.querySelectorAll('.hero-slide')],dots=[...document.querySelectorAll('.hero-dot')];
