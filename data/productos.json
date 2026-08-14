@@ -4080,22 +4080,6 @@
     "description": "Armazón óptico FOOSE XAPFO-125 en acetato, para mujer. Diseño cómodo y contemporáneo para el día a día."
   },
   {
-    "id": "le-giro-pz-22009-1-principal",
-    "title": "PZ-22009 (1)",
-    "brand": "Le Giro",
-    "price": null,
-    "category": "optico",
-    "gender": "unisex",
-    "shape": "",
-    "color": "",
-    "material": "",
-    "features": [
-      "nuevo"
-    ],
-    "image": "assets/catalogo/le-giro/optico/pz-22009-1-principal.jpg",
-    "description": "Armazón óptico Le Giro PZ-22009 (1), unisex. Diseño cómodo y contemporáneo para el día a día."
-  },
-  {
     "id": "le-giro-pz-22009-principal",
     "title": "PZ-22009",
     "brand": "Le Giro",
@@ -4108,7 +4092,7 @@
     "features": [
       "nuevo"
     ],
-    "image": "assets/catalogo/le-giro/optico/pz-22009-principal.jpg",
+    "image": "assets/catalogo/le-giro/optico/pz-22009-principal-catalogo.jpg",
     "description": "Armazón óptico Le Giro PZ-22009, unisex. Diseño cómodo y contemporáneo para el día a día."
   },
   {
@@ -4124,24 +4108,8 @@
     "features": [
       "nuevo"
     ],
-    "image": "assets/catalogo/le-giro/optico/pz-22010-principal.jpg",
+    "image": "assets/catalogo/le-giro/optico/pz-22010-principal-catalogo.jpg",
     "description": "Armazón óptico Le Giro PZ-22010, unisex. Diseño cómodo y contemporáneo para el día a día."
-  },
-  {
-    "id": "le-giro-pz-22011-1-principal",
-    "title": "PZ-22011 (1)",
-    "brand": "Le Giro",
-    "price": null,
-    "category": "optico",
-    "gender": "unisex",
-    "shape": "",
-    "color": "",
-    "material": "",
-    "features": [
-      "nuevo"
-    ],
-    "image": "assets/catalogo/le-giro/optico/pz-22011-1-principal.jpg",
-    "description": "Armazón óptico Le Giro PZ-22011 (1), unisex. Diseño cómodo y contemporáneo para el día a día."
   },
   {
     "id": "le-giro-pz-22011-principal",
@@ -4156,7 +4124,7 @@
     "features": [
       "nuevo"
     ],
-    "image": "assets/catalogo/le-giro/optico/pz-22011-principal.jpg",
+    "image": "assets/catalogo/le-giro/optico/pz-22011-principal-catalogo.jpg",
     "description": "Armazón óptico Le Giro PZ-22011, unisex. Diseño cómodo y contemporáneo para el día a día."
   },
   {
@@ -4172,24 +4140,8 @@
     "features": [
       "nuevo"
     ],
-    "image": "assets/catalogo/le-giro/optico/pz-22012-principal.jpg",
+    "image": "assets/catalogo/le-giro/optico/pz-22012-principal-catalogo.jpg",
     "description": "Armazón óptico Le Giro PZ-22012, unisex. Diseño cómodo y contemporáneo para el día a día."
-  },
-  {
-    "id": "le-giro-pz-22013-1-principal",
-    "title": "PZ-22013 (1)",
-    "brand": "Le Giro",
-    "price": null,
-    "category": "optico",
-    "gender": "unisex",
-    "shape": "",
-    "color": "",
-    "material": "",
-    "features": [
-      "nuevo"
-    ],
-    "image": "assets/catalogo/le-giro/optico/pz-22013-1-principal.jpg",
-    "description": "Armazón óptico Le Giro PZ-22013 (1), unisex. Diseño cómodo y contemporáneo para el día a día."
   },
   {
     "id": "le-giro-pz-22013-principal",
@@ -4204,7 +4156,7 @@
     "features": [
       "nuevo"
     ],
-    "image": "assets/catalogo/le-giro/optico/pz-22013-principal.jpg",
+    "image": "assets/catalogo/le-giro/optico/pz-22013-principal-catalogo.jpg",
     "description": "Armazón óptico Le Giro PZ-22013, unisex. Diseño cómodo y contemporáneo para el día a día."
   },
   {
@@ -4220,7 +4172,7 @@
     "features": [
       "nuevo"
     ],
-    "image": "assets/catalogo/le-giro/optico/pz-22014-principal.jpg",
+    "image": "assets/catalogo/le-giro/optico/pz-22014-principal-catalogo.jpg",
     "description": "Armazón óptico Le Giro PZ-22014, unisex. Diseño cómodo y contemporáneo para el día a día."
   },
   {
@@ -4236,7 +4188,7 @@
     "features": [
       "nuevo"
     ],
-    "image": "assets/catalogo/le-giro/optico/pz-22015-principal.jpg",
+    "image": "assets/catalogo/le-giro/optico/pz-22015-principal-catalogo.jpg",
     "description": "Armazón óptico Le Giro PZ-22015, unisex. Diseño cómodo y contemporáneo para el día a día."
   },
   {
@@ -4252,7 +4204,7 @@
     "features": [
       "nuevo"
     ],
-    "image": "assets/catalogo/le-giro/optico/pz-22016-principal.jpg",
+    "image": "assets/catalogo/le-giro/optico/pz-22016-principal-catalogo.jpg",
     "description": "Armazón óptico Le Giro PZ-22016, unisex. Diseño cómodo y contemporáneo para el día a día."
   },
   {
@@ -4268,24 +4220,8 @@
     "features": [
       "nuevo"
     ],
-    "image": "assets/catalogo/le-giro/optico/pz-22017-principal.jpg",
+    "image": "assets/catalogo/le-giro/optico/pz-22017-principal-catalogo.jpg",
     "description": "Armazón óptico Le Giro PZ-22017, unisex. Diseño cómodo y contemporáneo para el día a día."
-  },
-  {
-    "id": "le-giro-pz-22018-1-principal",
-    "title": "PZ-22018 (1)",
-    "brand": "Le Giro",
-    "price": null,
-    "category": "optico",
-    "gender": "unisex",
-    "shape": "",
-    "color": "",
-    "material": "",
-    "features": [
-      "nuevo"
-    ],
-    "image": "assets/catalogo/le-giro/optico/pz-22018-1-principal.jpg",
-    "description": "Armazón óptico Le Giro PZ-22018 (1), unisex. Diseño cómodo y contemporáneo para el día a día."
   },
   {
     "id": "le-giro-pz-22018-principal",
@@ -4300,24 +4236,8 @@
     "features": [
       "nuevo"
     ],
-    "image": "assets/catalogo/le-giro/optico/pz-22018-principal.jpg",
+    "image": "assets/catalogo/le-giro/optico/pz-22018-principal-catalogo.jpg",
     "description": "Armazón óptico Le Giro PZ-22018, unisex. Diseño cómodo y contemporáneo para el día a día."
-  },
-  {
-    "id": "le-giro-pz-22019-1-principal",
-    "title": "PZ-22019 (1)",
-    "brand": "Le Giro",
-    "price": null,
-    "category": "optico",
-    "gender": "unisex",
-    "shape": "",
-    "color": "",
-    "material": "",
-    "features": [
-      "nuevo"
-    ],
-    "image": "assets/catalogo/le-giro/optico/pz-22019-1-principal.jpg",
-    "description": "Armazón óptico Le Giro PZ-22019 (1), unisex. Diseño cómodo y contemporáneo para el día a día."
   },
   {
     "id": "le-giro-pz-22019-principal",
@@ -4332,7 +4252,7 @@
     "features": [
       "nuevo"
     ],
-    "image": "assets/catalogo/le-giro/optico/pz-22019-principal.jpg",
+    "image": "assets/catalogo/le-giro/optico/pz-22019-principal-catalogo.jpg",
     "description": "Armazón óptico Le Giro PZ-22019, unisex. Diseño cómodo y contemporáneo para el día a día."
   },
   {
@@ -4348,24 +4268,8 @@
     "features": [
       "nuevo"
     ],
-    "image": "assets/catalogo/le-giro/optico/pz-22020-principal.jpg",
+    "image": "assets/catalogo/le-giro/optico/pz-22020-principal-catalogo.jpg",
     "description": "Armazón óptico Le Giro PZ-22020, unisex. Diseño cómodo y contemporáneo para el día a día."
-  },
-  {
-    "id": "le-giro-pz-22021-1-principal",
-    "title": "PZ-22021 (1)",
-    "brand": "Le Giro",
-    "price": null,
-    "category": "optico",
-    "gender": "unisex",
-    "shape": "",
-    "color": "",
-    "material": "",
-    "features": [
-      "nuevo"
-    ],
-    "image": "assets/catalogo/le-giro/optico/pz-22021-1-principal.jpg",
-    "description": "Armazón óptico Le Giro PZ-22021 (1), unisex. Diseño cómodo y contemporáneo para el día a día."
   },
   {
     "id": "le-giro-pz-22021-principal",
@@ -4380,7 +4284,7 @@
     "features": [
       "nuevo"
     ],
-    "image": "assets/catalogo/le-giro/optico/pz-22021-principal.jpg",
+    "image": "assets/catalogo/le-giro/optico/pz-22021-principal-catalogo.jpg",
     "description": "Armazón óptico Le Giro PZ-22021, unisex. Diseño cómodo y contemporáneo para el día a día."
   },
   {
@@ -4396,7 +4300,7 @@
     "features": [
       "nuevo"
     ],
-    "image": "assets/catalogo/le-giro/optico/pz-22022-principal.jpg",
+    "image": "assets/catalogo/le-giro/optico/pz-22022-principal-catalogo.jpg",
     "description": "Armazón óptico Le Giro PZ-22022, unisex. Diseño cómodo y contemporáneo para el día a día."
   },
   {
@@ -4412,7 +4316,7 @@
     "features": [
       "nuevo"
     ],
-    "image": "assets/catalogo/le-giro/optico/pz-22023-principal.jpg",
+    "image": "assets/catalogo/le-giro/optico/pz-22023-principal-catalogo.jpg",
     "description": "Armazón óptico Le Giro PZ-22023, unisex. Diseño cómodo y contemporáneo para el día a día."
   },
   {
@@ -4428,7 +4332,7 @@
     "features": [
       "nuevo"
     ],
-    "image": "assets/catalogo/le-giro/optico/pz-22024-principal.jpg",
+    "image": "assets/catalogo/le-giro/optico/pz-22024-principal-catalogo.jpg",
     "description": "Armazón óptico Le Giro PZ-22024, unisex. Diseño cómodo y contemporáneo para el día a día."
   },
   {
@@ -4444,24 +4348,8 @@
     "features": [
       "nuevo"
     ],
-    "image": "assets/catalogo/le-giro/optico/pz-22025-principal.jpg",
+    "image": "assets/catalogo/le-giro/optico/pz-22025-principal-catalogo.jpg",
     "description": "Armazón óptico Le Giro PZ-22025, unisex. Diseño cómodo y contemporáneo para el día a día."
-  },
-  {
-    "id": "le-giro-pz-22026-1-principal",
-    "title": "PZ-22026 (1)",
-    "brand": "Le Giro",
-    "price": null,
-    "category": "optico",
-    "gender": "unisex",
-    "shape": "",
-    "color": "",
-    "material": "",
-    "features": [
-      "nuevo"
-    ],
-    "image": "assets/catalogo/le-giro/optico/pz-22026-1-principal.jpg",
-    "description": "Armazón óptico Le Giro PZ-22026 (1), unisex. Diseño cómodo y contemporáneo para el día a día."
   },
   {
     "id": "le-giro-pz-22026-principal",
@@ -4476,24 +4364,8 @@
     "features": [
       "nuevo"
     ],
-    "image": "assets/catalogo/le-giro/optico/pz-22026-principal.jpg",
+    "image": "assets/catalogo/le-giro/optico/pz-22026-principal-catalogo.jpg",
     "description": "Armazón óptico Le Giro PZ-22026, unisex. Diseño cómodo y contemporáneo para el día a día."
-  },
-  {
-    "id": "le-giro-pz-22027-1-principal",
-    "title": "PZ-22027 (1)",
-    "brand": "Le Giro",
-    "price": null,
-    "category": "optico",
-    "gender": "unisex",
-    "shape": "",
-    "color": "",
-    "material": "",
-    "features": [
-      "nuevo"
-    ],
-    "image": "assets/catalogo/le-giro/optico/pz-22027-1-principal.jpg",
-    "description": "Armazón óptico Le Giro PZ-22027 (1), unisex. Diseño cómodo y contemporáneo para el día a día."
   },
   {
     "id": "le-giro-pz-22027-principal",
@@ -4508,7 +4380,7 @@
     "features": [
       "nuevo"
     ],
-    "image": "assets/catalogo/le-giro/optico/pz-22027-principal.jpg",
+    "image": "assets/catalogo/le-giro/optico/pz-22027-principal-catalogo.jpg",
     "description": "Armazón óptico Le Giro PZ-22027, unisex. Diseño cómodo y contemporáneo para el día a día."
   },
   {
@@ -4524,7 +4396,7 @@
     "features": [
       "nuevo"
     ],
-    "image": "assets/catalogo/le-giro/optico/pz-22028-principal.jpg",
+    "image": "assets/catalogo/le-giro/optico/pz-22028-principal-catalogo.jpg",
     "description": "Armazón óptico Le Giro PZ-22028, unisex. Diseño cómodo y contemporáneo para el día a día."
   },
   {
@@ -4540,7 +4412,7 @@
     "features": [
       "nuevo"
     ],
-    "image": "assets/catalogo/le-giro/optico/pz-22029-principal.jpg",
+    "image": "assets/catalogo/le-giro/optico/pz-22029-principal-catalogo.jpg",
     "description": "Armazón óptico Le Giro PZ-22029, unisex. Diseño cómodo y contemporáneo para el día a día."
   },
   {
@@ -4556,7 +4428,7 @@
     "features": [
       "nuevo"
     ],
-    "image": "assets/catalogo/le-giro/optico/pz-22030a-principal.jpg",
+    "image": "assets/catalogo/le-giro/optico/pz-22030a-principal-catalogo.jpg",
     "description": "Armazón óptico Le Giro PZ-22030A, unisex. Diseño cómodo y contemporáneo para el día a día."
   },
   {
@@ -4572,7 +4444,7 @@
     "features": [
       "nuevo"
     ],
-    "image": "assets/catalogo/le-giro/optico/pz-22031-principal.jpg",
+    "image": "assets/catalogo/le-giro/optico/pz-22031-principal-catalogo.jpg",
     "description": "Armazón óptico Le Giro PZ-22031, unisex. Diseño cómodo y contemporáneo para el día a día."
   },
   {
@@ -4588,7 +4460,7 @@
     "features": [
       "nuevo"
     ],
-    "image": "assets/catalogo/le-giro/optico/pz-22032-principal.jpg",
+    "image": "assets/catalogo/le-giro/optico/pz-22032-principal-catalogo.jpg",
     "description": "Armazón óptico Le Giro PZ-22032, unisex. Diseño cómodo y contemporáneo para el día a día."
   },
   {
@@ -4604,7 +4476,7 @@
     "features": [
       "nuevo"
     ],
-    "image": "assets/catalogo/le-giro/optico/pz-22033-principal.jpg",
+    "image": "assets/catalogo/le-giro/optico/pz-22033-principal-catalogo.jpg",
     "description": "Armazón óptico Le Giro PZ-22033, unisex. Diseño cómodo y contemporáneo para el día a día."
   },
   {
@@ -4620,7 +4492,7 @@
     "features": [
       "nuevo"
     ],
-    "image": "assets/catalogo/le-giro/optico/pz-22035-principal.jpg",
+    "image": "assets/catalogo/le-giro/optico/pz-22035-principal-catalogo.jpg",
     "description": "Armazón óptico Le Giro PZ-22035, unisex. Diseño cómodo y contemporáneo para el día a día."
   },
   {
@@ -4636,7 +4508,7 @@
     "features": [
       "nuevo"
     ],
-    "image": "assets/catalogo/le-giro/optico/pz-22036-principal.jpg",
+    "image": "assets/catalogo/le-giro/optico/pz-22036-principal-catalogo.jpg",
     "description": "Armazón óptico Le Giro PZ-22036, unisex. Diseño cómodo y contemporáneo para el día a día."
   },
   {
@@ -4652,7 +4524,7 @@
     "features": [
       "nuevo"
     ],
-    "image": "assets/catalogo/le-giro/optico/pz-22037-principal.jpg",
+    "image": "assets/catalogo/le-giro/optico/pz-22037-principal-catalogo.jpg",
     "description": "Armazón óptico Le Giro PZ-22037, unisex. Diseño cómodo y contemporáneo para el día a día."
   },
   {
@@ -4668,7 +4540,7 @@
     "features": [
       "nuevo"
     ],
-    "image": "assets/catalogo/le-giro/optico/pz-22038-principal.jpg",
+    "image": "assets/catalogo/le-giro/optico/pz-22038-principal-catalogo.jpg",
     "description": "Armazón óptico Le Giro PZ-22038, unisex. Diseño cómodo y contemporáneo para el día a día."
   },
   {
@@ -4684,7 +4556,7 @@
     "features": [
       "nuevo"
     ],
-    "image": "assets/catalogo/le-giro/optico/pz-22041-principal.jpg",
+    "image": "assets/catalogo/le-giro/optico/pz-22041-principal-catalogo.jpg",
     "description": "Armazón óptico Le Giro PZ-22041, unisex. Diseño cómodo y contemporáneo para el día a día."
   },
   {
@@ -4700,7 +4572,7 @@
     "features": [
       "nuevo"
     ],
-    "image": "assets/catalogo/le-giro/optico/pz-22042-principal.jpg",
+    "image": "assets/catalogo/le-giro/optico/pz-22042-principal-catalogo.jpg",
     "description": "Armazón óptico Le Giro PZ-22042, unisex. Diseño cómodo y contemporáneo para el día a día."
   },
   {
@@ -4716,7 +4588,7 @@
     "features": [
       "nuevo"
     ],
-    "image": "assets/catalogo/le-giro/optico/pz-22043-principal.jpg",
+    "image": "assets/catalogo/le-giro/optico/pz-22043-principal-catalogo.jpg",
     "description": "Armazón óptico Le Giro PZ-22043, unisex. Diseño cómodo y contemporáneo para el día a día."
   },
   {

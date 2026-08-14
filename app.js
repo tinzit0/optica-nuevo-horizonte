@@ -49,6 +49,8 @@ function renderizarFiltroMarcas() {
 
 document.addEventListener('DOMContentLoaded', async () => {
     await cargarCatalogoLocal();
+    initIdentidadMarca();
+    renderizarVitrinaMarcas();
     initNavegacionMovil();
     leerParametrosURLYMarcarCheckbox();
     initCatalogoInteractivo();
@@ -62,6 +64,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (document.querySelector('#checkout-form')) renderizarVistaCheckout();
     try { await initBarraAdmin(); } catch (error) { console.warn('Panel administrativo no disponible:', error); }
 });
+
+function initIdentidadMarca() {
+    document.querySelectorAll('a.logo, .logo-text').forEach(logo => {
+        if (logo.querySelector('.logo-mark') || logo.querySelector('.site-logo-stack')) return;
+        logo.innerHTML = '<span class="site-logo-stack"><span>Óptica</span><strong>Nuevo Horizonte</strong><small>Concepción</small></span>';
+    });
+    document.querySelectorAll('.logo-name').forEach(nombre => {
+        if (nombre.querySelector('.logo-prefix')) return;
+        nombre.innerHTML = '<span class="logo-prefix">Óptica</span>Nuevo Horizonte<small class="logo-location">Concepción</small>';
+    });
+    const style = document.createElement('style');
+    style.textContent = `.site-logo-stack{display:flex;align-items:center;flex-direction:column;font-family:'Playfair Display',serif;line-height:1;text-align:center}.site-logo-stack>span{margin-bottom:3px;font-size:.72em;font-weight:500;letter-spacing:.08em}.site-logo-stack>strong{font:inherit;font-weight:500;white-space:nowrap}.site-logo-stack>small{margin-top:5px;color:#b99350;font:700 .43rem 'DM Sans',sans-serif;letter-spacing:.2em;text-transform:uppercase}.logo-prefix{display:block!important;order:-1;margin:0 0 3px!important;color:inherit!important;font:500 .68em 'Playfair Display',serif!important;letter-spacing:.08em!important;line-height:1!important;text-align:center;text-transform:none!important}.logo-location{margin-top:5px!important;text-align:center}`;
+    document.head.appendChild(style);
+}
 
 function initNavegacionMovil() {
     const page = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
@@ -183,7 +199,7 @@ async function cargarProductosConFiltros() {
 
     const esCatalogo = !!document.querySelector('#catalog-grid');
     const favoritos = obtenerFavoritos();
-    const visibles = esCatalogo ? filtrados.slice(0, catalogVisibleCount) : filtrados.slice(0, 6);
+    const visibles = esCatalogo ? filtrados.slice(0, catalogVisibleCount) : seleccionarDestacadosMultimarca(filtrados, 6);
     grid.innerHTML = visibles.map(p => {
         const features = Array.isArray(p.features) ? p.features : [];
         const badge = features.includes('oferta') ? 'Oferta' : features.includes('nuevo') ? 'Nuevo' : '';
@@ -199,6 +215,34 @@ async function cargarProductosConFiltros() {
         loadMore.hidden = visibles.length >= filtrados.length;
         loadMore.textContent = `Ver más armazones (${filtrados.length - visibles.length} restantes)`;
     }
+}
+
+function seleccionarDestacadosMultimarca(productos, cantidad) {
+    const grupos = new Map();
+    productos.forEach(producto => {
+        const marca = String(producto.brand || 'Otros');
+        if (!grupos.has(marca)) grupos.set(marca, []);
+        grupos.get(marca).push(producto);
+    });
+    const marcas = [...grupos.keys()];
+    const seleccion = [];
+    let vuelta = 0;
+    while (seleccion.length < cantidad && marcas.some(marca => grupos.get(marca)[vuelta])) {
+        marcas.forEach(marca => {
+            const producto = grupos.get(marca)[vuelta];
+            if (producto && seleccion.length < cantidad) seleccion.push(producto);
+        });
+        vuelta++;
+    }
+    return seleccion;
+}
+
+function renderizarVitrinaMarcas() {
+    const track = document.querySelector('#eyewear-marquee-track');
+    if (!track || !PRODUCTOS_LOCALES.length) return;
+    const seleccion = seleccionarDestacadosMultimarca(PRODUCTOS_LOCALES, 14);
+    const tarjeta = producto => `<a class="marquee-product" href="producto.html?id=${encodeURIComponent(producto.id)}"><span class="marquee-image"><img src="${producto.image}" alt="${producto.brand} ${producto.title}" loading="lazy"></span><span class="marquee-brand">${producto.brand}</span><strong>${producto.title}</strong></a>`;
+    track.innerHTML = [...seleccion, ...seleccion].map(tarjeta).join('');
 }
 
 window.cargarMasCatalogo = function() {
