@@ -2,6 +2,16 @@ import { readFileSync, writeFileSync } from 'node:fs';
 
 const path = new URL('../data/productos.json', import.meta.url);
 const products = JSON.parse(readFileSync(path, 'utf8').replace(/^\uFEFF/, ''));
+const prices = {
+  FOOSE: 40000,
+  Lavanett: 70000,
+  Polo: 90000,
+  Silmo: 60000,
+  'Moods Kids': 50000,
+  Vespa: 60000,
+  Bergello: 70000,
+  'Le Giro': 25000
+};
 
 const audience = {
   mujer: 'para mujer',
@@ -11,6 +21,7 @@ const audience = {
 };
 
 for (const product of products) {
+  if (prices[product.brand]) product.price = prices[product.brand];
   const model = String(product.title).replace(/\s+C-?\d+[A-Z]?$/i, '').replace(/\s+Principal$/i, '');
   const type = product.category === 'sol' ? 'de sol' : 'óptico';
   const material = product.material ? ` en ${product.material}` : '';
