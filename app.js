@@ -21,6 +21,7 @@ const PRODUCTOS_BASE = [
     { id:'12', title:'Palazzo Edition', brand:'Versace', price:189900, category:'sol', gender:'mujer', shape:'geométrico', color:'habano', material:'acetato', features:['polarizado'], image:'https://images.unsplash.com/photo-1577803645773-f96470509666?q=80&w=700&auto=format&fit=crop' }
 ];
 let PRODUCTOS_LOCALES = [];
+let catalogVisibleCount = 48;
 
 async function cargarCatalogoLocal() {
     try {
@@ -28,10 +29,22 @@ async function cargarCatalogoLocal() {
         if (!respuesta.ok) throw new Error(`Catálogo local: ${respuesta.status}`);
         const datos = await respuesta.json();
         PRODUCTOS_LOCALES = Array.isArray(datos) ? datos : [];
+        renderizarFiltroMarcas();
     } catch (error) {
         console.warn('No fue posible cargar el catálogo FOOSE:', error);
         PRODUCTOS_LOCALES = [];
     }
+}
+
+function renderizarFiltroMarcas() {
+    const container = document.querySelector('#brand-filter-options');
+    if (!container) return;
+    const marcas = [...new Set(PRODUCTOS_LOCALES.map(p => String(p.brand || '').trim()).filter(Boolean))]
+        .sort((a, b) => a.localeCompare(b, 'es'));
+    container.innerHTML = marcas.map(marca => {
+        const safe = marca.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        return `<label><input type="checkbox" class="filter-brand" value="${safe}"> ${safe}</label>`;
+    }).join('');
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -170,7 +183,7 @@ async function cargarProductosConFiltros() {
 
     const esCatalogo = !!document.querySelector('#catalog-grid');
     const favoritos = obtenerFavoritos();
-    const visibles = esCatalogo ? filtrados : filtrados.slice(0, 6);
+    const visibles = esCatalogo ? filtrados.slice(0, catalogVisibleCount) : filtrados.slice(0, 6);
     grid.innerHTML = visibles.map(p => {
         const features = Array.isArray(p.features) ? p.features : [];
         const badge = features.includes('oferta') ? 'Oferta' : features.includes('nuevo') ? 'Nuevo' : '';
@@ -181,13 +194,23 @@ async function cargarProductosConFiltros() {
         const accion = tienePrecio ? `<button onclick="agregarAlCarritoDirecto('${p.id}', '${p.title}', '${p.brand}', ${p.price}, '${p.image}')" class="btn-gold">AÑADIR A LA BOLSA</button>` : `<a class="btn-gold" href="producto.html?id=${encodeURIComponent(p.id)}">VER DISPONIBILIDAD</a>`;
         return `<article class="product-card"><div class="product-media">${badge ? `<span class="product-badge">${badge}</span>` : ''}<img src="${p.image}" alt="${p.brand} ${p.title}" loading="lazy">${esCatalogo ? `<button class="favorite-btn ${favoritos.includes(String(p.id)) ? 'active' : ''}" onclick="toggleFavorito('${p.id}',this)" aria-label="Guardar ${p.title} en favoritos" aria-pressed="${favoritos.includes(String(p.id))}"><svg class="icon" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/></svg></button>` : ''}</div><div class="product-info"><div class="brand">${p.brand}</div><div class="p-name">${p.title}</div>${meta ? `<div class="product-meta">${meta}</div>` : ''}${descripcion}<div class="price">${precio}</div><div class="product-actions">${accion}${esCatalogo ? `<a class="detail-btn" href="producto.html?id=${encodeURIComponent(p.id)}" aria-label="Ver detalle de ${p.title}">→</a>` : ''}</div>${esAdmin ? `<button onclick="eliminarProducto('${p.id}')" style="margin-top:8px;background:#a43d3d;color:#fff;border:0;padding:7px;cursor:pointer">ELIMINAR</button>` : ''}</div></article>`;
     }).join('');
+    const loadMore = document.querySelector('#catalog-load-more');
+    if (loadMore) {
+        loadMore.hidden = visibles.length >= filtrados.length;
+        loadMore.textContent = `Ver más armazones (${filtrados.length - visibles.length} restantes)`;
+    }
 }
+
+window.cargarMasCatalogo = function() {
+    catalogVisibleCount += 48;
+    cargarProductosConFiltros();
+};
 
 function initCatalogoInteractivo() {
     const search = document.querySelector('#catalog-search');
     if (!search) return;
     let timer;
-    search.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(cargarProductosConFiltros, 180); });
+    search.addEventListener('input', () => { clearTimeout(timer); catalogVisibleCount = 48; timer = setTimeout(cargarProductosConFiltros, 180); });
     document.querySelector('#catalog-sort')?.addEventListener('change', cargarProductosConFiltros);
     document.querySelectorAll('#drawer-filter input').forEach(input => input.addEventListener('change', cargarProductosConFiltros));
     document.querySelector('#clear-filters')?.addEventListener('click', limpiarFiltrosCatalogo);
