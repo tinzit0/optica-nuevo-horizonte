@@ -355,18 +355,14 @@ function initConfiguradorCristales(producto) {
         {
             kicker:'Paso 2 de 3', title:'Elige el tipo de tus cristales', intro:'Piensa en tu estilo de vida y selecciona el tratamiento que más te convenga.',
             options:[
-                { id:'transparente', name:'Transparente', desc:'Cristales tradicionales, nítidos y cómodos para el uso diario.', price:39990, visual:'○' },
-                { id:'azul', name:'Protección luz azul-violeta', desc:'Ayuda a reducir la exposición a la luz azul de dispositivos digitales.', price:69990, visual:'○', className:'blue' },
-                { id:'foto', name:'Fotosensible', desc:'Se oscurece en exteriores y vuelve a aclararse en interiores.', price:109990, visual:'○', className:'photo' }
+                { id:'transparente', name:'Transparente', desc:'Cristales tradicionales, nítidos y cómodos para el uso diario.', price:0, image:'assets/configurador/cristales-receta.png' },
+                { id:'azul', name:'Protección luz azul-violeta', desc:'Ayuda a reducir la exposición a la luz azul de dispositivos digitales.', price:0, image:'assets/configurador/cristales-descanso.png' },
+                { id:'foto', name:'Fotosensible', desc:'Se oscurece en exteriores y vuelve a aclararse en interiores.', price:0, image:'assets/configurador/cristales-fotosensibles.png' }
             ]
         },
         {
             kicker:'Paso 3 de 3', title:'Elige el material de tus cristales', intro:'Un cristal más delgado resulta más liviano y estético. Si tienes una receta alta, te orientaremos antes de fabricar.',
-            options:[
-                { id:'estandar', name:'Confort 1.56', desc:'Material liviano y resistente para recetas leves a moderadas.', price:0, visual:'Ⅰ', className:'layers' },
-                { id:'delgado', name:'Delgado 1.60', desc:'Más delgado y liviano, ideal para recetas moderadas.', price:39990, visual:'Ⅱ', className:'layers' },
-                { id:'ultrafino', name:'Ultrafino 1.67', desc:'Alta definición y mejor estética para recetas medias a altas.', price:69990, visual:'Ⅲ', className:'layers' }
-            ]
+            options:[]
         }
     ];
     let step = 0;
@@ -385,6 +381,30 @@ function initConfiguradorCristales(producto) {
     };
     const render = () => {
         const data = steps[step];
+        if (step === 2) {
+            const materialImages = {
+                organico:'assets/configurador/material-organico-ar.png',
+                soft:'assets/configurador/material-soft-air.png',
+                perfect:'assets/configurador/material-perfect-view.png',
+                plus:'assets/configurador/material-perfect-view-plus.png'
+            };
+            if (selected[1]?.id === 'azul') data.options = [
+                { id:'soft-azul', name:'Soft Air', desc:'Policarbonato resistente a impactos, adecuado para recetas leves a moderadas.', price:109990, image:materialImages.soft },
+                { id:'perfect-azul', name:'Perfect View', desc:'Alto índice 1.67, recomendado para recetas altas y con excelente definición.', price:209990, image:materialImages.perfect },
+                { id:'plus-azul', name:'Perfect View+', desc:'Ultrafino 1.74, liviano y con protección antirreflejos.', price:259990, image:materialImages.plus }
+            ];
+            else if (selected[1]?.id === 'foto') data.options = [
+                { id:'soft-foto', name:'Soft Air Fotosensible', desc:'Policarbonato fotosensible que se oscurece en exteriores y aclara en interiores.', price:199990, image:materialImages.soft },
+                { id:'perfect-foto', name:'Perfect View Fotosensible', desc:'Material 1.67 fotosensible, más delgado y recomendado para recetas moderadas a altas.', price:249990, image:materialImages.perfect }
+            ];
+            else data.options = [
+                { id:'organico', name:'Orgánico AR', desc:'Visión clara y sin reflejos. Ligero, cómodo y durable para uso diario.', price:39990, image:materialImages.organico },
+                { id:'soft', name:'Soft Air', desc:'Policarbonato resistente a impactos, adecuado para recetas leves a moderadas.', price:69990, image:materialImages.soft },
+                { id:'perfect', name:'Perfect View', desc:'Alto índice 1.67, recomendado para recetas altas y con excelente definición.', price:149990, image:materialImages.perfect },
+                { id:'plus', name:'Perfect View+', desc:'Ultrafino 1.74, liviano y con protección antirreflejos.', price:229990, image:materialImages.plus }
+            ];
+            if (selected[2] && !data.options.some(option => option.id === selected[2].id)) delete selected[2];
+        }
         progress.style.width = `${((step + 1) / steps.length) * 100}%`;
         back.style.visibility = step ? 'visible' : 'hidden';
         body.innerHTML = `<span class="step-kicker">${data.kicker}</span><h2>${data.title}</h2><p class="step-intro">${data.intro}</p><div class="option-list">${data.options.map(option => `<button class="option-card ${selected[step]?.id === option.id ? 'selected' : ''}" type="button" data-option="${option.id}"><span class="option-visual ${option.image ? 'option-photo' : ''} ${option.className || ''}">${option.image ? `<img src="${option.image}" alt="" loading="eager">` : option.visual}</span><span><strong class="option-name">${option.name}</strong><span class="option-desc">${option.desc}</span></span><span class="option-price">${option.price ? `+ ${money(option.price)}` : 'Incluido'}</span></button>`).join('')}</div>`;
