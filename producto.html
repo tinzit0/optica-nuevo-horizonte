@@ -1,71 +1,47 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detalle de Armazón | Óptica Nuevo Horizonte</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23080E21'/%3E%3Cpath d='M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z' fill='none' stroke='%23C5A059' stroke-width='1.8'/%3E%3Ccircle cx='12' cy='12' r='3' fill='none' stroke='%23C5A059' stroke-width='1.8'/%3E%3C/svg%3E">
-    <meta name="description" content="Ficha técnica y compra de armazones ópticos y de sol en Óptica Nuevo Horizonte, Concepción.">
-    <meta name="theme-color" content="#080E21">
-    <meta property="og:title" content="Detalle de Armazón | Óptica Nuevo Horizonte">
-    <meta property="og:description" content="Ficha técnica y compra de armazones ópticos y de sol en Óptica Nuevo Horizonte, Concepción.">
-    <meta property="og:type" content="website">
-    <meta property="og:locale" content="es_CL">
-    <meta property="og:image" content="https://images.unsplash.com/photo-1511499767150-a48a237f0083?q=80&w=1200&auto=format&fit=crop">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-    <style>
-        :root { --primary: #17352a; --gold: #b99350; --gray-border: rgba(16,23,19,.13); --text-dark: #101713; --text-muted: #66706a; }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', sans-serif; color: var(--text-dark); background-color: #fbfaf7; }
-        a { text-decoration: none; color: inherit; }
-
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 22px 8%; background: #FFF; border-bottom: 1px solid var(--gray-border); }
-        .logo-text { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: var(--primary); text-transform: uppercase; }
-
-        .product-detail { display: flex; gap: 60px; padding: 60px 8%; max-width: 1200px; margin: 0 auto; }
-        .gallery { flex: 1; }
-        .main-img { width: 100%; height:460px; object-fit:contain; border: 1px solid var(--gray-border); padding: 12px; background: #fff; }
-
-        .info { flex: 1; }
-        .brand { font-size: 11px; color: var(--gold); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
-        .title { font-size: 28px; font-family: 'Playfair Display', serif; margin: 6px 0 16px; color: var(--primary); }
-        .price-box { font-size: 24px; font-weight: 700; color: var(--primary); margin-bottom: 28px; }
-
-        .btn-add { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; background: var(--gold); color: white; padding: 18px; font-weight: 700; border-radius: 0; border: none; font-size: 13px; letter-spacing: 1px; cursor: pointer; transition: background 0.25s; }
-        .btn-add:hover { background: var(--primary); }
-        .btn-buy-now { display:flex;align-items:center;justify-content:center;width:100%;margin-top:10px;background:var(--primary);color:#fff;padding:18px;border:0;font-size:13px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:.25s }.btn-buy-now:hover{background:#101713}
-        @media(max-width:760px){.header{padding:18px 5%}.product-detail{flex-direction:column;padding:35px 5%;gap:30px}.main-img{height:320px}.title{font-size:25px}}
-    </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detalle de armazón | Óptica Nuevo Horizonte</title>
+  <meta name="description" content="Configura tu armazón y cristales en Óptica Nuevo Horizonte, Concepción.">
+  <meta name="theme-color" content="#17352a">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--forest:#17352a;--gold:#b99350;--ink:#101713;--muted:#66706a;--line:rgba(16,23,19,.14);--cream:#f3efe6;--paper:#fbfaf7;--white:#fff;--serif:'Playfair Display',serif;--sans:'DM Sans',sans-serif}
+    *{box-sizing:border-box;margin:0;padding:0}body{font-family:var(--sans);color:var(--ink);background:var(--paper)}a{color:inherit;text-decoration:none}button{font:inherit}.announcement{padding:8px 20px;background:var(--ink);color:#eee9df;text-align:center;font-size:.65rem;letter-spacing:.12em;text-transform:uppercase}.header{background:#fff;border-bottom:1px solid var(--line)}.header-inner{width:min(1320px,calc(100% - 48px));height:78px;margin:auto;display:flex;align-items:center;justify-content:space-between}.logo-text{font:500 1.25rem var(--serif)}.header-actions{display:flex;align-items:center;gap:24px;font-size:.68rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase}.bag-link{display:flex;align-items:center;gap:8px}.badge-count{display:grid;place-items:center;width:21px;height:21px;border-radius:50%;background:var(--forest);color:#fff;font-size:.6rem}
+    .product-detail{width:min(1320px,calc(100% - 48px));margin:auto;padding:54px 0 78px;display:grid;grid-template-columns:minmax(0,1.45fr) minmax(340px,.75fr);gap:52px}.gallery{position:relative;min-width:0}.gallery-stage{height:570px;background:#fff;border:1px solid var(--line);display:grid;place-items:center;overflow:hidden}.main-img{width:90%;height:88%;object-fit:contain;transition:opacity .18s}.zoom-note{position:absolute;top:18px;right:18px;padding:9px 12px;background:rgba(255,255,255,.9);border:1px solid var(--line);color:var(--muted);font-size:.62rem}.info{padding-top:10px}.brand{color:var(--gold);font-size:.67rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase}.title{margin:8px 0 10px;font:500 clamp(2.3rem,4vw,3.7rem)/1.02 var(--serif);letter-spacing:-.035em}.product-code{color:var(--muted);font-size:.69rem;letter-spacing:.08em}.price-row{display:flex;align-items:end;justify-content:space-between;margin:28px 0 8px;padding-top:22px;border-top:1px solid var(--line)}.price-label{font-size:.66rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase}.price-box{font-size:1.35rem;font-weight:700}.installments{margin-bottom:25px;text-align:right;color:var(--muted);font-size:.7rem}.product-copy{margin-bottom:24px;color:var(--muted);font-size:.86rem;line-height:1.7}.btn-configure,.btn-add,.btn-buy-now{width:100%;min-height:58px;border:0;cursor:pointer;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase}.btn-configure{background:var(--forest);color:#fff}.btn-configure small{display:block;margin-top:3px;font-size:.57rem;font-weight:400;letter-spacing:0;text-transform:none}.btn-add{margin-top:10px;background:var(--gold);color:#fff}.btn-buy-now{display:none}.benefits{margin-top:28px;border-top:1px solid var(--line)}.benefit{display:grid;grid-template-columns:30px 1fr;gap:10px;padding:15px 0;border-bottom:1px solid var(--line)}.benefit-icon{font-size:1.05rem}.benefit strong{display:block;font-size:.72rem}.benefit span{display:block;margin-top:2px;color:var(--muted);font-size:.66rem;line-height:1.45}.specs{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;margin-top:28px;background:var(--line)}.spec{padding:16px 12px;background:var(--cream);text-align:center}.spec span{display:block;color:var(--muted);font-size:.58rem;text-transform:uppercase}.spec strong{font:500 .85rem var(--serif)}
+    .configurator{position:fixed;z-index:3000;inset:0;display:none;background:#fff}.configurator.open{display:grid;grid-template-columns:minmax(300px,1fr) minmax(520px,1fr)}.config-preview{position:relative;padding:42px;display:flex;flex-direction:column}.config-brand{font:500 1.2rem var(--serif)}.selection-toggle{position:absolute;right:42px;top:34px;border:1px solid var(--line);background:#fff;padding:12px 17px;font-size:.68rem;font-weight:700;letter-spacing:.06em;cursor:pointer}.config-image{width:80%;height:60%;margin:auto;object-fit:contain}.config-product{font-size:.7rem;color:var(--muted)}.config-product strong{display:block;margin-bottom:5px;color:var(--ink);font:500 1.15rem var(--serif)}.config-panel{position:relative;display:flex;min-height:0;flex-direction:column;background:#f7f7f6;border-left:1px solid var(--line)}.config-top{padding:24px 46px 0}.config-close{position:absolute;right:24px;top:16px;width:42px;height:42px;border:0;background:none;font-size:2rem;cursor:pointer}.config-back{width:42px;height:42px;border:0;background:none;font-size:1.6rem;cursor:pointer}.progress-track{height:2px;margin:0 50px 26px 82px;background:#dfe2df}.progress-fill{height:100%;width:33.33%;background:var(--forest);transition:width .25s}.step-body{flex:1;overflow:auto;padding:0 46px 115px}.step-kicker{color:var(--gold);font-size:.61rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase}.step-body h2{margin:7px 0 5px;font:500 clamp(1.5rem,2.5vw,2rem) var(--serif)}.step-intro{margin-bottom:24px;color:var(--muted);font-size:.77rem}.option-list{display:grid;gap:13px}.option-card{display:grid;grid-template-columns:72px 1fr auto;align-items:center;gap:17px;min-height:112px;padding:18px;border:1px solid var(--line);background:#fff;cursor:pointer;text-align:left;transition:.18s}.option-card:hover,.option-card.selected{border-color:var(--forest);box-shadow:inset 0 0 0 1px var(--forest)}.option-visual{display:grid;place-items:center;width:66px;height:66px;border-radius:50%;background:linear-gradient(135deg,#fff 35%,#e7ecea);border:1px solid #dfe3e0;color:var(--forest);font:600 1.4rem var(--serif)}.option-visual.blue{background:linear-gradient(135deg,#fff 25%,#b8e4f0 52%,#fff 75%)}.option-visual.photo{background:linear-gradient(135deg,#f5f1ed,#69584e)}.option-visual.layers{border-radius:8px;background:repeating-linear-gradient(90deg,#f7f7f7 0 12px,#c8e7ed 13px 18px,#fff 19px 27px)}.option-name{display:block;font:500 1.05rem var(--serif)}.option-desc{display:block;margin-top:5px;color:var(--muted);font-size:.7rem;line-height:1.45}.option-price{font-size:.7rem;font-weight:700;white-space:nowrap}.config-footer{position:absolute;right:0;bottom:0;left:0;display:flex;align-items:center;justify-content:space-between;padding:18px 46px;background:#fff;border-top:1px solid var(--line)}.subtotal small{display:block;color:var(--muted);font-size:.58rem;text-transform:uppercase}.subtotal strong{font-size:1.25rem}.next-step{min-width:190px;min-height:48px;border:0;background:var(--forest);color:#fff;font-size:.67rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;cursor:pointer}.next-step:disabled{opacity:.38;cursor:not-allowed}.selection-summary{display:none;position:absolute;z-index:4;top:90px;right:42px;width:min(360px,calc(100% - 84px));padding:22px;background:var(--ink);color:#fff;box-shadow:0 20px 60px rgba(0,0,0,.2)}.selection-summary.open{display:block}.selection-summary h3{margin-bottom:14px;font:500 1.2rem var(--serif)}.summary-line{display:flex;justify-content:space-between;gap:15px;padding:10px 0;border-top:1px solid rgba(255,255,255,.13);font-size:.68rem}.summary-line span{color:rgba(255,255,255,.65)}
+    @media(max-width:900px){.product-detail{grid-template-columns:1fr;gap:28px}.gallery-stage{height:440px}.info{padding-top:0}.configurator.open{grid-template-columns:1fr}.config-preview{display:none}.config-panel{border:0}.option-card{grid-template-columns:58px 1fr}.option-price{grid-column:2}.option-visual{width:54px;height:54px}.config-top,.step-body{padding-inline:20px}.progress-track{margin-left:60px;margin-right:55px}.config-footer{padding:14px 20px}}@media(max-width:560px){.header-inner,.product-detail{width:calc(100% - 28px)}.header-actions>a:first-child{display:none}.product-detail{padding:28px 0 60px}.gallery-stage{height:320px}.title{font-size:2.35rem}.specs{grid-template-columns:1fr}.step-body{padding-bottom:125px}.option-card{padding:14px;min-height:105px}.config-footer{align-items:stretch;gap:12px}.next-step{min-width:150px}.selection-toggle{display:none}}
+  </style>
+  <style>
+    .option-card:has(.option-photo){grid-template-columns:102px 1fr auto}
+    .option-visual.option-photo{width:92px;height:76px;border:0;border-radius:0;background:#fff;overflow:hidden}
+    .option-visual.option-photo img{width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply}
+    @media(max-width:900px){.option-card:has(.option-photo){grid-template-columns:82px 1fr}.option-visual.option-photo{width:72px;height:60px}}
+  </style>
 </head>
 <body>
-    <header class="header">
-        <a href="index.html" class="logo-text">NUEVO HORIZONTE</a>
-        <a href="catalogo.html" style="font-size:12px; font-weight:600;">← VOLVER AL CATÁLOGO</a>
-    </header>
-
-    <div class="product-detail">
-        <div class="gallery">
-            <img class="main-img" src="https://images.unsplash.com/photo-1572635196237-14b3f281503f?q=80&w=500&auto=format&fit=crop" alt="Ray-Ban">
-        </div>
-        <div class="info">
-            <div class="brand">Ray-Ban</div>
-            <h1 class="title">Wayfarer Classic Acetato</h1>
-            <div class="price-box"><span>$60.000</span></div>
-
-            <p class="product-copy" style="margin-bottom:20px;color:var(--text-muted);line-height:1.65;">Armazón óptico de diseño contemporáneo.</p>
-
-            <button class="btn-add" data-id="wayfarer-classic">AÑADIR A MI BOLSA DE COMPRAS</button>
-            <button class="btn-buy-now" type="button">COMPRAR AHORA</button>
-
-            <div style="margin-top: 30px; border-top: 1px solid var(--gray-border); padding-top: 20px; font-size: 13px; color: var(--text-muted);">
-                <p><strong>Material:</strong> Acetato Inyectado de Alta Densidad</p>
-                <p><strong>Calibre:</strong> 50 mm | <strong>Puente:</strong> 22 mm</p>
-                <p><strong>Incluye:</strong> Estuche rígido + Paño microfibra + Garantía Oficial</p>
-            </div>
-        </div>
-    </div>
-
-    <script src="app.js?v=20260806-3"></script>
-</body>
-</html>
+  <div class="announcement">Atención personalizada · Envíos a todo Chile · Garantía óptica</div>
+  <header class="header"><div class="header-inner"><a href="index.html" class="logo-text">Nuevo Horizonte</a><nav class="header-actions"><a href="catalogo.html">← Catálogo</a><a class="bag-link" href="carrito.html">Mi bolsa <span class="badge-count">0</span></a></nav></div></header>
+  <main class="product-detail">
+    <section class="gallery"><div class="gallery-stage"><img class="main-img" src="" alt=""><span class="zoom-note">Vista ampliada</span></div></section>
+    <section class="info">
+      <div class="brand"></div><h1 class="title"></h1><div class="product-code">ARMAZÓN ÓPTICO · DISPONIBLE EN TIENDA Y ONLINE</div>
+      <div class="price-row"><span class="price-label">Precio armazón</span><div class="price-box"><span></span></div></div><div class="installments"></div>
+      <p class="product-copy">Armazón óptico de diseño contemporáneo para uso diario.</p>
+      <button class="btn-configure" type="button">Seleccionar cristales <small>Con receta, descanso o solo armazón</small></button>
+      <button class="btn-add" data-id="">Añadir solo armazón a mi bolsa</button><button class="btn-buy-now" type="button">Comprar ahora</button>
+      <div class="benefits"><div class="benefit"><span class="benefit-icon">♢</span><div><strong>Garantía óptica y estética</strong><span>Respaldo y ajuste profesional en nuestra óptica.</span></div></div><div class="benefit"><span class="benefit-icon">▣</span><div><strong>Despacho a todo Chile</strong><span>Seguimiento del pedido o retiro gratuito en Concepción.</span></div></div><div class="benefit"><span class="benefit-icon">✓</span><div><strong>Compra segura</strong><span>Pago protegido y atención antes y después de tu compra.</span></div></div></div>
+      <div class="specs"><div class="spec"><span>Material</span><strong class="spec-material">Acetato</strong></div><div class="spec"><span>Incluye</span><strong>Estuche + paño</strong></div><div class="spec"><span>Ajuste</span><strong>Sin costo</strong></div></div>
+    </section>
+  </main>
+  <section class="configurator" id="lens-configurator" aria-hidden="true" aria-label="Configurar cristales">
+    <div class="config-preview"><div class="config-brand">Óptica Nuevo Horizonte</div><button class="selection-toggle" type="button">☷ &nbsp; TU SELECCIÓN</button><img class="config-image" src="" alt=""><div class="config-product"><strong></strong><span>Los colores del armazón y cristal son referenciales.</span></div><aside class="selection-summary"><h3>Tu selección</h3><div id="selection-lines"></div></aside></div>
+    <div class="config-panel"><div class="config-top"><button class="config-back" type="button" aria-label="Volver">‹</button><button class="config-close" type="button" aria-label="Cerrar">×</button><div class="progress-track"><div class="progress-fill"></div></div></div><div class="step-body"></div><footer class="config-footer"><div class="subtotal"><small>Subtotal</small><strong>$0</strong></div><button class="next-step" type="button" disabled>Continuar</button></footer></div>
+  </section>
+  <script src="app.js?v=20260815-1"></script>
+</body></html>

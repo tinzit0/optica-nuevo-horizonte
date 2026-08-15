@@ -48,6 +48,7 @@ function renderizarFiltroMarcas() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+    document.querySelectorAll('a[href*="oferta"], label:has(input[value="oferta"])').forEach(element => element.remove());
     await cargarCatalogoLocal();
     initIdentidadMarca();
     renderizarVitrinaMarcas();
@@ -202,7 +203,7 @@ async function cargarProductosConFiltros() {
     const visibles = esCatalogo ? filtrados.slice(0, catalogVisibleCount) : seleccionarDestacadosMultimarca(filtrados, 6);
     grid.innerHTML = visibles.map(p => {
         const features = Array.isArray(p.features) ? p.features : [];
-        const badge = features.includes('oferta') ? 'Oferta' : features.includes('nuevo') ? 'Nuevo' : '';
+        const badge = features.includes('nuevo') ? 'Nuevo' : '';
         const meta = [p.shape, p.color, p.material].filter(Boolean).join(' · ');
         const tienePrecio = Number(p.price) > 0;
         const precio = tienePrecio ? `$${Number(p.price).toLocaleString('es-CL')}` : 'Consultar precio';
@@ -309,6 +310,13 @@ async function cargarDetalleProducto() {
         if (title) title.textContent = item.title;
         if (price) price.textContent = Number(item.price) > 0 ? `$${Number(item.price).toLocaleString('es-CL')}` : 'Consultar precio';
         if (description && item.description) description.textContent = item.description;
+        const material = document.querySelector('.spec-material');
+        if (material) material.textContent = item.material ? String(item.material).replace(/^./, c => c.toUpperCase()) : 'Material seleccionado';
+        const installments = document.querySelector('.installments');
+        if (installments && Number(item.price) > 0) installments.textContent = `Hasta 12 cuotas de $${Math.ceil(Number(item.price) / 12).toLocaleString('es-CL')}`;
+        document.querySelectorAll('.config-image').forEach(el => { el.src = item.image; el.alt = `${item.brand} ${item.title}`; });
+        const configName = document.querySelector('.config-product strong');
+        if (configName) configName.textContent = `${item.brand} · ${item.title}`;
         document.title = `${item.title} | Óptica Nuevo Horizonte`;
         const addButton = document.querySelector('.btn-add');
         const buyButton = document.querySelector('.btn-buy-now');
@@ -321,6 +329,7 @@ async function cargarDetalleProducto() {
             buyButton.disabled = !(Number(item.price) > 0);
             buyButton.onclick = () => comprarAhora(String(item.id), item.title, item.brand, item.price, item.image);
         }
+        initConfiguradorCristales(item);
     };
     aplicarProducto(producto);
 
@@ -328,6 +337,83 @@ async function cargarDetalleProducto() {
         const { data } = await _supabase.from('optica_productos').select('*').eq('id', id).maybeSingle();
         if (data) { producto = { ...producto, ...data }; aplicarProducto(producto); }
     } catch (error) { /* La ficha base mantiene disponible la página sin conexión. */ }
+}
+
+function initConfiguradorCristales(producto) {
+    const modal = document.querySelector('#lens-configurator');
+    const openButton = document.querySelector('.btn-configure');
+    if (!modal || !openButton) return;
+    const steps = [
+        {
+            kicker: 'Paso 1 de 3', title: '¿Cómo quieres usar tus anteojos?', intro: 'Elige la opción que mejor representa lo que necesitas.',
+            options: [
+                { id:'receta', name:'Cristales con receta', desc:'Para visión de lejos, cerca, lectura o uso permanente.', price:0, image:'assets/configurador/cristales-receta.png' },
+                { id:'descanso', name:'Cristales de descanso', desc:'Comodidad visual para pantallas, sin corrección óptica.', price:0, image:'assets/configurador/cristales-descanso.png' },
+                { id:'armazon', name:'Solo armazón', desc:'Recibe tu armazón con cristales de muestra, sin tratamiento.', price:0, image:'assets/configurador/solo-armazon.png' }
+            ]
+        },
+        {
+            kicker:'Paso 2 de 3', title:'Elige el tipo de tus cristales', intro:'Piensa en tu estilo de vida y selecciona el tratamiento que más te convenga.',
+            options:[
+                { id:'transparente', name:'Transparente', desc:'Cristales tradicionales, nítidos y cómodos para el uso diario.', price:39990, visual:'○' },
+                { id:'azul', name:'Protección luz azul-violeta', desc:'Ayuda a reducir la exposición a la luz azul de dispositivos digitales.', price:69990, visual:'○', className:'blue' },
+                { id:'foto', name:'Fotosensible', desc:'Se oscurece en exteriores y vuelve a aclararse en interiores.', price:109990, visual:'○', className:'photo' }
+            ]
+        },
+        {
+            kicker:'Paso 3 de 3', title:'Elige el material de tus cristales', intro:'Un cristal más delgado resulta más liviano y estético. Si tienes una receta alta, te orientaremos antes de fabricar.',
+            options:[
+                { id:'estandar', name:'Confort 1.56', desc:'Material liviano y resistente para recetas leves a moderadas.', price:0, visual:'Ⅰ', className:'layers' },
+                { id:'delgado', name:'Delgado 1.60', desc:'Más delgado y liviano, ideal para recetas moderadas.', price:39990, visual:'Ⅱ', className:'layers' },
+                { id:'ultrafino', name:'Ultrafino 1.67', desc:'Alta definición y mejor estética para recetas medias a altas.', price:69990, visual:'Ⅲ', className:'layers' }
+            ]
+        }
+    ];
+    let step = 0;
+    let selected = {};
+    const body = modal.querySelector('.step-body');
+    const next = modal.querySelector('.next-step');
+    const back = modal.querySelector('.config-back');
+    const subtotal = modal.querySelector('.subtotal strong');
+    const progress = modal.querySelector('.progress-fill');
+    const money = value => `$${Number(value).toLocaleString('es-CL')}`;
+    const total = () => Number(producto.price || 0) + Object.values(selected).reduce((sum, option) => sum + Number(option.price || 0), 0);
+    const updateSummary = () => {
+        subtotal.textContent = money(total());
+        const lines = modal.querySelector('#selection-lines');
+        if (lines) lines.innerHTML = `<div class="summary-line"><span>Armazón</span><b>${money(producto.price)}</b></div>` + Object.values(selected).map(option => `<div class="summary-line"><span>${option.name}</span><b>${option.price ? money(option.price) : 'Incluido'}</b></div>`).join('');
+    };
+    const render = () => {
+        const data = steps[step];
+        progress.style.width = `${((step + 1) / steps.length) * 100}%`;
+        back.style.visibility = step ? 'visible' : 'hidden';
+        body.innerHTML = `<span class="step-kicker">${data.kicker}</span><h2>${data.title}</h2><p class="step-intro">${data.intro}</p><div class="option-list">${data.options.map(option => `<button class="option-card ${selected[step]?.id === option.id ? 'selected' : ''}" type="button" data-option="${option.id}"><span class="option-visual ${option.image ? 'option-photo' : ''} ${option.className || ''}">${option.image ? `<img src="${option.image}" alt="" loading="eager">` : option.visual}</span><span><strong class="option-name">${option.name}</strong><span class="option-desc">${option.desc}</span></span><span class="option-price">${option.price ? `+ ${money(option.price)}` : 'Incluido'}</span></button>`).join('')}</div>`;
+        body.querySelectorAll('.option-card').forEach(card => card.addEventListener('click', () => {
+            selected[step] = data.options.find(option => option.id === card.dataset.option);
+            if (step === 0 && selected[0].id === 'armazon') { delete selected[1]; delete selected[2]; }
+            render();
+        }));
+        next.disabled = !selected[step];
+        next.textContent = step === steps.length - 1 || selected[0]?.id === 'armazon' ? 'Añadir a mi bolsa' : 'Continuar';
+        updateSummary();
+    };
+    const close = () => { modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); document.body.style.overflow = ''; };
+    const addConfigured = () => {
+        const details = Object.values(selected).map(o => o.name);
+        const suffix = details.map(o => o.toLowerCase().replace(/[^a-z0-9]+/g,'-')).join('-');
+        agregarAlCarritoConfigurado(`${producto.id}-${suffix || 'armazon'}`, producto.title, producto.brand, total(), producto.image, details);
+        close();
+    };
+    openButton.onclick = () => { step = 0; selected = {}; modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; render(); };
+    modal.querySelector('.config-close').onclick = close;
+    modal.querySelector('.selection-toggle').onclick = () => modal.querySelector('.selection-summary').classList.toggle('open');
+    back.onclick = () => { if (step) { step--; render(); } };
+    next.onclick = () => {
+        if (!selected[step]) return;
+        if (selected[0]?.id === 'armazon' || step === steps.length - 1) return addConfigured();
+        step++; render();
+    };
+    modal.addEventListener('keydown', event => { if (event.key === 'Escape') close(); });
 }
 
 window.toggleDrawer = function(open) {
@@ -417,6 +503,15 @@ window.agregarAlCarritoDirecto = function(id, nombre, marca, precio, imagen) {
     mostrarProductoAgregado(nombre, marca);
 };
 
+window.agregarAlCarritoConfigurado = function(id, nombre, marca, precio, imagen, configuracion) {
+    let carrito = obtenerCarrito();
+    const index = carrito.findIndex(item => String(item.id) === String(id));
+    if (index !== -1) carrito[index].cantidad += 1;
+    else carrito.push({ id: String(id), nombre, marca, precio: Number(precio), imagen, cantidad: 1, configuracion: Array.isArray(configuracion) ? configuracion : [] });
+    guardarCarrito(carrito);
+    mostrarProductoAgregado(nombre, marca);
+};
+
 window.comprarAhora = function(id, nombre, marca, precio, imagen) {
     let carrito = obtenerCarrito();
     const index = carrito.findIndex(item => String(item.id) === String(id));
@@ -453,6 +548,7 @@ function renderizarVistaCarrito() {
                 <div class="item-details">
                     <span class="item-brand">${item.marca}</span>
                     <h3 class="item-title">${item.nombre}</h3>
+                    ${item.configuracion?.length ? `<div class="item-configuration">${item.configuracion.join(' · ')}</div>` : ''}
                     <div class="quantity-control">
                         <button class="qty-btn" onclick="cambiarCantidad(${index}, -1)">-</button>
                         <span class="qty-val">${item.cantidad}</span>
@@ -508,7 +604,7 @@ function renderizarVistaCheckout() {
     initUbicacionesChile();
 
     itemsEl.innerHTML = carrito.length ? carrito.map(item => `
-        <div class="sidebar-item"><img src="${item.imagen}" alt="${item.nombre}"><div><div class="sidebar-item-title">${item.nombre}</div><div class="sidebar-item-subtitle">${item.marca} · Cantidad ${item.cantidad}</div><div class="sidebar-item-price">$${(item.precio * item.cantidad).toLocaleString('es-CL')}</div></div></div>
+        <div class="sidebar-item"><img src="${item.imagen}" alt="${item.nombre}"><div><div class="sidebar-item-title">${item.nombre}</div><div class="sidebar-item-subtitle">${item.marca} · Cantidad ${item.cantidad}${item.configuracion?.length ? `<br>${item.configuracion.join(' · ')}` : ''}</div><div class="sidebar-item-price">$${(item.precio * item.cantidad).toLocaleString('es-CL')}</div></div></div>
     `).join('') : '<div class="checkout-empty">No hay productos en tu bolsa.</div>';
 
     const actualizarTotales = () => {
