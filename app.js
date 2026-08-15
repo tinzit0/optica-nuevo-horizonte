@@ -471,6 +471,7 @@ function initNotificaciones() {
     const styles = document.createElement('style');
     styles.id = 'toast-optica-styles';
     styles.textContent = `
+        html,body{max-width:100%;overflow-x:hidden;overscroll-behavior-x:none}.product-card,.product-info,.product-actions,.config-panel,.step-body,.option-card{min-width:0}img{max-width:100%}
         .toast-region{position:fixed;right:24px;top:24px;z-index:10000;display:grid;gap:12px;width:min(390px,calc(100vw - 28px));pointer-events:none}
         .luxury-toast{position:relative;overflow:hidden;display:grid;grid-template-columns:48px 1fr auto;gap:14px;align-items:start;background:#101713;color:#fff;border:1px solid rgba(185,147,80,.45);padding:20px;box-shadow:0 24px 70px rgba(10,18,13,.3);pointer-events:auto;opacity:0;transform:translateY(-14px) scale(.98);transition:opacity .32s ease,transform .32s ease}
         .luxury-toast.visible{opacity:1;transform:none}.luxury-toast.leaving{opacity:0;transform:translateY(-8px) scale(.98)}
