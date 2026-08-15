@@ -52,7 +52,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     await cargarCatalogoLocal();
     initIdentidadMarca();
     renderizarVitrinaMarcas();
-    initNavegacionMovil();
     leerParametrosURLYMarcarCheckbox();
     initCatalogoInteractivo();
     cargarProductosConFiltros();
