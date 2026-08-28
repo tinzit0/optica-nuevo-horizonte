@@ -22,6 +22,7 @@ const PRODUCTOS_BASE = [
 ];
 let PRODUCTOS_LOCALES = [];
 let catalogVisibleCount = 48;
+const catalogRandomSeed = Math.floor(Math.random() * 2147483647);
 
 async function cargarCatalogoLocal() {
     try {
@@ -187,6 +188,7 @@ async function cargarProductosConFiltros() {
     if (sort === 'price-desc') filtrados.sort((a, b) => Number(b.price) - Number(a.price));
     if (sort === 'name') filtrados.sort((a, b) => a.title.localeCompare(b.title, 'es'));
     if (sort === 'newest') filtrados.sort((a, b) => Number(b.id) - Number(a.id));
+    if (!sort || sort === 'featured') filtrados = seleccionarDestacadosMultimarca(filtrados, filtrados.length);
 
     const countText = document.querySelector('#catalog-count-text');
     if (countText) countText.textContent = `${filtrados.length} ${filtrados.length === 1 ? 'armazón encontrado' : 'armazones encontrados'}`;
@@ -224,7 +226,13 @@ function seleccionarDestacadosMultimarca(productos, cantidad) {
         if (!grupos.has(marca)) grupos.set(marca, []);
         grupos.get(marca).push(producto);
     });
-    const marcas = [...grupos.keys()];
+    const puntajeAleatorio = valor => {
+        let hash = catalogRandomSeed;
+        for (const caracter of String(valor)) hash = Math.imul(hash ^ caracter.charCodeAt(0), 16777619);
+        return hash >>> 0;
+    };
+    grupos.forEach(lista => lista.sort((a, b) => puntajeAleatorio(a.id) - puntajeAleatorio(b.id)));
+    const marcas = [...grupos.keys()].sort((a, b) => puntajeAleatorio(a) - puntajeAleatorio(b));
     const seleccion = [];
     let vuelta = 0;
     while (seleccion.length < cantidad && marcas.some(marca => grupos.get(marca)[vuelta])) {

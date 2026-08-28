@@ -216,6 +216,7 @@
         let pasoActual = 2;
         let reservaState = { servicio: 'Examen visual (tecnólogo médico)', fecha: null, hora: null };
         let horariosMap = {};
+        let horasOcupadas = new Set();
         const hoy = new Date();
         let mesVisible = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
         const mesInicial = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
@@ -268,12 +269,16 @@
 
         async function cargarHorariosDesdeSupabase() {
             try {
-                const { data: bloques } = await _supabase.from('optica_horarios').select('*').eq('disponible', true).order('fecha', { ascending: true });
+                const [{ data: bloques }, { data: citas }] = await Promise.all([
+                    _supabase.from('optica_horarios').select('*').eq('disponible', true).order('fecha', { ascending: true }),
+                    _supabase.from('optica_citas').select('fecha')
+                ]);
                 (bloques || []).forEach(b => {
                     if (!horariosMap[b.fecha]) horariosMap[b.fecha] = [];
                     if (!horariosMap[b.fecha].includes(b.hora)) horariosMap[b.fecha].push(b.hora);
                 });
-            } catch (error) { horariosMap = {}; }
+                horasOcupadas = new Set((citas || []).map(c => String(c.fecha || '').replace(/\s*hrs?\.?$/i, '').trim()));
+            } catch (error) { horariosMap = {}; horasOcupadas = new Set(); }
         }
 
         function seleccionarFecha(fechaStr, el) {
@@ -283,7 +288,7 @@
             document.querySelectorAll('.cal-day.available').forEach(d => d.classList.remove('active'));
             if (el) el.classList.add('active');
 
-            const horas = horariosMap[fechaStr] || [];
+            const horas = (horariosMap[fechaStr] || []).filter(hora => !horasOcupadas.has(`${fechaStr} ${String(hora).replace(/\s*hrs?\.?$/i, '').trim()}`));
             
             const horasManana = horas.filter(h => parseInt(h.split(':')[0]) < 13);
             const horasTarde = horas.filter(h => parseInt(h.split(':')[0]) >= 13);
