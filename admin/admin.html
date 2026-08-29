@@ -4,8 +4,8 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><base href="../">
 <meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#0b1712">
 <title>Administración | Óptica Nuevo Horizonte</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabase-client.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4"></script>
+<script src="js/supabase-client.js?v=20260829-3"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
 <style>
@@ -19,14 +19,16 @@
 .table-wrap{width:100%;max-width:100%;min-width:0;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
 .table-wrap table{width:100%;min-width:680px}
 #panel-pedidos .table-wrap{width:100%;overflow-x:auto}
-#panel-pedidos table{width:100%;min-width:750px}
+#panel-pedidos table{width:100%;min-width:980px}
 @media(max-width:1100px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.dashboard-grid{grid-template-columns:minmax(0,1fr)}.form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:760px){.stats,.brand-inventory-grid,.inventory-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.form-grid,.file-row{grid-template-columns:minmax(0,1fr)}}
+.order-products{display:grid;gap:7px;min-width:250px}.order-product{display:block;line-height:1.4}.order-product small{display:block;color:var(--muted);font-size:.61rem}.order-products-empty{color:var(--muted);font-size:.65rem}
+[hidden]{display:none!important}.login-screen{padding:32px 20px}.login-card{width:min(500px,100%);padding:52px 54px}.login-card>p{margin-bottom:30px}.login-card form{display:grid;gap:16px}.login-card input{height:54px;margin-bottom:0;padding:0 17px}.login-card button{height:54px;margin-top:4px}.login-card button:disabled,.btn:disabled{cursor:wait;opacity:.7}.login-error{margin-top:18px!important}@media(max-width:560px){.login-screen{padding:18px}.login-card{padding:38px 24px}.login-card h1{font-size:1.75rem}}
 </style>
 </head>
 <body>
-<section class="login-screen" id="login-screen"><div class="login-card"><div class="login-mark">NH</div><h1>Nuevo Horizonte</h1><p>Administración privada · Concepción</p><form id="form-login"><input id="login-email" type="email" placeholder="Correo electrónico" autocomplete="username" required><input id="login-pass" type="password" placeholder="Contraseña" autocomplete="current-password" required><button>Ingresar al panel</button></form><p class="login-error" id="login-error">No pudimos iniciar sesión. Revisa tus credenciales.</p></div></section>
-<div class="shell" id="app-shell">
+<section class="login-screen" id="login-screen" hidden><div class="login-card"><div class="login-mark">NH</div><h1>Nuevo Horizonte</h1><p>Administración privada · Concepción</p><form id="form-login"><input id="login-email" type="email" placeholder="Correo electrónico" autocomplete="username" required><input id="login-pass" type="password" placeholder="Contraseña" autocomplete="current-password" required><button type="submit">Ingresar al panel</button></form><p class="login-error" id="login-error" role="alert" aria-live="polite"></p></div></section>
+<div class="shell" id="app-shell" hidden>
 <aside class="sidebar" id="sidebar"><div class="brand"><strong>Óptica Nuevo Horizonte</strong><small>Panel ejecutivo</small></div><nav class="nav">
 <button class="active" data-panel="resumen" data-title="Resumen ejecutivo">◈ Resumen</button><button data-panel="inventario" data-title="Inventario">◇ Inventario</button><button data-panel="agenda" data-title="Agenda visual">□ Agenda de exámenes</button><button data-panel="pedidos" data-title="Ventas y pedidos">△ Ventas y pedidos</button><button data-panel="productos" data-title="Gestión de productos">＋ Nuevo producto</button>
 </nav><div class="sidebar-foot"><a href="../index.html">← Volver a la tienda</a><button class="btn logout" id="btn-logout">Cerrar sesión</button></div></aside>
@@ -46,12 +48,140 @@
 const db=window.opticaSupabase;const STOCK_KEY='inventario_optica_nuevo_horizonte';let state={local:[],cloud:[],citas:[],horarios:[],pedidos:[],stock:JSON.parse(localStorage.getItem(STOCK_KEY)||'{}')};
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];const money=n=>`$${Math.round(Number(n)||0).toLocaleString('es-CL')}`;const safe=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 const parseDate=v=>{if(!v)return null;let value=String(v).trim().replace(/\s*hrs?\.?$/i,'');value=/^\d{4}-\d{2}-\d{2}$/.test(value)?`${value}T12:00:00`:value.replace(/^(\d{4}-\d{2}-\d{2})\s+/,'$1T');const d=new Date(value);return isNaN(d)?null:d};const dateLabel=v=>{const d=parseDate(v);return d?new Intl.DateTimeFormat('es-CL',{dateStyle:'medium',timeStyle:v&&String(v).includes(':')?'short':undefined}).format(d):safe(v||'—')};
-document.addEventListener('DOMContentLoaded',async()=>{const {data:{session}}=await db.auth.getSession();session?await showPanel():showLogin();$('#form-login').addEventListener('submit',login);$('#btn-logout').addEventListener('click',logout);$('#btn-refresh').addEventListener('click',loadAll);$('#menu-toggle').addEventListener('click',()=>$('#sidebar').classList.toggle('open'));$$('.nav button').forEach(b=>b.addEventListener('click',()=>goPanel(b.dataset.panel,b.dataset.title)));$$('[data-go]').forEach(b=>b.addEventListener('click',()=>{const n=$(`.nav button[data-panel="${b.dataset.go}"]`);goPanel(b.dataset.go,n.dataset.title)}));$('#inventory-search').addEventListener('input',renderInventory);$('#inventory-brand').addEventListener('change',renderInventory);$('#inventory-category').addEventListener('change',renderInventory);$('#inventory-clear-brand').addEventListener('click',()=>{$('#inventory-brand').value='';renderInventory()});$('#orders-period').addEventListener('change',renderOrders);$('#form-horario').addEventListener('submit',saveSchedule);$('#form-producto').addEventListener('submit',saveProduct);window.addEventListener('resize',drawSalesChart)});
+document.addEventListener('DOMContentLoaded',async()=>{
+  console.log('ADMIN INICIO');
+  $('#form-login').addEventListener('submit',login);
+  $('#btn-logout').addEventListener('click',logout);$('#btn-refresh').addEventListener('click',loadAll);$('#menu-toggle').addEventListener('click',()=>$('#sidebar').classList.toggle('open'));$$('.nav button').forEach(b=>b.addEventListener('click',()=>goPanel(b.dataset.panel,b.dataset.title)));$$('[data-go]').forEach(b=>b.addEventListener('click',()=>{const n=$(`.nav button[data-panel="${b.dataset.go}"]`);goPanel(b.dataset.go,n.dataset.title)}));$('#inventory-search').addEventListener('input',renderInventory);$('#inventory-brand').addEventListener('change',renderInventory);$('#inventory-category').addEventListener('change',renderInventory);$('#inventory-clear-brand').addEventListener('click',()=>{$('#inventory-brand').value='';renderInventory()});$('#orders-period').addEventListener('change',renderOrders);$('#form-horario').addEventListener('submit',saveSchedule);$('#form-producto').addEventListener('submit',saveProduct);window.addEventListener('resize',drawSalesChart);
+  if (!db?.auth) {
+    showLogin('No fue posible conectar con el servicio de autenticación. Recarga la página.');
+    return;
+  }
+  try {
+    console.log('SESSION CHECK');
+    console.time('GET_SESSION_INICIAL');
+    let session,error;
+    try{
+      const result=await db.auth.getSession();
+      session=result.data.session;error=result.error;
+    }finally{
+      console.timeEnd('GET_SESSION_INICIAL');
+    }
+    if(error)throw error;
+    console.log('SESION:',session);
+    session?await validateAndShowPanel(false):showLogin();
+  } catch(error) {
+    console.error('Error al recuperar la sesión:',error);
+    showLogin('No fue posible comprobar la sesión. Puedes intentar ingresar nuevamente.');
+  }
+});
 document.addEventListener('DOMContentLoaded',()=>{const viewer=$('#inventory-image-viewer'),photo=$('#image-viewer-photo'),caption=$('#image-viewer-caption');$('#tabla-inventario').addEventListener('click',event=>{const image=event.target.closest('.thumb');if(!image)return;photo.src=image.src;photo.alt=image.closest('tr')?.querySelector('td:nth-child(2) strong')?.textContent||'Armazón ampliado';caption.textContent=photo.alt;viewer.showModal()});$('#image-viewer-close').addEventListener('click',()=>viewer.close());viewer.addEventListener('click',event=>{if(event.target===viewer)viewer.close()})});
-async function login(e){e.preventDefault();$('#login-error').classList.remove('visible');const {error}=await db.auth.signInWithPassword({email:$('#login-email').value,password:$('#login-pass').value});error?$('#login-error').classList.add('visible'):await showPanel()}async function logout(){await db.auth.signOut();showLogin()}function showLogin(){$('#login-screen').style.display='grid';$('#app-shell').classList.remove('active')}async function showPanel(){const {data:allowed,error}=await db.rpc('is_optica_admin');if(error||allowed!==true){await db.auth.signOut();showLogin();$('#login-error').textContent='La cuenta no tiene permisos administrativos.';$('#login-error').classList.add('visible');return}$('#login-screen').style.display='none';$('#app-shell').classList.add('active');loadAll()}
+function showLoginError(message){const target=$('#login-error');target.textContent=message;target.classList.add('visible')}
+function clearLoginError(){const target=$('#login-error');target.textContent='';target.classList.remove('visible')}
+function resetAdminState(){state={local:[],cloud:[],citas:[],horarios:[],pedidos:[],stock:JSON.parse(localStorage.getItem(STOCK_KEY)||'{}')}}
+function showLogin(message=''){
+  $('#app-shell').hidden=true;$('#app-shell').classList.remove('active');$('#sidebar').classList.remove('open');
+  $('#login-screen').hidden=false;
+  message?showLoginError(message):clearLoginError();
+}
+async function validateAndShowPanel(measureLogin=false,flowStartedAt=0){
+  console.log('VALIDANDO ADMIN');
+  if(measureLogin)console.timeLog('FLUJO_LOGIN_COMPLETO','antes de mostrar estructura del panel');
+  if(measureLogin)console.time('MOSTRAR_PANEL');
+  clearLoginError();$('#login-screen').hidden=true;$('#app-shell').hidden=false;$('#app-shell').classList.add('active');
+  if(measureLogin){console.timeEnd('MOSTRAR_PANEL');console.timeLog('FLUJO_LOGIN_COMPLETO','estructura del panel visible')}
+  if(measureLogin)console.time('VALIDACION_ADMIN');
+  let allowed,error;
+  try{
+    const result=await db.rpc('is_optica_admin');
+    allowed=result.data;error=result.error;
+  }finally{
+    if(measureLogin)console.timeEnd('VALIDACION_ADMIN');
+  }
+  if(measureLogin)console.timeLog('FLUJO_LOGIN_COMPLETO','validación de administrador finalizada');
+  if(error||allowed!==true){
+    resetAdminState();showLogin(error?.message||'La cuenta no tiene permisos administrativos.');
+    void db.auth.signOut({scope:'local'});
+    return false;
+  }
+  console.log('MOSTRANDO PANEL');
+  if(measureLogin){
+    console.time('CARGA_PANEL');
+    void loadAll().catch(error=>console.error('Error al cargar el panel:',error)).finally(()=>{
+      console.timeEnd('CARGA_PANEL');
+      console.log('FLUJO HASTA CARGA_PANEL:',`${(performance.now()-flowStartedAt).toFixed(1)} ms`);
+    });
+    console.timeLog('FLUJO_LOGIN_COMPLETO','loadAll iniciado sin await');
+  }else{
+    void loadAll();
+  }
+  return true;
+}
+async function login(e){
+  e.preventDefault();
+  const flowStartedAt=performance.now();
+  console.time('FLUJO_LOGIN_COMPLETO');
+  console.time('LOGIN_TOTAL');
+  const button=e.submitter||e.currentTarget.querySelector('button'),originalText=button.textContent;
+  clearLoginError();
+  if(!db?.auth){showLoginError('No fue posible conectar con el servicio de autenticación.');console.timeEnd('LOGIN_TOTAL');console.timeEnd('FLUJO_LOGIN_COMPLETO');return}
+  button.disabled=true;
+  button.textContent='Ingresando…';
+  try{
+    const email=$('#login-email').value.trim(),password=$('#login-pass').value;
+    console.timeLog('FLUJO_LOGIN_COMPLETO','antes de signInWithPassword');
+    console.time('AUTH_LOGIN');
+    let data,error;
+    try{
+      const result=await db.auth.signInWithPassword({email,password});
+      data=result.data;error=result.error;
+    }finally{
+      console.timeEnd('AUTH_LOGIN');
+    }
+    console.timeLog('FLUJO_LOGIN_COMPLETO','signInWithPassword finalizado');
+    if(error)throw error;
+    if(await validateAndShowPanel(true,flowStartedAt))e.currentTarget.reset();
+    console.timeLog('FLUJO_LOGIN_COMPLETO','validateAndShowPanel finalizado');
+  }catch(error){showLoginError(error?.message||'No fue posible iniciar sesión. Revisa tus credenciales y tu conexión.')}finally{button.disabled=false;button.textContent=originalText;console.timeEnd('LOGIN_TOTAL');console.timeEnd('FLUJO_LOGIN_COMPLETO')}
+}
+async function logout(){
+  console.log('LOGOUT INICIO');
+  const button=$('#btn-logout'),originalText=button.textContent;
+  button.disabled=true;button.textContent='Cerrando…';
+  resetAdminState();showLogin();
+  try{
+    const {error}=await db.auth.signOut({scope:'local'});
+    if(error)throw error;
+  }catch(error){console.error('Error al cerrar sesión:',error);showLoginError('La sesión local se cerró, pero Supabase no respondió correctamente.')}finally{button.disabled=false;button.textContent=originalText;console.log('LOGOUT FINAL')}
+}
 function goPanel(name,title){$$('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.panel===name));$$('.panel').forEach(p=>p.classList.toggle('active',p.id===`panel-${name}`));$('#page-title').textContent=title;$('#sidebar').classList.remove('open');if(name==='resumen')drawSalesChart()}
 async function query(table,order='created_at'){const q=db.from(table).select('*').order(order,{ascending:false});const {data,error}=await q;return {data:data||[],error}}
-async function loadAll(){const btn=$('#btn-refresh');btn.disabled=true;btn.textContent='Actualizando…';const [local,products,citas,horarios,pedidos]=await Promise.all([fetch('../data/productos.json',{cache:'no-store'}).then(r=>r.ok?r.json():[]).catch(()=>[]),query('optica_productos'),query('optica_citas'),query('optica_horarios','fecha'),query('optica_pedidos')]);state={local:Array.isArray(local)?local:[],cloud:products.data,citas:citas.data,horarios:horarios.data,pedidos:pedidos.data};const errors=[products,citas,horarios,pedidos].filter(x=>x.error).map(x=>x.error.message);$('#data-notice').classList.toggle('visible',!!errors.length);$('#data-notice').textContent=errors.length?'Algunos módulos no pudieron sincronizarse. Se muestran los datos disponibles.':'';renderAll();$('#last-update').textContent=`Actualizado ${new Date().toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'})}`;btn.disabled=false;btn.textContent='↻ Actualizar'}
+async function measureAdminLoad(label,operation){console.time(label);try{return await operation()}finally{console.timeEnd(label)}}
+async function loadAll(){
+  console.time('LOAD_ALL_TOTAL');
+  const btn=$('#btn-refresh');btn.disabled=true;btn.textContent='Actualizando…';
+  try{
+    console.time('CARGA_CLIENTES');
+    console.timeEnd('CARGA_CLIENTES');
+    console.info('CARGA_CLIENTES: loadAll no consulta optica_clientes actualmente.');
+    const [local,products,citas,horarios,pedidos]=await Promise.all([
+      measureAdminLoad('CARGA_CATALOGO_LOCAL',()=>fetch('../data/productos.json',{cache:'no-store'}).then(r=>r.ok?r.json():[]).catch(()=>[])),
+      measureAdminLoad('CARGA_PRODUCTOS',()=>query('optica_productos')),
+      measureAdminLoad('CARGA_CITAS',()=>query('optica_citas')),
+      measureAdminLoad('CARGA_HORARIOS',()=>query('optica_horarios','fecha')),
+      measureAdminLoad('CARGA_PEDIDOS',()=>query('optica_pedidos'))
+    ]);
+    if($('#app-shell').hidden)return;
+    state={local:Array.isArray(local)?local:[],cloud:products.data,citas:citas.data,horarios:horarios.data,pedidos:pedidos.data};
+    const errors=[products,citas,horarios,pedidos].filter(x=>x.error).map(x=>x.error.message);
+    $('#data-notice').classList.toggle('visible',!!errors.length);
+    $('#data-notice').textContent=errors.length?'Algunos módulos no pudieron sincronizarse. Se muestran los datos disponibles.':'';
+    console.time('CARGA_ESTADISTICAS');
+    try{renderAll()}finally{console.timeEnd('CARGA_ESTADISTICAS')}
+    $('#last-update').textContent=`Actualizado ${new Date().toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'})}`;
+  }finally{
+    btn.disabled=false;btn.textContent='↻ Actualizar';console.timeEnd('LOAD_ALL_TOTAL');
+  }
+}
 function stockOverrides(){try{return JSON.parse(localStorage.getItem(STOCK_KEY)||'{}')}catch{return {}}}function inventory(){const source=state.cloud.length?state.cloud.map(p=>({...p,_source:'Nube'})):state.local.map(p=>({...p,_source:'Catálogo'})),overrides=state.cloud.length?{}:stockOverrides();return source.map(p=>({...p,stock:overrides[String(p.id)]??Number(p.stock??1)}))}function futureAppointments(){const now=new Date;return state.citas.filter(c=>{const d=parseDate(c.starts_at??c.fecha);return d&&d>=now}).sort((a,b)=>parseDate(a.starts_at??a.fecha)-parseDate(b.starts_at??b.fecha))}
 function renderAll(){const inv=inventory(),future=futureAppointments(),now=new Date,month=now.getMonth(),year=now.getFullYear(),monthOrders=state.pedidos.filter(p=>{const d=parseDate(p.created_at);return d&&d.getMonth()===month&&d.getFullYear()===year}),monthSales=monthOrders.reduce((s,p)=>s+(Number(p.total)||0),0),allSales=state.pedidos.reduce((s,p)=>s+(Number(p.total)||0),0);$('#kpi-productos').textContent=inv.length.toLocaleString('es-CL');$('#kpi-productos-detail').textContent=`${new Set(inv.map(p=>p.brand).filter(Boolean)).size} marcas disponibles`;$('#kpi-ventas').textContent=money(monthSales);$('#kpi-ventas-detail').textContent=`${monthOrders.length} pedidos registrados`;$('#kpi-citas').textContent=future.length;$('#kpi-ticket').textContent=money(state.pedidos.length?allSales/state.pedidos.length:0);renderOperational(inv,future);renderBrands(inv);renderAppointments();renderSchedules();renderInventoryFilters(inv);renderInventory();renderOrders();renderCloudProducts();requestAnimationFrame(drawSalesChart)}
 function renderOperational(inv,future){const available=state.horarios.filter(h=>h.disponible).length,optical=inv.filter(p=>p.category==='optico').length,solar=inv.filter(p=>p.category==='sol').length;$('#operational-summary').innerHTML=[['Inventario óptico',`${optical} unidades`],['Inventario solar',`${solar} unidades`],['Bloques disponibles',`${available} horas`],['Próxima atención',future[0]?dateLabel(future[0].starts_at??future[0].fecha):'Sin reservas']].map((x,i)=>`<div class="summary-item"><i class="summary-dot" style="opacity:${1-i*.15}"></i><div><strong>${x[0]}</strong><span>Información actual</span></div><b>${x[1]}</b></div>`).join('')}
@@ -63,6 +193,10 @@ function renderInventory(){const inv=inventory(),q=$('#inventory-search').value.
 function renderBrandInventory(inv,selected){const groups={};inv.forEach(p=>{const b=p.brand||'Sin marca';if(!groups[b])groups[b]={models:0,units:0,low:0};groups[b].models++;groups[b].units+=Number(p.stock||0);if(Number(p.stock)<=2)groups[b].low++});$('#brand-inventory-summary').innerHTML=Object.entries(groups).sort((a,b)=>b[1].units-a[1].units).map(([brand,x])=>`<button type="button" class="brand-inventory-card ${selected===brand?'active':''}" onclick="chooseBrand('${encodeURIComponent(brand)}')"><strong>${safe(brand)}</strong><span>Detalle de existencias</span><div class="brand-inventory-numbers"><div><b>${x.models}</b><small>Modelos</small></div><div><b>${x.units}</b><small>Unidades</small></div><div><b class="${x.low?'inventory-alert':''}">${x.low}</b><small>Alertas</small></div></div></button>`).join('')}
 window.chooseBrand=function(value){$('#inventory-brand').value=decodeURIComponent(value);renderInventory();$('#tabla-inventario').closest('.card').scrollIntoView({behavior:'smooth',block:'start'})};window.setStock=async function(encoded,value){const id=decodeURIComponent(encoded),stock=Math.max(0,Math.floor(Number(value)||0)),cloud=state.cloud.find(p=>String(p.id)===id);if(cloud){const {error}=await db.from('optica_productos').update({stock}).eq('id',id);if(error)console.warn('El stock no pudo sincronizarse con Supabase.',error.message);else cloud.stock=stock}else{const overrides=stockOverrides();overrides[id]=stock;localStorage.setItem(STOCK_KEY,JSON.stringify(overrides))}renderInventory();renderAllStockMetrics()};window.adjustStock=function(encoded,change){const id=decodeURIComponent(encoded),item=inventory().find(p=>String(p.id)===id);setStock(encoded,Math.max(0,Number(item?.stock||0)+change))};function renderAllStockMetrics(){const inv=inventory();$('#kpi-productos').textContent=inv.reduce((s,p)=>s+Number(p.stock||0),0).toLocaleString('es-CL');$('#kpi-productos-detail').textContent=`${inv.length.toLocaleString('es-CL')} modelos · ${new Set(inv.map(p=>p.brand).filter(Boolean)).size} marcas`}
 function filterOrders(){const period=$('#orders-period').value,now=new Date;return state.pedidos.filter(p=>{const d=parseDate(p.created_at);if(period==='month')return d&&d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();if(period==='year')return d&&d.getFullYear()===now.getFullYear();return true})}function renderOrders(){const items=filterOrders(),revenue=items.reduce((s,p)=>s+(Number(p.total)||0),0);$('#orders-revenue').textContent=money(revenue);$('#orders-count').textContent=items.length;$('#orders-ticket').textContent=money(items.length?revenue/items.length:0);$('#orders-prescription').textContent=items.filter(p=>p.receta_path||p.receta_url).length;$('#tabla-pedidos').innerHTML=items.map(p=>`<tr><td>${dateLabel(p.created_at)}</td><td><strong>${safe(p.nombre)}</strong></td><td>${safe(p.telefono)}</td><td><strong>${money(p.total)}</strong></td><td>${safe(p.metodo_envio)}</td><td>${p.receta_path?`<button class="action" type="button" onclick="openPrescription('${encodeURIComponent(p.receta_path)}')">Ver receta</button>`:p.receta_url?'<span class="pill amber">Receta heredada</span>':'<span class="pill gray">Sin receta</span>'}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">No hay pedidos en este período.</td></tr>';drawSalesChart()}
+function orderItems(value){if(Array.isArray(value))return value;if(typeof value==='string'){try{const parsed=JSON.parse(value);return Array.isArray(parsed)?parsed:[]}catch{return []}}return []}
+function orderVariant(item){const explicit=item.color||item.variante||item.variant||item.variant_name;if(explicit)return String(explicit);const sku=String(item.sku||'').trim(),last=sku.split('-').filter(Boolean).pop();return last&&!/^\d+$/.test(last)?last.replace(/(^|\s)\S/g,char=>char.toUpperCase()):''}
+function renderOrderProducts(value){const products=orderItems(value);if(!products.length)return '<span class="order-products-empty">Sin detalle de productos</span>';return `<div class="order-products">${products.map(item=>{const brand=safe(item.marca||item.brand||''),model=safe(item.nombre||item.modelo||item.title||'Producto'),variant=orderVariant(item),quantity=Math.max(1,Number(item.quantity??item.cantidad??1)||1),unitPrice=Number(item.precio_unitario??item.precio??item.price??item.precio_armazon??0);return `<span class="order-product"><strong>${brand}${brand?' ':''}${model}${variant?` (${safe(variant)})`:''}</strong><small>x${quantity} · ${money(unitPrice)}</small></span>`}).join('')}</div>`}
+function renderOrders(){const items=filterOrders(),revenue=items.reduce((s,p)=>s+(Number(p.total)||0),0),header=$('#panel-pedidos thead tr');if(header&&!header.querySelector('[data-orders-products]')){const th=document.createElement('th');th.dataset.ordersProducts='';th.textContent='Productos';header.children[3]?.before(th)}$('#orders-revenue').textContent=money(revenue);$('#orders-count').textContent=items.length;$('#orders-ticket').textContent=money(items.length?revenue/items.length:0);$('#orders-prescription').textContent=items.filter(p=>p.receta_path||p.receta_url).length;$('#tabla-pedidos').innerHTML=items.map(p=>`<tr><td>${dateLabel(p.created_at)}</td><td><strong>${safe(p.nombre)}</strong></td><td>${safe(p.telefono)}</td><td>${renderOrderProducts(p.items)}</td><td><strong>${money(p.total)}</strong></td><td>${safe(p.metodo_envio)}</td><td>${p.receta_path?`<button class="action" type="button" onclick="openPrescription('${encodeURIComponent(p.receta_path)}')">Ver receta</button>`:p.receta_url?'<span class="pill amber">Receta heredada</span>':'<span class="pill gray">Sin receta</span>'}</td></tr>`).join('')||'<tr><td colspan="7" class="empty">No hay pedidos en este período.</td></tr>';drawSalesChart()}
 window.openPrescription=async function(encodedPath){const path=decodeURIComponent(encodedPath),{data,error}=await db.storage.from('prescriptions').createSignedUrl(path,300);if(error||!data?.signedUrl)return alert('No fue posible abrir la receta.');window.open(data.signedUrl,'_blank','noopener,noreferrer')};
 function monthlySales(){const now=new Date,months=[];for(let i=11;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);months.push({year:d.getFullYear(),month:d.getMonth(),label:d.toLocaleDateString('es-CL',{month:'short'}),value:0})}state.pedidos.forEach(p=>{const d=parseDate(p.created_at);const m=months.find(x=>d&&x.year===d.getFullYear()&&x.month===d.getMonth());if(m)m.value+=Number(p.total)||0});return months}function drawSalesChart(){const canvas=$('#sales-chart');if(!canvas||!$('#panel-resumen').classList.contains('active'))return;const rect=canvas.getBoundingClientRect(),dpr=devicePixelRatio||1;canvas.width=rect.width*dpr;canvas.height=rect.height*dpr;const c=canvas.getContext('2d');c.scale(dpr,dpr);const data=monthlySales(),w=rect.width,h=rect.height,p={l:48,r:12,t:18,b:35},max=Math.max(...data.map(x=>x.value),1),cw=w-p.l-p.r,ch=h-p.t-p.b;c.strokeStyle='#e5e2da';c.fillStyle='#6d756f';c.font='10px DM Sans';c.textAlign='right';for(let i=0;i<4;i++){const y=p.t+ch*i/3;c.beginPath();c.moveTo(p.l,y);c.lineTo(w-p.r,y);c.stroke();c.fillText(money(max*(1-i/3)).replace('$','$'),p.l-7,y+3)}const gap=7,bw=cw/data.length-gap;data.forEach((x,i)=>{const bh=x.value/max*(ch-4),xpos=p.l+i*cw/data.length+gap/2,y=p.t+ch-bh;const grad=c.createLinearGradient(0,y,0,p.t+ch);grad.addColorStop(0,'#b99350');grad.addColorStop(1,'#d9bd82');c.fillStyle=grad;c.fillRect(xpos,y,bw,bh);c.fillStyle='#6d756f';c.textAlign='center';c.fillText(x.label.replace('.',''),xpos+bw/2,h-12)})}
 function renderCloudProducts(){$('#tabla-productos').innerHTML=state.cloud.map(p=>`<tr><td><img class="thumb" src="${safe(p.image)}" alt=""></td><td><strong>${safe(p.title)}</strong></td><td>${safe(p.brand)}</td><td>${money(p.price)}</td><td>${safe(p.category)}</td><td>${Number(p.stock??1)}</td><td><button class="action" onclick="deleteProduct('${safe(p.id)}')">Eliminar</button></td></tr>`).join('')||'<tr><td colspan="7" class="empty">No hay productos administrables en Supabase.</td></tr>'}

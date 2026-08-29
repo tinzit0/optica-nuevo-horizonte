@@ -67,6 +67,18 @@
         return getGroups(products).find(group => group.variants.some(variant => String(variant.id) === String(item?.id))) || null;
     }
 
+    function getProductIdentifiers(product) {
+        return [product?.id, product?.product_code, product?.sku, product?.SKU]
+            .map(value => String(value ?? '').trim().toLocaleLowerCase('es'))
+            .filter(Boolean);
+    }
+
+    function findRequestedProduct(products, requestedId) {
+        const requested = String(requestedId ?? '').trim().toLocaleLowerCase('es');
+        if (!requested) return null;
+        return products.find(product => getProductIdentifiers(product).includes(requested)) || null;
+    }
+
     function createImage(src, alt, className = '', doc = document) {
         const image = doc.createElement('img');
         image.src = getSafeURL(src);
@@ -84,10 +96,11 @@
             .filter(Boolean)
             .filter((product, index, list) => list.findIndex(item => String(item.id) === String(product.id)) === index);
         const requestedId = new URLSearchParams(global.location.search).get('id');
-        let selectedProduct = products.find(product => String(product.id) === String(requestedId)) || products[0] || null;
+        let selectedProduct = findRequestedProduct(products, requestedId);
         let galleryImages = [];
         let galleryIndex = 0;
         let galleryReady = false;
+        let galleryLoadToken = 0;
 
         const stage = doc.querySelector('.gallery-stage');
         const mainImage = doc.querySelector('.main-img');
@@ -102,9 +115,23 @@
             if (!galleryImages.length || !mainImage) return;
             galleryIndex = (index + galleryImages.length) % galleryImages.length;
             const image = galleryImages[galleryIndex];
-            mainImage.src = getSafeURL(image);
-            mainImage.hidden = false;
-            mainImage.alt = selectedProduct ? `${selectedProduct.brand || ''} ${getModelTitle(selectedProduct)}`.trim() : '';
+            const safeSource = getSafeURL(image);
+            const loadToken = ++galleryLoadToken;
+            mainImage.hidden = true;
+            mainImage.removeAttribute('src');
+            const preload = doc.createElement('img');
+            preload.onload = () => {
+                if (loadToken !== galleryLoadToken) return;
+                mainImage.src = safeSource;
+                mainImage.alt = selectedProduct ? `${selectedProduct.brand || ''} ${getModelTitle(selectedProduct)}`.trim() : '';
+                mainImage.hidden = false;
+            };
+            preload.onerror = () => {
+                if (loadToken !== galleryLoadToken) return;
+                mainImage.hidden = true;
+                mainImage.removeAttribute('src');
+            };
+            preload.src = safeSource;
             stage?.classList.remove('is-zoomed');
             if (galleryCount) galleryCount.textContent = `${galleryIndex + 1} / ${galleryImages.length}`;
             thumbnails?.querySelectorAll('[data-gallery-index]').forEach(button => {
@@ -117,6 +144,8 @@
         }
 
         function renderGallery(product) {
+            galleryLoadToken += 1;
+            if (mainImage) { mainImage.hidden = true; mainImage.removeAttribute('src'); }
             galleryImages = getProductGallery(product);
             galleryIndex = 0;
             if (thumbnails) thumbnails.replaceChildren();
@@ -293,7 +322,7 @@
         }
 
         initGalleryEvents();
-        renderProduct(selectedProduct);
+        if (selectedProduct) renderProduct(selectedProduct);
 
         return (async () => {
             if (!supabase) return selectedProduct;
@@ -301,7 +330,7 @@
                 const { data, error } = await supabase.from('optica_productos').select('*');
                 if (error || !Array.isArray(data) || !data.length) return selectedProduct;
                 products = data.filter(Boolean);
-                const remoteProduct = products.find(product => String(product.id) === String(requestedId)) || products.find(product => String(product.id) === String(selectedProduct?.id));
+                const remoteProduct = findRequestedProduct(products, requestedId);
                 if (remoteProduct) renderProduct(remoteProduct);
             } catch (error) {
                 // La ficha local sigue disponible si Supabase no responde.

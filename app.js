@@ -22,7 +22,7 @@ const FRONTEND_DEPENDENCIES = [
     ['catalogState', 'js/modules/catalog-state.js'],
     ['productDetail', 'js/modules/product-detail.js'],
     ['cart', 'js/modules/cart.js'],
-    ['checkout', 'js/modules/checkout.js'],
+    ['checkout', 'js/modules/checkout.js?v=20260829-2'],
     ['checkoutFlow', 'js/modules/checkout-flow.js'],
     ['navigation', 'js/modules/navigation.js']
 ];
@@ -1046,6 +1046,11 @@ function renderizarVistaCheckoutLegacy() {
             }
             const { data: pedidoId, error } = await _supabase.rpc('create_optica_order', payload);
             if (error) throw error;
+            const clientPayload = _checkout.buildClientPayload?.(fields, retiro);
+            if (clientPayload) {
+                const { error: clientError } = await _supabase.rpc('upsert_optica_cliente', clientPayload);
+                if (clientError) console.warn('El pedido se registró, pero no fue posible actualizar la ficha del cliente.', clientError.message);
+            }
             localStorage.setItem('ultimo_pedido_optica', JSON.stringify({ id: pedidoId, creado: new Date().toISOString() }));
             status.textContent = 'Pedido registrado. La tienda te enviará el cobro protegido de Mercado Pago al correo o WhatsApp indicado.';
             status.classList.add('visible');
@@ -1113,6 +1118,22 @@ function renderizarVistaCheckout() {
             }
             const { data: pedidoId, error } = await _supabase.rpc('create_optica_order', payload);
             if (error) throw error;
+            if (typeof _checkout.buildClientPayload !== 'function') {
+                console.error('ERROR UPSERT CLIENTE: buildClientPayload no está disponible. Revisa la versión cargada de checkout.js.');
+            } else {
+                const clientPayload = _checkout.buildClientPayload(fields, retiro);
+                console.log('PAYLOAD CLIENTE:', clientPayload);
+                try {
+                    const { error: clientError } = await _supabase.rpc('upsert_optica_cliente', clientPayload);
+                    if (clientError) {
+                        console.error('ERROR UPSERT CLIENTE:', clientError);
+                    } else {
+                        console.log('CLIENTE GUARDADO CORRECTAMENTE:', clientPayload);
+                    }
+                } catch (clientError) {
+                    console.error('ERROR UPSERT CLIENTE:', clientError);
+                }
+            }
             localStorage.setItem('ultimo_pedido_optica', JSON.stringify({ id: pedidoId, creado: new Date().toISOString() }));
             localStorage.removeItem('cart_optica');
             sessionStorage.removeItem('cart_checkout_optica');

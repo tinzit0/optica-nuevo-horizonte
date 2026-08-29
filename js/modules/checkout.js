@@ -42,5 +42,17 @@
         };
     }
 
-    root.checkout = Object.freeze({ buildOrderItems, estimateSubtotal, buildOrderPayload, ORDER_ITEM_KEYS });
+    function buildClientPayload(fields, retiro) {
+        return {
+            p_nombre: fields.get('nombre'),
+            p_rut: fields.get('rut'),
+            p_email: fields.get('email'),
+            p_telefono: fields.get('telefono'),
+            p_direccion: retiro ? null : fields.get('direccion'),
+            p_comuna: retiro ? null : fields.get('comuna'),
+            p_region: retiro ? null : fields.get('region')
+        };
+    }
+
+    root.checkout = Object.freeze({ buildOrderItems, estimateSubtotal, buildOrderPayload, buildClientPayload, ORDER_ITEM_KEYS });
 })(window);
