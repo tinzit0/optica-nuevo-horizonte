@@ -269,15 +269,20 @@
 
         async function cargarHorariosDesdeSupabase() {
             try {
+                const limiteDesde = new Date(mesInicial.getFullYear(), mesInicial.getMonth(), 1).toISOString();
+                const limiteHasta = new Date(mesInicial.getFullYear(), mesInicial.getMonth() + 4, 1).toISOString();
                 const [{ data: bloques }, { data: citas }] = await Promise.all([
                     _supabase.from('optica_horarios').select('*').eq('disponible', true).order('fecha', { ascending: true }),
-                    _supabase.from('optica_citas').select('fecha')
+                    _supabase.rpc('get_optica_booked_slots', { p_from: limiteDesde, p_to: limiteHasta })
                 ]);
                 (bloques || []).forEach(b => {
                     if (!horariosMap[b.fecha]) horariosMap[b.fecha] = [];
                     if (!horariosMap[b.fecha].includes(b.hora)) horariosMap[b.fecha].push(b.hora);
                 });
-                horasOcupadas = new Set((citas || []).map(c => String(c.fecha || '').replace(/\s*hrs?\.?$/i, '').trim()));
+                horasOcupadas = new Set((citas || []).map(c => {
+                    const fecha = new Date(c.starts_at);
+                    return `${fechaISO(fecha)} ${String(fecha.getHours()).padStart(2,'0')}:${String(fecha.getMinutes()).padStart(2,'0')}`;
+                }));
             } catch (error) { horariosMap = {}; horasOcupadas = new Set(); }
         }
 
@@ -386,20 +391,11 @@
             }
 
             const fechaReserva = `${reservaState.fecha} ${reservaState.hora}`;
-            const { data: ocupada } = await _supabase.from('optica_citas').select('fecha').eq('fecha', fechaReserva).limit(1);
-            if (ocupada && ocupada.length) {
-                alert('Ese horario acaba de ser reservado. Por favor selecciona otro bloque.');
-                irAlPaso(2);
-                return;
-            }
-
-            const { error } = await _supabase.from('optica_citas').insert([{
-                nombre: `${nombre} ${apellido}`,
-                rut: rut,
-                telefono: tel,
-                tipo: reservaState.servicio,
-                fecha: fechaReserva
-            }]);
+            const { error } = await _supabase.rpc('create_optica_appointment', {
+                p_nombre: `${nombre} ${apellido}`, p_rut: rut, p_telefono: tel, p_email: email,
+                p_tipo: reservaState.servicio, p_fecha: reservaState.fecha,
+                p_hora: reservaState.hora, p_fecha_legacy: fechaReserva
+            });
 
             if (error) {
                 alert('Error al procesar reserva: ' + error.message);

@@ -428,7 +428,13 @@ function initConfiguradorCristales(producto) {
     const addConfigured = () => {
         const details = Object.values(selected).map(o => o.name);
         const suffix = details.map(o => o.toLowerCase().replace(/[^a-z0-9]+/g,'-')).join('-');
-        agregarAlCarritoConfigurado(`${producto.id}-${suffix || 'armazon'}`, producto.title, producto.brand, total(), producto.image, details);
+        const crystalConfig = Object.fromEntries(Object.entries(selected).map(([stepId, option]) => [stepId, {
+            id: option.id,
+            name: option.name,
+            price: Number(option.price || 0)
+        }]));
+        const sku = `${producto.id}-${suffix || 'armazon'}`;
+        agregarAlCarritoConfigurado(String(producto.id), sku, producto.title, producto.brand, total(), producto.image, details, crystalConfig);
         close();
     };
     openButton.onclick = () => { step = 0; selected = {}; modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; render(); };
@@ -452,23 +458,46 @@ window.toggleDrawer = function(open) {
     }
 };
 
+function normalizarItemCarrito(item) {
+    const original = item && typeof item === 'object' ? item : {};
+    // El product_id debe venir explícito. Para carritos simples anteriores se
+    // conserva `id` sin transformarlo; un SKU compuesto antiguo sin product_id
+    // será rechazado por la RPC en vez de adivinar el producto base.
+    const productId = original.product_id ?? original.id ?? '';
+    const sku = original.sku ?? original.id ?? productId;
+    const quantity = Math.max(1, Math.floor(Number(original.quantity ?? original.cantidad ?? 1) || 1));
+    const crystalConfig = original.crystal_config && typeof original.crystal_config === 'object'
+        ? original.crystal_config
+        : (Array.isArray(original.configuracion) ? { legacy: original.configuracion } : {});
+    return {
+        ...original,
+        id: String(sku ?? ''),
+        product_id: String(productId ?? ''),
+        sku: String(sku ?? ''),
+        quantity,
+        cantidad: quantity,
+        crystal_config: crystalConfig,
+        configuracion: Array.isArray(original.configuracion) ? original.configuracion : Object.values(crystalConfig).map(value => value?.name).filter(Boolean)
+    };
+}
+
 function obtenerCarrito() {
     try {
         const principal = JSON.parse(localStorage.getItem('cart_optica') || '[]');
-        if (Array.isArray(principal) && principal.length) return principal;
+        if (Array.isArray(principal) && principal.length) return principal.map(normalizarItemCarrito);
         const respaldo = JSON.parse(sessionStorage.getItem('cart_checkout_optica') || '[]');
-        return Array.isArray(respaldo) ? respaldo : [];
+        return Array.isArray(respaldo) ? respaldo.map(normalizarItemCarrito) : [];
     } catch (error) { return []; }
 }
 function guardarCarrito(c) {
-    const limpio = Array.isArray(c) ? c : [];
+    const limpio = Array.isArray(c) ? c.map(normalizarItemCarrito).filter(item => item.product_id && item.sku) : [];
     localStorage.setItem('cart_optica', JSON.stringify(limpio));
     sessionStorage.setItem('cart_checkout_optica', JSON.stringify(limpio));
     actualizarContadorHeader();
 }
 
 function actualizarContadorHeader() {
-    const totalItems = obtenerCarrito().reduce((acc, item) => acc + item.cantidad, 0);
+    const totalItems = obtenerCarrito().reduce((acc, item) => acc + item.quantity, 0);
     document.querySelectorAll('.badge-count').forEach(b => b.textContent = totalItems);
 }
 
@@ -525,27 +554,29 @@ function mostrarProductoAgregado(nombre, marca) {
 
 window.agregarAlCarritoDirecto = function(id, nombre, marca, precio, imagen) {
     let carrito = obtenerCarrito();
-    const index = carrito.findIndex(item => String(item.id) === String(id));
-    if (index !== -1) carrito[index].cantidad += 1;
-    else carrito.push({ id: String(id), nombre, marca, precio: parseInt(precio), imagen, cantidad: 1 });
+    const productId = String(id);
+    const index = carrito.findIndex(item => String(item.sku) === productId);
+    if (index !== -1) carrito[index].quantity += 1;
+    else carrito.push({ id: productId, product_id: productId, sku: productId, nombre, marca, precio: parseInt(precio), imagen, quantity: 1, cantidad: 1, crystal_config: {}, configuracion: [] });
     guardarCarrito(carrito);
     mostrarProductoAgregado(nombre, marca);
 };
 
-window.agregarAlCarritoConfigurado = function(id, nombre, marca, precio, imagen, configuracion) {
+window.agregarAlCarritoConfigurado = function(productId, sku, nombre, marca, precio, imagen, configuracion, crystalConfig) {
     let carrito = obtenerCarrito();
-    const index = carrito.findIndex(item => String(item.id) === String(id));
-    if (index !== -1) carrito[index].cantidad += 1;
-    else carrito.push({ id: String(id), nombre, marca, precio: Number(precio), imagen, cantidad: 1, configuracion: Array.isArray(configuracion) ? configuracion : [] });
+    const index = carrito.findIndex(item => String(item.sku) === String(sku));
+    if (index !== -1) carrito[index].quantity += 1;
+    else carrito.push({ id: String(sku), product_id: String(productId), sku: String(sku), nombre, marca, precio: Number(precio), imagen, quantity: 1, cantidad: 1, configuracion: Array.isArray(configuracion) ? configuracion : [], crystal_config: crystalConfig && typeof crystalConfig === 'object' ? crystalConfig : {} });
     guardarCarrito(carrito);
     mostrarProductoAgregado(nombre, marca);
 };
 
 window.comprarAhora = function(id, nombre, marca, precio, imagen) {
     let carrito = obtenerCarrito();
-    const index = carrito.findIndex(item => String(item.id) === String(id));
-    if (index !== -1) carrito[index].cantidad += 1;
-    else carrito.push({ id: String(id), nombre, marca, precio: Number(precio), imagen, cantidad: 1 });
+    const productId = String(id);
+    const index = carrito.findIndex(item => String(item.sku) === productId);
+    if (index !== -1) carrito[index].quantity += 1;
+    else carrito.push({ id: productId, product_id: productId, sku: productId, nombre, marca, precio: Number(precio), imagen, quantity: 1, cantidad: 1, crystal_config: {}, configuracion: [] });
     guardarCarrito(carrito);
     window.location.href = 'checkout.html';
 };
@@ -569,7 +600,7 @@ function renderizarVistaCarrito() {
 
     let subtotal = 0;
     contenedor.innerHTML = carrito.map((item, index) => {
-        const totalItem = item.precio * item.cantidad;
+        const totalItem = item.precio * item.quantity;
         subtotal += totalItem;
         return `
             <div class="cart-item">
@@ -580,7 +611,7 @@ function renderizarVistaCarrito() {
                     ${item.configuracion?.length ? `<div class="item-configuration">${item.configuracion.join(' · ')}</div>` : ''}
                     <div class="quantity-control">
                         <button class="qty-btn" onclick="cambiarCantidad(${index}, -1)">-</button>
-                        <span class="qty-val">${item.cantidad}</span>
+                        <span class="qty-val">${item.quantity}</span>
                         <button class="qty-btn" onclick="cambiarCantidad(${index}, 1)">+</button>
                     </div>
                 </div>
@@ -598,8 +629,9 @@ function renderizarVistaCarrito() {
 
 window.cambiarCantidad = function(index, cambio) {
     let carrito = obtenerCarrito();
-    carrito[index].cantidad += cambio;
-    if (carrito[index].cantidad <= 0) carrito.splice(index, 1);
+    carrito[index].quantity += cambio;
+    carrito[index].cantidad = carrito[index].quantity;
+    if (carrito[index].quantity <= 0) carrito.splice(index, 1);
     guardarCarrito(carrito);
     renderizarVistaCarrito();
 };
@@ -628,12 +660,12 @@ function renderizarVistaCheckout() {
     const form = document.querySelector('#checkout-form');
     if (!itemsEl || !form) return;
     const carrito = obtenerCarrito();
-    const subtotal = carrito.reduce((total, item) => total + Number(item.precio) * Number(item.cantidad), 0);
+    const subtotal = carrito.reduce((total, item) => total + Number(item.precio) * Number(item.quantity), 0);
     let shipping = 4500;
     initUbicacionesChile();
 
     itemsEl.innerHTML = carrito.length ? carrito.map(item => `
-        <div class="sidebar-item"><img src="${item.imagen}" alt="${item.nombre}"><div><div class="sidebar-item-title">${item.nombre}</div><div class="sidebar-item-subtitle">${item.marca} · Cantidad ${item.cantidad}${item.configuracion?.length ? `<br>${item.configuracion.join(' · ')}` : ''}</div><div class="sidebar-item-price">$${(item.precio * item.cantidad).toLocaleString('es-CL')}</div></div></div>
+        <div class="sidebar-item"><img src="${item.imagen}" alt="${item.nombre}"><div><div class="sidebar-item-title">${item.nombre}</div><div class="sidebar-item-subtitle">${item.marca} · Cantidad ${item.quantity}${item.configuracion?.length ? `<br>${item.configuracion.join(' · ')}` : ''}</div><div class="sidebar-item-price">$${(item.precio * item.quantity).toLocaleString('es-CL')}</div></div></div>
     `).join('') : '<div class="checkout-empty">No hay productos en tu bolsa.</div>';
 
     const actualizarTotales = () => {
@@ -663,6 +695,8 @@ function renderizarVistaCheckout() {
         const label = document.querySelector('#prescription-label');
         if (!file) return;
         if (file.size > 10 * 1024 * 1024) { event.target.value = ''; label.textContent = 'El archivo supera los 10 MB'; return; }
+        const tiposPermitidos = ['image/jpeg', 'image/png', 'application/pdf'];
+        if (!tiposPermitidos.includes(file.type)) { event.target.value = ''; label.textContent = 'Formato no permitido'; return; }
         label.textContent = `Archivo seleccionado: ${file.name}`;
     });
 
@@ -676,26 +710,35 @@ function renderizarVistaCheckout() {
         status.className = 'status-message';
 
         const fields = new FormData(form);
+        const retiro = fields.get('shipping') === 'retiro';
+        const direccionEntrega = retiro ? 'Retiro en Caupolicán #314, Concepción' : `${fields.get('direccion')}, ${fields.get('comuna')}, ${fields.get('region')}`;
+        const items = carrito.map(item => ({
+            product_id: String(item.product_id),
+            sku: String(item.sku),
+            quantity: Number(item.quantity),
+            crystal_config: item.crystal_config && typeof item.crystal_config === 'object' ? item.crystal_config : {}
+        }));
         const payload = {
-            nombre: fields.get('nombre'),
-            telefono: fields.get('telefono'),
-            total: subtotal + shipping,
-            metodo_envio: fields.get('shipping') === 'retiro' ? 'Retiro en tienda' : 'Despacho a domicilio',
-            receta_url: null
+            p_nombre: fields.get('nombre'), p_rut: fields.get('rut'), p_telefono: fields.get('telefono'),
+            p_email: fields.get('email'), p_direccion_entrega: direccionEntrega,
+            p_indicaciones_entrega: fields.get('indicaciones') || '',
+            p_metodo_envio: retiro ? 'Retiro en tienda' : 'Despacho a domicilio',
+            p_subtotal: subtotal, p_costo_envio: shipping, p_total: subtotal + shipping,
+            p_items: items, p_receta_path: null
         };
         try {
             const receta = document.querySelector('#prescription-file')?.files[0];
             if (receta) {
-                const extension = receta.name.split('.').pop().toLowerCase();
-                const ruta = `recetas/${Date.now()}-${Math.random().toString(36).slice(2)}.${extension}`;
-                const { error: uploadError } = await _supabase.storage.from('optica_media').upload(ruta, receta);
+                const extension = { 'image/jpeg': 'jpg', 'image/png': 'png', 'application/pdf': 'pdf' }[receta.type];
+                if (!extension) throw new Error('Formato de receta no permitido');
+                const ruta = `incoming/${crypto.randomUUID()}.${extension}`;
+                const { error: uploadError } = await _supabase.storage.from('prescriptions').upload(ruta, receta, { cacheControl: '0', contentType: receta.type, upsert: false });
                 if (uploadError) throw uploadError;
-                payload.receta_url = _supabase.storage.from('optica_media').getPublicUrl(ruta).data.publicUrl;
+                payload.p_receta_path = ruta;
             }
-            const { error } = await _supabase.from('optica_pedidos').insert([payload]);
+            const { data: pedidoId, error } = await _supabase.rpc('create_optica_order', payload);
             if (error) throw error;
-            const direccionEntrega = fields.get('shipping') === 'retiro' ? 'Retiro en Caupolicán #314, Concepción' : `${fields.get('direccion')}, ${fields.get('comuna')}, ${fields.get('region')}`;
-            localStorage.setItem('ultimo_pedido_optica', JSON.stringify({ ...payload, email: fields.get('email'), direccion_entrega: direccionEntrega, indicaciones_entrega: fields.get('indicaciones') || '', carrito, creado: new Date().toISOString() }));
+            localStorage.setItem('ultimo_pedido_optica', JSON.stringify({ id: pedidoId, creado: new Date().toISOString() }));
             status.textContent = 'Pedido registrado. La tienda te enviará el cobro protegido de Mercado Pago al correo o WhatsApp indicado.';
             status.classList.add('visible');
             localStorage.removeItem('cart_optica');
