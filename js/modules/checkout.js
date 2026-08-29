@@ -1,5 +1,6 @@
 (function (global) {
     const root = global.OpticaModules = global.OpticaModules || {};
+    const ORDER_ITEM_KEYS = Object.freeze(['product_id', 'sku', 'quantity', 'crystal_config']);
 
     function buildOrderItems(cart) {
         return (Array.isArray(cart) ? cart : []).map(item => ({
@@ -41,5 +42,5 @@
         };
     }
 
-    root.checkout = Object.freeze({ buildOrderItems, estimateSubtotal, buildOrderPayload });
+    root.checkout = Object.freeze({ buildOrderItems, estimateSubtotal, buildOrderPayload, ORDER_ITEM_KEYS });
 })(window);

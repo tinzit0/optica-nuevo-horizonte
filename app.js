@@ -7,6 +7,7 @@ let _catalogState = window.OpticaModules?.catalogState || {};
 let _productDetail = window.OpticaModules?.productDetail || {};
 let _cart = window.OpticaModules?.cart || {};
 let _checkout = window.OpticaModules?.checkout || {};
+let _checkoutFlow = window.OpticaModules?.checkoutFlow || {};
 let _navigation = window.OpticaModules?.navigation || {};
 let escapeHTML = _ui.escapeHTML || (value => String(value ?? '').replace(/[&<>'"]/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[character])));
 let safeURL = _ui.safeURL || (value => escapeHTML(value));
@@ -22,6 +23,7 @@ const FRONTEND_DEPENDENCIES = [
     ['productDetail', 'js/modules/product-detail.js'],
     ['cart', 'js/modules/cart.js'],
     ['checkout', 'js/modules/checkout.js'],
+    ['checkoutFlow', 'js/modules/checkout-flow.js'],
     ['navigation', 'js/modules/navigation.js']
 ];
 
@@ -49,6 +51,7 @@ async function cargarDependenciasFrontend() {
     _productDetail = window.OpticaModules?.productDetail || _productDetail;
     _cart = window.OpticaModules?.cart || _cart;
     _checkout = window.OpticaModules?.checkout || _checkout;
+    _checkoutFlow = window.OpticaModules?.checkoutFlow || _checkoutFlow;
     _navigation = window.OpticaModules?.navigation || _navigation;
     escapeHTML = _ui.escapeHTML || escapeHTML;
     safeURL = _ui.safeURL || safeURL;
@@ -965,7 +968,7 @@ window.eliminarProducto = async function(id) {
     await cargarProductosConFiltros();
 };
 
-function renderizarVistaCheckout() {
+function renderizarVistaCheckoutLegacy() {
     const itemsEl = document.querySelector('#checkout-cart-items');
     const form = document.querySelector('#checkout-form');
     if (!itemsEl || !form) return;
@@ -1059,6 +1062,75 @@ function renderizarVistaCheckout() {
     });
 }
 
+function renderizarVistaCheckout() {
+    const itemsEl = document.querySelector('#checkout-cart-items');
+    const reviewEl = document.querySelector('#checkout-review-items');
+    const form = document.querySelector('#checkout-form');
+    if (!itemsEl || !reviewEl || !form) return;
+    const carrito = obtenerCarrito();
+    const subtotal = _checkout.estimateSubtotal?.(carrito) || 0;
+    let shipping = 0;
+    initUbicacionesChile();
+
+    const itemMarkup = carrito.length ? carrito.map(item => {
+        const variant = [item.marca, item.color, item.sku ? `SKU ${item.sku}` : ''].filter(Boolean).map(safe).join(' · ');
+        const configuration = Object.values(item.crystal_config || {}).map(option => option?.name).filter(Boolean).map(safe).join(' · ');
+        return `<div class="sidebar-item"><img src="${safeURL(item.imagen)}" alt="${safe(item.nombre)}" loading="lazy" decoding="async"><div><div class="sidebar-item-title">${safe(item.nombre)}</div><div class="sidebar-item-subtitle">${variant}<br>Cantidad ${Number(item.quantity)}${configuration ? `<br>${configuration}` : ''}</div><div class="sidebar-item-price">$${(Number(item.precio) * Number(item.quantity)).toLocaleString('es-CL')}</div></div></div>`;
+    }).join('') : '<div class="checkout-empty">No hay productos en tu bolsa.</div>';
+    itemsEl.innerHTML = itemMarkup;
+    reviewEl.innerHTML = itemMarkup;
+
+    const actualizarTotales = () => {
+        document.querySelector('#summary-subtotal').textContent = `$${subtotal.toLocaleString('es-CL')}`;
+        document.querySelector('#summary-shipping').textContent = shipping ? `$${shipping.toLocaleString('es-CL')}` : 'Gratis';
+        document.querySelector('#summary-total').textContent = `$${(subtotal + shipping).toLocaleString('es-CL')}`;
+    };
+    actualizarTotales();
+
+    const flow = _checkoutFlow.createController({
+        form,
+        cart: carrito,
+        onShippingChange(cost) { shipping = cost; actualizarTotales(); }
+    });
+
+    form.addEventListener('submit', async event => {
+        event.preventDefault();
+        if (flow.isSubmitting() || !flow.validateStep(4) || !carrito.length) return;
+        flow.showError('');
+        flow.setLoading(true);
+        const fields = new FormData(form);
+        const retiro = fields.get('shipping') === 'retiro';
+        const payload = _checkout.buildOrderPayload({ fields, cart: carrito, shipping, retiro });
+        try {
+            const receta = document.querySelector('#prescription-file')?.files[0];
+            if (receta) {
+                const extension = { 'image/jpeg': 'jpg', 'image/png': 'png', 'application/pdf': 'pdf' }[receta.type];
+                if (!extension || receta.size > 10 * 1024 * 1024) throw new Error('Archivo de receta inválido');
+                const ruta = `incoming/${crypto.randomUUID()}.${extension}`;
+                const { error: uploadError } = await _supabase.storage.from('prescriptions').upload(ruta, receta, { cacheControl: '0', contentType: receta.type, upsert: false });
+                if (uploadError) throw uploadError;
+                payload.p_receta_path = ruta;
+            }
+            const { data: pedidoId, error } = await _supabase.rpc('create_optica_order', payload);
+            if (error) throw error;
+            localStorage.setItem('ultimo_pedido_optica', JSON.stringify({ id: pedidoId, creado: new Date().toISOString() }));
+            localStorage.removeItem('cart_optica');
+            sessionStorage.removeItem('cart_checkout_optica');
+            actualizarContadorHeader();
+            const whatsappText = encodeURIComponent(`Hola, quisiera consultar por mi pedido ${pedidoId}, pendiente de pago.`);
+            flow.showConfirmation({
+                orderId: String(pedidoId),
+                summaryHTML: `${itemMarkup}<div class="summary-row total"><span>Total estimado enviado</span><span>$${(subtotal + shipping).toLocaleString('es-CL')}</span></div>`,
+                whatsappURL: `https://wa.me/56912345678?text=${whatsappText}`
+            });
+        } catch (error) {
+            console.error('Error al registrar el pedido:', error);
+            flow.showError('No pudimos registrar el pedido. Revisa los datos y tu conexión e inténtalo nuevamente.');
+            flow.setLoading(false);
+        }
+    });
+}
+
 const UBICACIONES_CHILE = {
     'Región de Arica y Parinacota': ['Arica','Camarones','General Lagos','Putre'],
     'Región de Tarapacá': ['Alto Hospicio','Camiña','Colchane','Huara','Iquique','Pica','Pozo Almonte'],
@@ -1085,9 +1157,10 @@ function initUbicacionesChile() {
     const comuna = document.createElement('select');
     comuna.id = inputComuna.id;
     comuna.name = inputComuna.name;
-    comuna.required = true;
+    comuna.required = inputComuna.required;
     comuna.disabled = true;
     comuna.autocomplete = 'address-level2';
+    comuna.setAttribute('aria-describedby', 'buyer-city-error');
     comuna.innerHTML = '<option value="">Primero selecciona una región</option>';
     inputComuna.replaceWith(comuna);
     region.autocomplete = 'address-level1';
