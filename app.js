@@ -1,10 +1,68 @@
-const SUPABASE_URL = "https://kxldsjodgfonrrlwjbws.supabase.co";
-const SUPABASE_KEY = "sb_publishable_J5s_2YqtASIYSqu2k00SGA_copdr39x";
-// Mantener operativas la tienda y la bolsa aunque el CDN de Supabase sea
-// bloqueado, reordenado o tarde en responder en el hosting.
-const _supabase = window.supabase?.createClient
-    ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
-    : null;
+// El cliente se crea en js/supabase-client.js. Mantener este guard permite que
+// la tienda siga renderizando el respaldo local si el CDN no está disponible.
+let _supabase = window.opticaSupabase || null;
+let _ui = window.OpticaModules?.ui || {};
+let _products = window.OpticaModules?.products || {};
+let _cart = window.OpticaModules?.cart || {};
+let _checkout = window.OpticaModules?.checkout || {};
+let _navigation = window.OpticaModules?.navigation || {};
+let escapeHTML = _ui.escapeHTML || (value => String(value ?? '').replace(/[&<>'"]/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[character])));
+let safeURL = _ui.safeURL || (value => escapeHTML(value));
+const safe = value => escapeHTML(value);
+
+const FRONTEND_DEPENDENCIES = [
+    ['ui', 'js/modules/ui.js'],
+    ['products', 'js/modules/products.js'],
+    ['cart', 'js/modules/cart.js'],
+    ['checkout', 'js/modules/checkout.js'],
+    ['navigation', 'js/modules/navigation.js']
+];
+
+function cargarScriptFrontend(src) {
+    return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = src;
+        script.onload = resolve;
+        script.onerror = () => reject(new Error(`No se pudo cargar ${src}`));
+        document.head.appendChild(script);
+    });
+}
+
+async function cargarDependenciasFrontend() {
+    if (!window.opticaSupabase && window.supabase?.createClient) {
+        await cargarScriptFrontend('js/supabase-client.js');
+    }
+    for (const [name, src] of FRONTEND_DEPENDENCIES) {
+        if (!window.OpticaModules?.[name]) await cargarScriptFrontend(src);
+    }
+    _supabase = window.opticaSupabase || _supabase;
+    _ui = window.OpticaModules?.ui || _ui;
+    _products = window.OpticaModules?.products || _products;
+    _cart = window.OpticaModules?.cart || _cart;
+    _checkout = window.OpticaModules?.checkout || _checkout;
+    _navigation = window.OpticaModules?.navigation || _navigation;
+    escapeHTML = _ui.escapeHTML || escapeHTML;
+    safeURL = _ui.safeURL || safeURL;
+};
+
+function filtrarProductosCompat(products, criteria) {
+    const { categories = [], genders = [], brands = [], shapes = [], colors = [], materials = [], features = [], search = '', minPrice = 0, maxPrice = Infinity } = criteria;
+    const normalizedSearch = String(search).trim().toLocaleLowerCase('es');
+    return (Array.isArray(products) ? products : []).filter(product => {
+        const productFeatures = Array.isArray(product.features) ? product.features : String(product.features || '').split(',').map(value => value.trim()).filter(Boolean);
+        const searchable = `${product.brand || ''} ${product.title || ''} ${product.color || ''} ${product.shape || ''} ${product.material || ''}`.toLocaleLowerCase('es');
+        const price = Number(product.price) || 0;
+        return (!categories.length || categories.includes(product.category))
+            && (!genders.length || genders.includes(product.gender))
+            && (!brands.length || brands.some(brand => String(product.brand || '').toLowerCase().includes(String(brand).toLowerCase())))
+            && (!shapes.length || shapes.includes(product.shape || ''))
+            && (!colors.length || colors.includes(product.color || ''))
+            && (!materials.length || materials.includes(product.material || ''))
+            && features.every(feature => productFeatures.includes(feature))
+            && (!normalizedSearch || searchable.includes(normalizedSearch))
+            && price >= minPrice && price <= maxPrice;
+    });
+}
 
 const PRODUCTOS_BASE = [
     { id:'1', title:'Wayfarer Classic', brand:'Ray-Ban', price:119900, category:'optico', gender:'unisex', shape:'rectangular', color:'negro', material:'acetato', features:['nuevo'], image:'https://images.unsplash.com/photo-1572635196237-14b3f281503f?q=80&w=700&auto=format&fit=crop' },
@@ -21,12 +79,13 @@ const PRODUCTOS_BASE = [
     { id:'12', title:'Palazzo Edition', brand:'Versace', price:189900, category:'sol', gender:'mujer', shape:'geométrico', color:'habano', material:'acetato', features:['polarizado'], image:'https://images.unsplash.com/photo-1577803645773-f96470509666?q=80&w=700&auto=format&fit=crop' }
 ];
 let PRODUCTOS_LOCALES = [];
+let PRODUCTOS_ACTIVOS = [];
 let catalogVisibleCount = 48;
 const catalogRandomSeed = Math.floor(Math.random() * 2147483647);
 
 async function cargarCatalogoLocal() {
     try {
-        const respuesta = await fetch('data/productos.json', { cache: 'no-store' });
+        const respuesta = await fetch('data/productos.json', { cache: 'default' });
         if (!respuesta.ok) throw new Error(`Catálogo local: ${respuesta.status}`);
         const datos = await respuesta.json();
         PRODUCTOS_LOCALES = Array.isArray(datos) ? datos : [];
@@ -43,15 +102,17 @@ function renderizarFiltroMarcas() {
     const marcas = [...new Set(PRODUCTOS_LOCALES.map(p => String(p.brand || '').trim()).filter(Boolean))]
         .sort((a, b) => a.localeCompare(b, 'es'));
     container.innerHTML = marcas.map(marca => {
-        const safe = marca.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        return `<label><input type="checkbox" class="filter-brand" value="${safe}"> ${safe}</label>`;
+        const escapedMarca = safe(marca);
+        return `<label><input type="checkbox" class="filter-brand" value="${escapedMarca}"> ${escapedMarca}</label>`;
     }).join('');
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-    document.querySelectorAll('a[href*="oferta"], label:has(input[value="oferta"])').forEach(element => element.remove());
+    try { await cargarDependenciasFrontend(); }
+    catch (error) { console.warn('Módulos frontend no disponibles; se utilizará el modo compatible:', error); }
     await cargarCatalogoLocal();
     initIdentidadMarca();
+    _navigation.initMobileNavigation?.();
     renderizarVitrinaMarcas();
     leerParametrosURLYMarcarCheckbox();
     initCatalogoInteractivo();
@@ -80,24 +141,6 @@ function initIdentidadMarca() {
     document.head.appendChild(style);
 }
 
-function initNavegacionMovil() {
-    const page = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
-    if (page === 'index.html' || document.querySelector('.mobile-bottom-nav')) return;
-    const links = [['index.html','Inicio','⌂'],['catalogo.html','Catálogo','◫'],['agenda.html','Agenda','○'],['carrito.html','Bolsa','▢']];
-    const nav = document.createElement('nav');
-    nav.className = 'mobile-bottom-nav';
-    nav.setAttribute('aria-label', 'Navegación móvil');
-    nav.innerHTML = links.map(([href,label,icon]) => {
-        const active = page === href || (page === 'producto.html' && href === 'catalogo.html') || (page === 'checkout.html' && href === 'carrito.html');
-        return `<a href="${href}" ${active ? 'aria-current="page"' : ''}><span aria-hidden="true">${icon}</span><small>${label}</small></a>`;
-    }).join('');
-    document.body.appendChild(nav);
-    const style = document.createElement('style');
-    style.textContent = `.mobile-bottom-nav{display:none}@media(max-width:760px){body{padding-bottom:76px}button,a,input,select{touch-action:manipulation}button,.btn-gold,.detail-btn,.btn-add,.btn-buy-now,.btn-checkout,.btn-pay-now{min-height:44px}.mobile-bottom-nav{position:fixed;z-index:1000;right:10px;bottom:8px;left:10px;display:grid;grid-template-columns:repeat(4,1fr);padding:7px;background:rgba(16,23,19,.96);border:1px solid rgba(255,255,255,.12);border-radius:16px;box-shadow:0 12px 35px rgba(0,0,0,.28);backdrop-filter:blur(14px)}.mobile-bottom-nav a{display:flex;min-width:0;min-height:50px;align-items:center;justify-content:center;flex-direction:column;gap:2px;border-radius:11px;color:rgba(255,255,255,.7);text-decoration:none}.mobile-bottom-nav a[aria-current="page"]{background:#b99350;color:#fff}.mobile-bottom-nav a>span{font-size:1.15rem;line-height:1}.mobile-bottom-nav small{font:600 .61rem 'DM Sans',sans-serif}}`;
-    style.textContent += '.item-img,.sidebar-item img{object-fit:contain!important;background:#fff}';
-    document.head.appendChild(style);
-}
-
 function leerParametrosURLYMarcarCheckbox() {
     const urlParams = new URLSearchParams(window.location.search);
     const cat = urlParams.get('cat');
@@ -105,28 +148,41 @@ function leerParametrosURLYMarcarCheckbox() {
     const marca = urlParams.get('marca');
     const oferta = urlParams.get('oferta');
 
-    if (cat) document.querySelectorAll(`.filter-cat[value="${cat}"]`).forEach(cb => cb.checked = true);
-    if (gen) document.querySelectorAll(`.filter-gen[value="${gen}"]`).forEach(cb => cb.checked = true);
-    if (marca) document.querySelectorAll(`.filter-brand[value="${marca}"]`).forEach(cb => cb.checked = true);
+    if (cat) document.querySelectorAll('.filter-cat').forEach(cb => { if (cb.value === cat) cb.checked = true; });
+    if (gen) document.querySelectorAll('.filter-gen').forEach(cb => { if (cb.value === gen) cb.checked = true; });
+    if (marca) document.querySelectorAll('.filter-brand').forEach(cb => { if (cb.value === marca) cb.checked = true; });
     if (oferta) document.querySelectorAll('.filter-feature[value="oferta"]').forEach(cb => cb.checked = true);
 }
 
+let _adminStatusPromise = null;
+async function obtenerEstadoAdmin() {
+    if (!_supabase) return false;
+    if (_adminStatusPromise) return _adminStatusPromise;
+    _adminStatusPromise = (async () => {
+        const { data: { session } } = await _supabase.auth.getSession();
+        if (!session) return false;
+        const { data, error } = await _supabase.rpc('is_optica_admin');
+        return !error && data === true;
+    })().catch(() => false);
+    return _adminStatusPromise;
+}
+
 async function initBarraAdmin() {
-    if (!_supabase) return;
-    const { data: { session } } = await _supabase.auth.getSession();
+    if (!(await obtenerEstadoAdmin())) return;
 
     const adminBar = document.createElement('div');
     adminBar.style.cssText = 'background:#080E21; color:#C5A059; padding:8px 5%; font-size:12px; display:flex; justify-content:space-between; align-items:center; z-index:9999; position:sticky; top:0; border-bottom:1px solid #C5A059;';
 
-    if (session) {
+    if (document.body) {
         adminBar.innerHTML = `
             <span>🛠️ <strong>PANEL DE CONTROL ACTIVO</strong></span>
             <div style="display:flex; gap:10px;">
                 <a href="admin/admin.html" style="background:#C5A059; color:#FFF; padding:4px 10px; border-radius:4px; font-weight:700;">IR AL PANEL ADMIN</a>
-                <button onclick="cerrarSesionAdmin()" style="background:#E53E3E; color:#fff; border:none; padding:4px 10px; border-radius:4px; font-weight:700; cursor:pointer;">CERRAR SESIÓN</button>
+                <button type="button" data-admin-logout style="background:#E53E3E; color:#fff; border:none; padding:4px 10px; border-radius:4px; font-weight:700; cursor:pointer;">CERRAR SESIÓN</button>
             </div>
         `;
         document.body.prepend(adminBar);
+        adminBar.querySelector('[data-admin-logout]')?.addEventListener('click', window.cerrarSesionAdmin);
     }
 }
 
@@ -139,23 +195,19 @@ async function cargarProductosConFiltros() {
     const grid = document.querySelector('#catalog-grid, .products-grid');
     if (!grid) return;
 
-    let esAdmin = false;
-    if (_supabase) {
-        try {
-            const { data: { session } } = await _supabase.auth.getSession();
-            esAdmin = !!session;
-        } catch (error) { esAdmin = false; }
-    }
+    const esAdmin = await obtenerEstadoAdmin();
 
     let productos = [];
     try {
         if (!_supabase) throw new Error('Supabase no disponible');
         const { data, error } = await _supabase.from('optica_productos').select('*').order('created_at', { ascending: false });
-        if (!error && data && data.length > 0) productos = [...data, ...PRODUCTOS_LOCALES];
-        else productos = PRODUCTOS_LOCALES.length ? PRODUCTOS_LOCALES : PRODUCTOS_BASE;
+        if (!error && data && data.length > 0) productos = _products.resolveProducts?.(data, PRODUCTOS_LOCALES, PRODUCTOS_BASE) || data;
+        else productos = _products.resolveProducts?.([], PRODUCTOS_LOCALES, PRODUCTOS_BASE) || PRODUCTOS_LOCALES;
     } catch (e) {
-        productos = PRODUCTOS_LOCALES.length ? PRODUCTOS_LOCALES : PRODUCTOS_BASE;
+        productos = _products.resolveProducts?.([], PRODUCTOS_LOCALES, PRODUCTOS_BASE) || PRODUCTOS_LOCALES;
     }
+    PRODUCTOS_ACTIVOS = productos;
+    renderizarVitrinaMarcas(productos);
 
     const valores = selector => Array.from(document.querySelectorAll(`${selector}:checked`)).map(cb => cb.value);
     const catsChecked = valores('.filter-cat');
@@ -169,25 +221,28 @@ async function cargarProductosConFiltros() {
     const minPrice = Number(document.querySelector('#price-min')?.value || 0);
     const maxPrice = Number(document.querySelector('#price-max')?.value || Infinity);
 
-    let filtrados = productos.filter(p => {
-        const matchCat = catsChecked.length === 0 || catsChecked.includes(p.category);
-        const matchGen = gensChecked.length === 0 || gensChecked.includes(p.gender);
-        const matchMarca = marcasChecked.length === 0 || marcasChecked.some(m => String(p.brand || '').toLowerCase().includes(m.toLowerCase()));
-        const matchShape = shapesChecked.length === 0 || shapesChecked.includes(p.shape || '');
-        const matchColor = colorsChecked.length === 0 || colorsChecked.includes(p.color || '');
-        const matchMaterial = materialsChecked.length === 0 || materialsChecked.includes(p.material || '');
-        const productFeatures = Array.isArray(p.features) ? p.features : String(p.features || '').split(',').map(v => v.trim());
-        const matchFeatures = featuresChecked.every(feature => productFeatures.includes(feature));
-        const searchable = `${p.brand || ''} ${p.title || ''} ${p.color || ''} ${p.shape || ''} ${p.material || ''}`.toLocaleLowerCase('es');
-        const price = Number(p.price) || 0;
-        return matchCat && matchGen && matchMarca && matchShape && matchColor && matchMaterial && matchFeatures && (!search || searchable.includes(search)) && price >= minPrice && price <= maxPrice;
-    });
+    let filtrados = (_products.filterProducts || filtrarProductosCompat)(productos, {
+        categories: catsChecked,
+        genders: gensChecked,
+        brands: marcasChecked,
+        shapes: shapesChecked,
+        colors: colorsChecked,
+        materials: materialsChecked,
+        features: featuresChecked,
+        search,
+        minPrice,
+        maxPrice
+    }) || productos;
 
     const sort = document.querySelector('#catalog-sort')?.value;
     if (sort === 'price-asc') filtrados.sort((a, b) => Number(a.price) - Number(b.price));
     if (sort === 'price-desc') filtrados.sort((a, b) => Number(b.price) - Number(a.price));
     if (sort === 'name') filtrados.sort((a, b) => a.title.localeCompare(b.title, 'es'));
-    if (sort === 'newest') filtrados.sort((a, b) => Number(b.id) - Number(a.id));
+    if (sort === 'newest') filtrados.sort((a, b) => {
+        const dateA = Date.parse(a.created_at || '') || 0;
+        const dateB = Date.parse(b.created_at || '') || 0;
+        return dateB - dateA;
+    });
     if (!sort || sort === 'featured') filtrados = seleccionarDestacadosMultimarca(filtrados, filtrados.length);
 
     const countText = document.querySelector('#catalog-count-text');
@@ -195,7 +250,8 @@ async function cargarProductosConFiltros() {
     actualizarResumenFiltros();
 
     if (filtrados.length === 0) {
-        grid.innerHTML = `<div class="empty-state"><h2>No encontramos coincidencias</h2><p>Prueba quitando algún filtro o usando otra búsqueda.</p><button class="btn-gold" onclick="limpiarFiltrosCatalogo()" style="padding:12px 20px">LIMPIAR FILTROS</button></div>`;
+        grid.innerHTML = `<div class="empty-state"><h2>No encontramos coincidencias</h2><p>Prueba quitando algún filtro o usando otra búsqueda.</p><button class="btn-gold" type="button" data-clear-filters style="padding:12px 20px">LIMPIAR FILTROS</button></div>`;
+        grid.querySelector('[data-clear-filters]')?.addEventListener('click', window.limpiarFiltrosCatalogo);
         return;
     }
 
@@ -208,10 +264,16 @@ async function cargarProductosConFiltros() {
         const meta = [p.shape, p.color, p.material].filter(Boolean).join(' · ');
         const tienePrecio = Number(p.price) > 0;
         const precio = tienePrecio ? `$${Number(p.price).toLocaleString('es-CL')}` : 'Consultar precio';
-        const descripcion = p.description ? `<p class="product-description">${p.description}</p>` : '';
-        const accion = tienePrecio ? `<a class="btn-gold product-option-btn" href="producto.html?id=${encodeURIComponent(p.id)}"><span><small>Personaliza tu armazón</small>Seleccionar opciones</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></a>` : `<a class="btn-gold availability-link" href="producto.html?id=${encodeURIComponent(p.id)}">CONSULTAR EN TIENDA</a>`;
-        return `<article class="product-card"><div class="product-media">${badge ? `<span class="product-badge">${badge}</span>` : ''}<img src="${p.image}" alt="${p.brand} ${p.title}" loading="lazy">${esCatalogo ? `<button class="favorite-btn ${favoritos.includes(String(p.id)) ? 'active' : ''}" onclick="toggleFavorito('${p.id}',this)" aria-label="Guardar ${p.title} en favoritos" aria-pressed="${favoritos.includes(String(p.id))}"><svg class="icon" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/></svg></button>` : ''}</div><div class="product-info"><div class="brand">${p.brand}</div><div class="p-name">${p.title}</div>${meta ? `<div class="product-meta">${meta}</div>` : ''}${descripcion}<div class="price">${precio}</div><div class="product-actions">${accion}${esCatalogo ? `<a class="detail-btn" href="producto.html?id=${encodeURIComponent(p.id)}" aria-label="Ver detalle de ${p.title}">→</a>` : ''}</div>${esAdmin ? `<button onclick="eliminarProducto('${p.id}')" style="margin-top:8px;background:#a43d3d;color:#fff;border:0;padding:7px;cursor:pointer">ELIMINAR</button>` : ''}</div></article>`;
+        const id = String(p.id ?? '');
+        const title = safe(p.title);
+        const brand = safe(p.brand);
+        const encodedId = encodeURIComponent(id);
+        const descripcion = p.description ? `<p class="product-description">${safe(p.description)}</p>` : '';
+        const accion = tienePrecio ? `<a class="btn-gold product-option-btn" href="producto.html?id=${encodedId}"><span><small>Personaliza tu armazón</small>Seleccionar opciones</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-5-5 5 5"/></svg></a>` : `<a class="btn-gold availability-link" href="producto.html?id=${encodedId}">CONSULTAR EN TIENDA</a>`;
+        return `<article class="product-card"><div class="product-media">${badge ? `<span class="product-badge">${badge}</span>` : ''}<img src="${safeURL(p.image)}" alt="${brand} ${title}" loading="lazy" decoding="async">${esCatalogo ? `<button class="favorite-btn ${favoritos.includes(id) ? 'active' : ''}" type="button" data-favorite-id="${safe(id)}" aria-label="Guardar ${brand} ${title} en favoritos" aria-pressed="${favoritos.includes(id)}"><svg class="icon" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/></svg></button>` : ''}</div><div class="product-info"><div class="brand">${brand}</div><div class="p-name">${title}</div>${meta ? `<div class="product-meta">${safe(meta)}</div>` : ''}${descripcion}<div class="price">${precio}</div><div class="product-actions">${accion}${esCatalogo ? `<a class="detail-btn" href="producto.html?id=${encodedId}" aria-label="Ver detalle de ${title}">→</a>` : ''}</div>${esAdmin ? `<button type="button" data-delete-product="${safe(id)}" style="margin-top:8px;background:#a43d3d;color:#fff;border:0;padding:7px;cursor:pointer">ELIMINAR</button>` : ''}</div></article>`;
     }).join('');
+    grid.querySelectorAll('[data-favorite-id]').forEach(button => button.addEventListener('click', () => window.toggleFavorito(button.dataset.favoriteId, button)));
+    grid.querySelectorAll('[data-delete-product]').forEach(button => button.addEventListener('click', () => window.eliminarProducto(button.dataset.deleteProduct)));
     const loadMore = document.querySelector('#catalog-load-more');
     if (loadMore) {
         loadMore.hidden = visibles.length >= filtrados.length;
@@ -245,11 +307,11 @@ function seleccionarDestacadosMultimarca(productos, cantidad) {
     return seleccion;
 }
 
-function renderizarVitrinaMarcas() {
+function renderizarVitrinaMarcas(productosDisponibles = PRODUCTOS_ACTIVOS.length ? PRODUCTOS_ACTIVOS : PRODUCTOS_LOCALES) {
     const track = document.querySelector('#eyewear-marquee-track');
-    if (!track || !PRODUCTOS_LOCALES.length) return;
-    const seleccion = seleccionarDestacadosMultimarca(PRODUCTOS_LOCALES, 14);
-    const tarjeta = producto => `<a class="marquee-product" href="producto.html?id=${encodeURIComponent(producto.id)}"><span class="marquee-image"><img src="${producto.image}" alt="${producto.brand} ${producto.title}" loading="lazy"></span><span class="marquee-brand">${producto.brand}</span><strong>${producto.title}</strong></a>`;
+    if (!track || !productosDisponibles.length) return;
+    const seleccion = seleccionarDestacadosMultimarca(productosDisponibles, 14);
+    const tarjeta = producto => `<a class="marquee-product" href="producto.html?id=${encodeURIComponent(String(producto.id))}"><span class="marquee-image"><img src="${safeURL(producto.image)}" alt="${safe(producto.brand)} ${safe(producto.title)}" loading="lazy" decoding="async"></span><span class="marquee-brand">${safe(producto.brand)}</span><strong>${safe(producto.title)}</strong></a>`;
     track.innerHTML = [...seleccion, ...seleccion].map(tarjeta).join('');
 }
 
@@ -275,11 +337,16 @@ function actualizarResumenFiltros() {
     const badge = document.querySelector('#filter-count');
     if (badge) { badge.textContent = count; badge.classList.toggle('visible', count > 0); }
     const chips = document.querySelector('#active-filters');
-    if (chips) chips.innerHTML = active.map(input => `<button class="filter-chip" onclick="quitarFiltro('${input.className}','${input.value}')">${input.parentElement.textContent.trim()} ×</button>`).join('');
+    if (chips) {
+        chips.innerHTML = active.map(input => `<button class="filter-chip" type="button" data-filter-class="${safe(input.className)}" data-filter-value="${safe(input.value)}">${safe(input.parentElement.textContent.trim())} ×</button>`).join('');
+        chips.querySelectorAll('.filter-chip').forEach(button => button.addEventListener('click', () => {
+            window.quitarFiltro(button.dataset.filterClass, button.dataset.filterValue);
+        }));
+    }
 }
 
 window.quitarFiltro = function(className, value) {
-    document.querySelectorAll(`.${className}[value="${value}"]`).forEach(input => input.checked = false);
+    document.querySelectorAll(`.${className}`).forEach(input => { if (input.value === value) input.checked = false; });
     cargarProductosConFiltros();
 };
 
@@ -312,7 +379,7 @@ async function cargarDetalleProducto() {
         const title = document.querySelector('.info .title');
         const price = document.querySelector('.price-box span');
         const description = document.querySelector('.product-copy');
-        if (image) { image.src = item.image; image.alt = `${item.brand} ${item.title}`; }
+        if (image) { image.src = safeURL(item.image); image.alt = `${item.brand} ${item.title}`; }
         if (brand) brand.textContent = item.brand;
         if (title) title.textContent = item.title;
         if (price) price.textContent = Number(item.price) > 0 ? `$${Number(item.price).toLocaleString('es-CL')}` : 'Consultar precio';
@@ -321,7 +388,7 @@ async function cargarDetalleProducto() {
         if (material) material.textContent = item.material ? String(item.material).replace(/^./, c => c.toUpperCase()) : 'Material seleccionado';
         const installments = document.querySelector('.installments');
         if (installments && Number(item.price) > 0) installments.textContent = `Hasta 12 cuotas de $${Math.ceil(Number(item.price) / 12).toLocaleString('es-CL')}`;
-        document.querySelectorAll('.config-image').forEach(el => { el.src = item.image; el.alt = `${item.brand} ${item.title}`; });
+        document.querySelectorAll('.config-image').forEach(el => { el.src = safeURL(item.image); el.alt = `${item.brand} ${item.title}`; });
         const configName = document.querySelector('.config-product strong');
         if (configName) configName.textContent = `${item.brand} · ${item.title}`;
         document.title = `${item.title} | Óptica Nuevo Horizonte`;
@@ -459,38 +526,15 @@ window.toggleDrawer = function(open) {
 };
 
 function normalizarItemCarrito(item) {
-    const original = item && typeof item === 'object' ? item : {};
-    // El product_id debe venir explícito. Para carritos simples anteriores se
-    // conserva `id` sin transformarlo; un SKU compuesto antiguo sin product_id
-    // será rechazado por la RPC en vez de adivinar el producto base.
-    const productId = original.product_id ?? original.id ?? '';
-    const sku = original.sku ?? original.id ?? productId;
-    const quantity = Math.max(1, Math.floor(Number(original.quantity ?? original.cantidad ?? 1) || 1));
-    const crystalConfig = original.crystal_config && typeof original.crystal_config === 'object'
-        ? original.crystal_config
-        : (Array.isArray(original.configuracion) ? { legacy: original.configuracion } : {});
-    return {
-        ...original,
-        id: String(sku ?? ''),
-        product_id: String(productId ?? ''),
-        sku: String(sku ?? ''),
-        quantity,
-        cantidad: quantity,
-        crystal_config: crystalConfig,
-        configuracion: Array.isArray(original.configuracion) ? original.configuracion : Object.values(crystalConfig).map(value => value?.name).filter(Boolean)
-    };
+    return _cart.normalizeItem ? _cart.normalizeItem(item) : item;
 }
 
 function obtenerCarrito() {
-    try {
-        const principal = JSON.parse(localStorage.getItem('cart_optica') || '[]');
-        if (Array.isArray(principal) && principal.length) return principal.map(normalizarItemCarrito);
-        const respaldo = JSON.parse(sessionStorage.getItem('cart_checkout_optica') || '[]');
-        return Array.isArray(respaldo) ? respaldo.map(normalizarItemCarrito) : [];
-    } catch (error) { return []; }
+    return _cart.getCart ? _cart.getCart() : [];
 }
 function guardarCarrito(c) {
-    const limpio = Array.isArray(c) ? c.map(normalizarItemCarrito).filter(item => item.product_id && item.sku) : [];
+    if (_cart.saveCart) return _cart.saveCart(c);
+    const limpio = Array.isArray(c) ? c.filter(item => item?.product_id && item?.sku) : [];
     localStorage.setItem('cart_optica', JSON.stringify(limpio));
     sessionStorage.setItem('cart_checkout_optica', JSON.stringify(limpio));
     actualizarContadorHeader();
@@ -602,26 +646,36 @@ function renderizarVistaCarrito() {
     contenedor.innerHTML = carrito.map((item, index) => {
         const totalItem = item.precio * item.quantity;
         subtotal += totalItem;
+        const itemName = safe(item.nombre);
+        const itemBrand = safe(item.marca);
+        const configuration = Array.isArray(item.configuracion) ? item.configuracion.map(safe).join(' · ') : '';
         return `
             <div class="cart-item">
-                <img class="item-img" src="${item.imagen}" alt="${item.nombre}">
+                <img class="item-img" src="${safeURL(item.imagen)}" alt="${itemName}" loading="lazy" decoding="async">
                 <div class="item-details">
-                    <span class="item-brand">${item.marca}</span>
-                    <h3 class="item-title">${item.nombre}</h3>
-                    ${item.configuracion?.length ? `<div class="item-configuration">${item.configuracion.join(' · ')}</div>` : ''}
+                    <span class="item-brand">${itemBrand}</span>
+                    <h3 class="item-title">${itemName}</h3>
+                    ${configuration ? `<div class="item-configuration">${configuration}</div>` : ''}
                     <div class="quantity-control">
-                        <button class="qty-btn" onclick="cambiarCantidad(${index}, -1)">-</button>
+                        <button class="qty-btn" type="button" data-cart-index="${index}" data-cart-change="-1" aria-label="Disminuir cantidad">-</button>
                         <span class="qty-val">${item.quantity}</span>
-                        <button class="qty-btn" onclick="cambiarCantidad(${index}, 1)">+</button>
+                        <button class="qty-btn" type="button" data-cart-index="${index}" data-cart-change="1" aria-label="Aumentar cantidad">+</button>
                     </div>
                 </div>
                 <div class="item-total">
                     <div>$${totalItem.toLocaleString('es-CL')}</div>
-                    <button class="remove-btn" onclick="eliminarDelCarrito(${index})">Eliminar</button>
+                    <button class="remove-btn" type="button" data-remove-cart-index="${index}">Eliminar</button>
                 </div>
             </div>
         `;
     }).join('');
+
+    contenedor.querySelectorAll('[data-cart-index]').forEach(button => button.addEventListener('click', () => {
+        window.cambiarCantidad(Number(button.dataset.cartIndex), Number(button.dataset.cartChange));
+    }));
+    contenedor.querySelectorAll('[data-remove-cart-index]').forEach(button => button.addEventListener('click', () => {
+        window.eliminarDelCarrito(Number(button.dataset.removeCartIndex));
+    }));
 
     if (subtotalEl) subtotalEl.textContent = `$${subtotal.toLocaleString('es-CL')}`;
     if (totalEl) totalEl.textContent = `$${subtotal.toLocaleString('es-CL')}`;
@@ -660,13 +714,16 @@ function renderizarVistaCheckout() {
     const form = document.querySelector('#checkout-form');
     if (!itemsEl || !form) return;
     const carrito = obtenerCarrito();
-    const subtotal = carrito.reduce((total, item) => total + Number(item.precio) * Number(item.quantity), 0);
+    const subtotal = _checkout.estimateSubtotal?.(carrito) || carrito.reduce((total, item) => total + Number(item.precio) * Number(item.quantity), 0);
     let shipping = 4500;
     initUbicacionesChile();
 
-    itemsEl.innerHTML = carrito.length ? carrito.map(item => `
-        <div class="sidebar-item"><img src="${item.imagen}" alt="${item.nombre}"><div><div class="sidebar-item-title">${item.nombre}</div><div class="sidebar-item-subtitle">${item.marca} · Cantidad ${item.quantity}${item.configuracion?.length ? `<br>${item.configuracion.join(' · ')}` : ''}</div><div class="sidebar-item-price">$${(item.precio * item.quantity).toLocaleString('es-CL')}</div></div></div>
-    `).join('') : '<div class="checkout-empty">No hay productos en tu bolsa.</div>';
+    itemsEl.innerHTML = carrito.length ? carrito.map(item => {
+        const configuration = Array.isArray(item.configuracion) ? item.configuracion.map(safe).join(' · ') : '';
+        return `
+        <div class="sidebar-item"><img src="${safeURL(item.imagen)}" alt="${safe(item.nombre)}" loading="lazy" decoding="async"><div><div class="sidebar-item-title">${safe(item.nombre)}</div><div class="sidebar-item-subtitle">${safe(item.marca)} · Cantidad ${item.quantity}${configuration ? `<br>${configuration}` : ''}</div><div class="sidebar-item-price">$${(item.precio * item.quantity).toLocaleString('es-CL')}</div></div></div>
+    `;
+    }).join('') : '<div class="checkout-empty">No hay productos en tu bolsa.</div>';
 
     const actualizarTotales = () => {
         document.querySelector('#summary-subtotal').textContent = `$${subtotal.toLocaleString('es-CL')}`;
@@ -711,20 +768,12 @@ function renderizarVistaCheckout() {
 
         const fields = new FormData(form);
         const retiro = fields.get('shipping') === 'retiro';
-        const direccionEntrega = retiro ? 'Retiro en Caupolicán #314, Concepción' : `${fields.get('direccion')}, ${fields.get('comuna')}, ${fields.get('region')}`;
-        const items = carrito.map(item => ({
-            product_id: String(item.product_id),
-            sku: String(item.sku),
-            quantity: Number(item.quantity),
-            crystal_config: item.crystal_config && typeof item.crystal_config === 'object' ? item.crystal_config : {}
-        }));
-        const payload = {
+        const payload = _checkout.buildOrderPayload?.({ fields, cart: carrito, shipping, retiro }) || {
             p_nombre: fields.get('nombre'), p_rut: fields.get('rut'), p_telefono: fields.get('telefono'),
-            p_email: fields.get('email'), p_direccion_entrega: direccionEntrega,
-            p_indicaciones_entrega: fields.get('indicaciones') || '',
-            p_metodo_envio: retiro ? 'Retiro en tienda' : 'Despacho a domicilio',
+            p_email: fields.get('email'), p_direccion_entrega: retiro ? 'Retiro en Caupolicán #314, Concepción' : `${fields.get('direccion')}, ${fields.get('comuna')}, ${fields.get('region')}`,
+            p_indicaciones_entrega: fields.get('indicaciones') || '', p_metodo_envio: retiro ? 'Retiro en tienda' : 'Despacho a domicilio',
             p_subtotal: subtotal, p_costo_envio: shipping, p_total: subtotal + shipping,
-            p_items: items, p_receta_path: null
+            p_items: carrito.map(item => ({ product_id: String(item.product_id), sku: String(item.sku), quantity: Number(item.quantity), crystal_config: item.crystal_config || {} })), p_receta_path: null
         };
         try {
             const receta = document.querySelector('#prescription-file')?.files[0];

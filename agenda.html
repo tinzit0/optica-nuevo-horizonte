@@ -6,6 +6,8 @@
     <title>Reserva tu Examen Visual | Óptica Nuevo Horizonte</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/modules/navigation.js"></script>
     <style>
         :root { --primary: #17352a; --gold: #b99350; --gold-hover: #a47e3e; --bg-body: #fbfaf7; --border: rgba(16,23,19,.13); --text: #101713; --muted: #66706a; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -209,9 +211,7 @@
     <footer><p>&copy; 2026 Óptica Nuevo Horizonte. Todos los derechos reservados.</p></footer>
 
     <script>
-        const SUPABASE_URL = "https://kxldsjodgfonrrlwjbws.supabase.co";
-        const SUPABASE_KEY = "sb_publishable_J5s_2YqtASIYSqu2k00SGA_copdr39x";
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const _supabase = window.opticaSupabase;
 
         let pasoActual = 2;
         let reservaState = { servicio: 'Examen visual (tecnólogo médico)', fecha: null, hora: null };
@@ -222,6 +222,7 @@
         const mesInicial = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
 
         document.addEventListener('DOMContentLoaded', async () => {
+            window.OpticaModules?.navigation?.initMobileNavigation();
             await cargarHorariosDesdeSupabase();
             renderizarCalendario();
         });

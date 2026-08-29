@@ -3,6 +3,17 @@
 .wrangler/
 node_modules/
 tools/
+supabase/
+docs/
+admin/config.yml
+assets/fichas-tecnicas/
+*.sql
+*.md
+*.ps1
+*.mjs
+*.log
+*.map
+.dev.vars
 assets/foose/OneDrive_1_10-08-2026/
 assets/foose/DFSO-048/
 assets/foose/DFSO-049/
