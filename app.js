@@ -9,6 +9,9 @@ let _navigation = window.OpticaModules?.navigation || {};
 let escapeHTML = _ui.escapeHTML || (value => String(value ?? '').replace(/[&<>'"]/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[character])));
 let safeURL = _ui.safeURL || (value => escapeHTML(value));
 const safe = value => escapeHTML(value);
+const agruparVariantes = products => _products.groupVariants ? _products.groupVariants(products) : (Array.isArray(products) ? products.map(product => ({ groupKey: String(product.id), product, variants: [product], title: String(product.title || '') })) : []);
+const etiquetaVariante = product => _products.getVariantLabel ? _products.getVariantLabel(product) : String(product?.color || 'Disponible');
+const tituloModelo = product => _products.getModelTitle ? _products.getModelTitle(product) : String(product?.title || '');
 
 const FRONTEND_DEPENDENCIES = [
     ['ui', 'js/modules/ui.js'],
@@ -221,7 +224,7 @@ async function cargarProductosConFiltros() {
     const minPrice = Number(document.querySelector('#price-min')?.value || 0);
     const maxPrice = Number(document.querySelector('#price-max')?.value || Infinity);
 
-    let filtrados = (_products.filterProducts || filtrarProductosCompat)(productos, {
+    let variantesFiltradas = (_products.filterProducts || filtrarProductosCompat)(productos, {
         categories: catsChecked,
         genders: gensChecked,
         brands: marcasChecked,
@@ -235,21 +238,30 @@ async function cargarProductosConFiltros() {
     }) || productos;
 
     const sort = document.querySelector('#catalog-sort')?.value;
-    if (sort === 'price-asc') filtrados.sort((a, b) => Number(a.price) - Number(b.price));
-    if (sort === 'price-desc') filtrados.sort((a, b) => Number(b.price) - Number(a.price));
-    if (sort === 'name') filtrados.sort((a, b) => a.title.localeCompare(b.title, 'es'));
-    if (sort === 'newest') filtrados.sort((a, b) => {
+    if (sort === 'price-asc') variantesFiltradas.sort((a, b) => Number(a.price) - Number(b.price));
+    if (sort === 'price-desc') variantesFiltradas.sort((a, b) => Number(b.price) - Number(a.price));
+    if (sort === 'name') variantesFiltradas.sort((a, b) => a.title.localeCompare(b.title, 'es'));
+    if (sort === 'newest') variantesFiltradas.sort((a, b) => {
         const dateA = Date.parse(a.created_at || '') || 0;
         const dateB = Date.parse(b.created_at || '') || 0;
         return dateB - dateA;
     });
-    if (!sort || sort === 'featured') filtrados = seleccionarDestacadosMultimarca(filtrados, filtrados.length);
+    let grupos = agruparVariantes(variantesFiltradas);
+    if (sort === 'price-asc') grupos.sort((a, b) => Number(a.product.price) - Number(b.product.price));
+    if (sort === 'price-desc') grupos.sort((a, b) => Number(b.product.price) - Number(a.product.price));
+    if (sort === 'name') grupos.sort((a, b) => a.title.localeCompare(b.title, 'es'));
+    if (sort === 'newest') grupos.sort((a, b) => {
+        const dateA = Date.parse(a.product.created_at || '') || 0;
+        const dateB = Date.parse(b.product.created_at || '') || 0;
+        return dateB - dateA;
+    });
+    if (!sort || sort === 'featured') grupos = seleccionarDestacadosMultimarca(grupos, grupos.length);
 
     const countText = document.querySelector('#catalog-count-text');
-    if (countText) countText.textContent = `${filtrados.length} ${filtrados.length === 1 ? 'armazón encontrado' : 'armazones encontrados'}`;
+    if (countText) countText.textContent = `${grupos.length} ${grupos.length === 1 ? 'modelo encontrado' : 'modelos encontrados'}`;
     actualizarResumenFiltros();
 
-    if (filtrados.length === 0) {
+    if (grupos.length === 0) {
         grid.innerHTML = `<div class="empty-state"><h2>No encontramos coincidencias</h2><p>Prueba quitando algún filtro o usando otra búsqueda.</p><button class="btn-gold" type="button" data-clear-filters style="padding:12px 20px">LIMPIAR FILTROS</button></div>`;
         grid.querySelector('[data-clear-filters]')?.addEventListener('click', window.limpiarFiltrosCatalogo);
         return;
@@ -257,34 +269,77 @@ async function cargarProductosConFiltros() {
 
     const esCatalogo = !!document.querySelector('#catalog-grid');
     const favoritos = obtenerFavoritos();
-    const visibles = esCatalogo ? filtrados.slice(0, catalogVisibleCount) : seleccionarDestacadosMultimarca(filtrados, 6);
-    grid.innerHTML = visibles.map(p => {
+    const visibles = esCatalogo ? grupos.slice(0, catalogVisibleCount) : seleccionarDestacadosMultimarca(grupos, 6);
+    grid.innerHTML = visibles.map(grupo => {
+        const p = grupo.product || {};
+        const variantes = Array.isArray(grupo.variants) && grupo.variants.length ? grupo.variants : [p];
         const features = Array.isArray(p.features) ? p.features : [];
         const badge = features.includes('nuevo') ? 'Nuevo' : '';
-        const meta = [p.shape, p.color, p.material].filter(Boolean).join(' · ');
+        const colorInicial = etiquetaVariante(p);
+        const meta = [p.shape, colorInicial, p.material].filter(Boolean).join(' · ');
         const tienePrecio = Number(p.price) > 0;
         const precio = tienePrecio ? `$${Number(p.price).toLocaleString('es-CL')}` : 'Consultar precio';
         const id = String(p.id ?? '');
-        const title = safe(p.title);
+        const title = safe(grupo.title || tituloModelo(p));
         const brand = safe(p.brand);
         const encodedId = encodeURIComponent(id);
         const descripcion = p.description ? `<p class="product-description">${safe(p.description)}</p>` : '';
-        const accion = tienePrecio ? `<a class="btn-gold product-option-btn" href="producto.html?id=${encodedId}"><span><small>Personaliza tu armazón</small>Seleccionar opciones</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-5-5 5 5"/></svg></a>` : `<a class="btn-gold availability-link" href="producto.html?id=${encodedId}">CONSULTAR EN TIENDA</a>`;
-        return `<article class="product-card"><div class="product-media">${badge ? `<span class="product-badge">${badge}</span>` : ''}<img src="${safeURL(p.image)}" alt="${brand} ${title}" loading="lazy" decoding="async">${esCatalogo ? `<button class="favorite-btn ${favoritos.includes(id) ? 'active' : ''}" type="button" data-favorite-id="${safe(id)}" aria-label="Guardar ${brand} ${title} en favoritos" aria-pressed="${favoritos.includes(id)}"><svg class="icon" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/></svg></button>` : ''}</div><div class="product-info"><div class="brand">${brand}</div><div class="p-name">${title}</div>${meta ? `<div class="product-meta">${safe(meta)}</div>` : ''}${descripcion}<div class="price">${precio}</div><div class="product-actions">${accion}${esCatalogo ? `<a class="detail-btn" href="producto.html?id=${encodedId}" aria-label="Ver detalle de ${title}">→</a>` : ''}</div>${esAdmin ? `<button type="button" data-delete-product="${safe(id)}" style="margin-top:8px;background:#a43d3d;color:#fff;border:0;padding:7px;cursor:pointer">ELIMINAR</button>` : ''}</div></article>`;
+        const swatches = variantes.length > 1 ? `<div class="product-variants" role="group" aria-label="Colores disponibles para ${title}">${variantes.map(variant => {
+            const variantId = String(variant.id || '');
+            const selected = variantId === id;
+            const label = etiquetaVariante(variant);
+            return `<button class="color-swatch${selected ? ' selected' : ''}" type="button" data-variant-id="${safe(variantId)}" aria-label="${safe(label)}" aria-pressed="${selected}"><img src="${safeURL(variant.image)}" alt="" loading="lazy" decoding="async"><span>${safe(label)}</span></button>`;
+        }).join('')}</div>` : '';
+        const accion = tienePrecio ? `<a class="btn-gold product-option-btn" data-product-link href="producto.html?id=${encodedId}"><span><small>Personaliza tu armazón</small>Seleccionar opciones</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-5-5 5 5"/></svg></a>` : `<a class="btn-gold availability-link" data-product-link href="producto.html?id=${encodedId}">CONSULTAR EN TIENDA</a>`;
+        return `<article class="product-card" data-product-group="${safe(String(grupo.groupKey || id))}" data-selected-variant="${safe(id)}"><div class="product-media">${badge ? `<span class="product-badge">${badge}</span>` : ''}<img class="product-card-image" data-product-image src="${safeURL(p.image)}" alt="${brand} ${title}" loading="lazy" decoding="async">${esCatalogo ? `<button class="favorite-btn ${favoritos.includes(id) ? 'active' : ''}" type="button" data-favorite-id="${safe(id)}" aria-label="Guardar ${brand} ${title} en favoritos" aria-pressed="${favoritos.includes(id)}"><svg class="icon" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/></svg></button>` : ''}</div><div class="product-info"><div class="brand">${brand}</div><div class="p-name" data-product-title>${title}</div>${meta ? `<div class="product-meta" data-product-meta>${safe(meta)}</div>` : ''}${descripcion}<div class="price" data-product-price>${precio}</div>${swatches}<div class="product-actions">${accion}${esCatalogo ? `<a class="detail-btn" data-product-link href="producto.html?id=${encodedId}" aria-label="Ver detalle de ${title}">→</a>` : ''}</div>${esAdmin ? `<button type="button" data-delete-product="${safe(id)}" style="margin-top:8px;background:#a43d3d;color:#fff;border:0;padding:7px;cursor:pointer">ELIMINAR</button>` : ''}</div></article>`;
     }).join('');
     grid.querySelectorAll('[data-favorite-id]').forEach(button => button.addEventListener('click', () => window.toggleFavorito(button.dataset.favoriteId, button)));
     grid.querySelectorAll('[data-delete-product]').forEach(button => button.addEventListener('click', () => window.eliminarProducto(button.dataset.deleteProduct)));
+    grid.querySelectorAll('[data-variant-id]').forEach(button => button.addEventListener('click', () => {
+        const card = button.closest('[data-product-group]');
+        const selectedGroup = card && visibles.find(group => String(group.groupKey) === String(card.dataset.productGroup));
+        const selected = selectedGroup?.variants.find(variant => String(variant.id) === String(button.dataset.variantId));
+        if (!card || !selected) return;
+        const selectedId = String(selected.id);
+        const selectedBrand = String(selected.brand || '');
+        const selectedModelTitle = selectedGroup?.title || grupoTitleForVariant(selected, card.dataset.productGroup);
+        const image = card.querySelector('[data-product-image]');
+        const titleEl = card.querySelector('[data-product-title]');
+        const metaEl = card.querySelector('[data-product-meta]');
+        const priceEl = card.querySelector('[data-product-price]');
+        if (image) { image.src = safeURL(selected.image); image.alt = `${selected.brand || ''} ${selectedModelTitle}`.trim(); }
+        if (titleEl) titleEl.textContent = selectedModelTitle;
+        if (metaEl) metaEl.textContent = [selected.shape, etiquetaVariante(selected), selected.material].filter(Boolean).join(' · ');
+        if (priceEl) priceEl.textContent = Number(selected.price) > 0 ? `$${Number(selected.price).toLocaleString('es-CL')}` : 'Consultar precio';
+        card.dataset.selectedVariant = selectedId;
+        card.querySelectorAll('[data-product-link]').forEach(link => { link.href = `producto.html?id=${encodeURIComponent(selectedId)}`; });
+        card.querySelectorAll('[data-variant-id]').forEach(option => {
+            const active = String(option.dataset.variantId) === selectedId;
+            option.classList.toggle('selected', active);
+            option.setAttribute('aria-pressed', String(active));
+        });
+        const favorite = card.querySelector('[data-favorite-id]');
+        if (favorite) {
+            favorite.dataset.favoriteId = selectedId;
+            favorite.setAttribute('aria-pressed', String(obtenerFavoritos().includes(selectedId)));
+            favorite.classList.toggle('active', obtenerFavoritos().includes(selectedId));
+            favorite.setAttribute('aria-label', `Guardar ${selectedBrand} ${selectedModelTitle} en favoritos`);
+        }
+        const deleteButton = card.querySelector('[data-delete-product]');
+        if (deleteButton) deleteButton.dataset.deleteProduct = selectedId;
+    }));
     const loadMore = document.querySelector('#catalog-load-more');
     if (loadMore) {
-        loadMore.hidden = visibles.length >= filtrados.length;
-        loadMore.textContent = `Ver más armazones (${filtrados.length - visibles.length} restantes)`;
+        loadMore.hidden = visibles.length >= grupos.length;
+        loadMore.textContent = `Ver más modelos (${grupos.length - visibles.length} restantes)`;
     }
 }
 
 function seleccionarDestacadosMultimarca(productos, cantidad) {
     const grupos = new Map();
     productos.forEach(producto => {
-        const marca = String(producto.brand || 'Otros');
+        const base = producto?.product || producto;
+        const marca = String(base.brand || 'Otros');
         if (!grupos.has(marca)) grupos.set(marca, []);
         grupos.get(marca).push(producto);
     });
@@ -293,7 +348,11 @@ function seleccionarDestacadosMultimarca(productos, cantidad) {
         for (const caracter of String(valor)) hash = Math.imul(hash ^ caracter.charCodeAt(0), 16777619);
         return hash >>> 0;
     };
-    grupos.forEach(lista => lista.sort((a, b) => puntajeAleatorio(a.id) - puntajeAleatorio(b.id)));
+    grupos.forEach(lista => lista.sort((a, b) => {
+        const idA = a?.product?.id || a?.id;
+        const idB = b?.product?.id || b?.id;
+        return puntajeAleatorio(idA) - puntajeAleatorio(idB);
+    }));
     const marcas = [...grupos.keys()].sort((a, b) => puntajeAleatorio(a) - puntajeAleatorio(b));
     const seleccion = [];
     let vuelta = 0;
@@ -307,11 +366,17 @@ function seleccionarDestacadosMultimarca(productos, cantidad) {
     return seleccion;
 }
 
+function grupoTitleForVariant(product, groupKey) {
+    const title = tituloModelo(product);
+    if (title) return title;
+    return String(groupKey || product?.id || 'Armazón');
+}
+
 function renderizarVitrinaMarcas(productosDisponibles = PRODUCTOS_ACTIVOS.length ? PRODUCTOS_ACTIVOS : PRODUCTOS_LOCALES) {
     const track = document.querySelector('#eyewear-marquee-track');
     if (!track || !productosDisponibles.length) return;
-    const seleccion = seleccionarDestacadosMultimarca(productosDisponibles, 14);
-    const tarjeta = producto => `<a class="marquee-product" href="producto.html?id=${encodeURIComponent(String(producto.id))}"><span class="marquee-image"><img src="${safeURL(producto.image)}" alt="${safe(producto.brand)} ${safe(producto.title)}" loading="lazy" decoding="async"></span><span class="marquee-brand">${safe(producto.brand)}</span><strong>${safe(producto.title)}</strong></a>`;
+    const seleccion = seleccionarDestacadosMultimarca(agruparVariantes(productosDisponibles), 14);
+    const tarjeta = grupo => { const producto = grupo.product || grupo; return `<a class="marquee-product" href="producto.html?id=${encodeURIComponent(String(producto.id))}"><span class="marquee-image"><img src="${safeURL(producto.image)}" alt="${safe(producto.brand)} ${safe(grupo.title || tituloModelo(producto))}" loading="lazy" decoding="async"></span><span class="marquee-brand">${safe(producto.brand)}</span><strong>${safe(grupo.title || tituloModelo(producto))}</strong></a>`; };
     track.innerHTML = [...seleccion, ...seleccion].map(tarjeta).join('');
 }
 
@@ -370,8 +435,41 @@ window.toggleFavorito = function(id, button) {
 
 async function cargarDetalleProducto() {
     const id = new URLSearchParams(location.search).get('id') || '1';
-    let producto = [...PRODUCTOS_LOCALES, ...PRODUCTOS_BASE].find(p => String(p.id) === String(id));
+    let productosDisponibles = [...PRODUCTOS_LOCALES, ...PRODUCTOS_BASE];
+    let producto = productosDisponibles.find(p => String(p.id) === String(id));
     if (!producto) producto = PRODUCTOS_BASE[0];
+
+    const obtenerGrupo = item => agruparVariantes(productosDisponibles).find(candidate => candidate.variants.some(variant => String(variant.id) === String(item.id)));
+    const obtenerVariantes = item => {
+        const grupo = obtenerGrupo(item);
+        return grupo?.variants || [item];
+    };
+
+    const aplicarSelectorColor = (item, variantes) => {
+        const picker = document.querySelector('#product-variants');
+        const options = picker?.querySelector('.product-variants');
+        if (!picker || !options) return;
+        if (!Array.isArray(variantes) || variantes.length < 2) {
+            picker.hidden = true;
+            options.replaceChildren();
+            return;
+        }
+        picker.hidden = false;
+        options.innerHTML = variantes.map(variant => {
+            const variantId = String(variant.id || '');
+            const selected = variantId === String(item.id);
+            const label = etiquetaVariante(variant);
+            return `<button class="color-swatch${selected ? ' selected' : ''}" type="button" data-detail-variant-id="${safe(variantId)}" aria-label="${safe(label)}" aria-pressed="${selected}"><img src="${safeURL(variant.image)}" alt="" loading="lazy" decoding="async"><span>${safe(label)}</span></button>`;
+        }).join('');
+        options.querySelectorAll('[data-detail-variant-id]').forEach(button => button.addEventListener('click', () => {
+            const selected = variantes.find(variant => String(variant.id) === String(button.dataset.detailVariantId));
+            if (!selected) return;
+            const url = new URL(window.location.href);
+            url.searchParams.set('id', String(selected.id));
+            history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
+            aplicarProducto(selected);
+        }));
+    };
 
     const aplicarProducto = item => {
         const image = document.querySelector('.main-img');
@@ -379,19 +477,23 @@ async function cargarDetalleProducto() {
         const title = document.querySelector('.info .title');
         const price = document.querySelector('.price-box span');
         const description = document.querySelector('.product-copy');
-        if (image) { image.src = safeURL(item.image); image.alt = `${item.brand} ${item.title}`; }
+        const grupo = obtenerGrupo(item);
+        const modelTitle = grupo?.title || grupoTitleForVariant(item, grupo?.groupKey);
+        if (image) { image.src = safeURL(item.image); image.alt = `${item.brand} ${modelTitle}`; }
         if (brand) brand.textContent = item.brand;
-        if (title) title.textContent = item.title;
+        if (title) title.textContent = modelTitle;
+        const productCode = document.querySelector('.product-code');
+        if (productCode) productCode.textContent = `ARMAZÓN ÓPTICO · COLOR ${etiquetaVariante(item)} · DISPONIBLE EN TIENDA Y ONLINE`;
         if (price) price.textContent = Number(item.price) > 0 ? `$${Number(item.price).toLocaleString('es-CL')}` : 'Consultar precio';
         if (description && item.description) description.textContent = item.description;
         const material = document.querySelector('.spec-material');
         if (material) material.textContent = item.material ? String(item.material).replace(/^./, c => c.toUpperCase()) : 'Material seleccionado';
         const installments = document.querySelector('.installments');
         if (installments && Number(item.price) > 0) installments.textContent = `Hasta 12 cuotas de $${Math.ceil(Number(item.price) / 12).toLocaleString('es-CL')}`;
-        document.querySelectorAll('.config-image').forEach(el => { el.src = safeURL(item.image); el.alt = `${item.brand} ${item.title}`; });
+        document.querySelectorAll('.config-image').forEach(el => { el.src = safeURL(item.image); el.alt = `${item.brand} ${modelTitle}`; });
         const configName = document.querySelector('.config-product strong');
-        if (configName) configName.textContent = `${item.brand} · ${item.title}`;
-        document.title = `${item.title} | Óptica Nuevo Horizonte`;
+        if (configName) configName.textContent = `${item.brand} · ${modelTitle} · ${etiquetaVariante(item)}`;
+        document.title = `${modelTitle} | Óptica Nuevo Horizonte`;
         const addButton = document.querySelector('.btn-add');
         const buyButton = document.querySelector('.btn-buy-now');
         if (addButton) {
@@ -403,13 +505,18 @@ async function cargarDetalleProducto() {
             buyButton.disabled = !(Number(item.price) > 0);
             buyButton.onclick = () => comprarAhora(String(item.id), item.title, item.brand, item.price, item.image);
         }
+        aplicarSelectorColor(item, obtenerVariantes(item));
         initConfiguradorCristales(item);
     };
     aplicarProducto(producto);
 
     try {
-        const { data } = await _supabase.from('optica_productos').select('*').eq('id', id).maybeSingle();
-        if (data) { producto = { ...producto, ...data }; aplicarProducto(producto); }
+        if (!_supabase) return;
+        const { data, error } = await _supabase.from('optica_productos').select('*');
+        if (error || !Array.isArray(data) || !data.length) return;
+        productosDisponibles = data;
+        const remoto = data.find(item => String(item.id) === String(id));
+        if (remoto) { producto = remoto; aplicarProducto(producto); }
     } catch (error) { /* La ficha base mantiene disponible la página sin conexión. */ }
 }
 
@@ -553,6 +660,7 @@ function initNotificaciones() {
     styles.id = 'toast-optica-styles';
     styles.textContent = `
         html,body{max-width:100%;overflow-x:hidden;overscroll-behavior-x:none}.product-card,.product-info,.product-actions,.config-panel,.step-body,.option-card{min-width:0}img{max-width:100%}
+        .product-variants{display:flex;align-items:center;gap:7px;overflow-x:auto;margin-top:13px;padding:2px 0 4px;scrollbar-width:thin}.product-variants::-webkit-scrollbar{height:3px}.product-variants::-webkit-scrollbar-thumb{background:rgba(16,23,19,.22)}.color-swatch{display:inline-flex;flex:none;align-items:center;gap:5px;border:1px solid rgba(16,23,19,.16);border-radius:99px;background:#fff;padding:3px 8px 3px 3px;color:#4c5851;font-size:.56rem;cursor:pointer;transition:border-color .18s,box-shadow .18s,background .18s}.color-swatch img{width:25px;height:25px;border-radius:50%;object-fit:cover;background:#f1f0ec}.color-swatch:hover{border-color:#b99350}.color-swatch.selected{border-color:#17352a;background:#f3efe6;box-shadow:0 0 0 1px #17352a;color:#101713;font-weight:700}.product-card-image{transition:opacity .16s ease,transform .5s}.product-variant-picker{margin:19px 0 5px;padding:15px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.product-variant-picker h2{margin-bottom:10px;font-size:.66rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase}.product-variant-picker .product-variants{margin-top:0;flex-wrap:wrap}.product-variant-picker .color-swatch{font-size:.65rem}.product-variant-picker .color-swatch img{width:34px;height:34px}
         .toast-region{position:fixed;right:24px;top:24px;z-index:10000;display:grid;gap:12px;width:min(390px,calc(100vw - 28px));pointer-events:none}
         .luxury-toast{position:relative;overflow:hidden;display:grid;grid-template-columns:48px 1fr auto;gap:14px;align-items:start;background:#101713;color:#fff;border:1px solid rgba(185,147,80,.45);padding:20px;box-shadow:0 24px 70px rgba(10,18,13,.3);pointer-events:auto;opacity:0;transform:translateY(-14px) scale(.98);transition:opacity .32s ease,transform .32s ease}
         .luxury-toast.visible{opacity:1;transform:none}.luxury-toast.leaving{opacity:0;transform:translateY(-8px) scale(.98)}
