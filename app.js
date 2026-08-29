@@ -3,6 +3,8 @@
 let _supabase = window.opticaSupabase || null;
 let _ui = window.OpticaModules?.ui || {};
 let _products = window.OpticaModules?.products || {};
+let _catalogState = window.OpticaModules?.catalogState || {};
+let _productDetail = window.OpticaModules?.productDetail || {};
 let _cart = window.OpticaModules?.cart || {};
 let _checkout = window.OpticaModules?.checkout || {};
 let _navigation = window.OpticaModules?.navigation || {};
@@ -16,6 +18,8 @@ const tituloModelo = product => _products.getModelTitle ? _products.getModelTitl
 const FRONTEND_DEPENDENCIES = [
     ['ui', 'js/modules/ui.js'],
     ['products', 'js/modules/products.js'],
+    ['catalogState', 'js/modules/catalog-state.js'],
+    ['productDetail', 'js/modules/product-detail.js'],
     ['cart', 'js/modules/cart.js'],
     ['checkout', 'js/modules/checkout.js'],
     ['navigation', 'js/modules/navigation.js']
@@ -41,6 +45,8 @@ async function cargarDependenciasFrontend() {
     _supabase = window.opticaSupabase || _supabase;
     _ui = window.OpticaModules?.ui || _ui;
     _products = window.OpticaModules?.products || _products;
+    _catalogState = window.OpticaModules?.catalogState || _catalogState;
+    _productDetail = window.OpticaModules?.productDetail || _productDetail;
     _cart = window.OpticaModules?.cart || _cart;
     _checkout = window.OpticaModules?.checkout || _checkout;
     _navigation = window.OpticaModules?.navigation || _navigation;
@@ -50,18 +56,24 @@ async function cargarDependenciasFrontend() {
 
 function filtrarProductosCompat(products, criteria) {
     const { categories = [], genders = [], brands = [], shapes = [], colors = [], materials = [], features = [], search = '', minPrice = 0, maxPrice = Infinity } = criteria;
-    const normalizedSearch = String(search).trim().toLocaleLowerCase('es');
+    const normalize = value => String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('es').replace(/\s+/g, ' ').trim();
+    const list = value => (Array.isArray(value) ? value : [value]).flatMap(item => String(item ?? '').split(',')).map(normalize).filter(Boolean);
+    const normalizedSearch = normalize(search);
+    const normalized = {
+        categories: list(categories), genders: list(genders), brands: list(brands), shapes: list(shapes), colors: list(colors), materials: list(materials), features: list(features)
+    };
     return (Array.isArray(products) ? products : []).filter(product => {
-        const productFeatures = Array.isArray(product.features) ? product.features : String(product.features || '').split(',').map(value => value.trim()).filter(Boolean);
-        const searchable = `${product.brand || ''} ${product.title || ''} ${product.color || ''} ${product.shape || ''} ${product.material || ''}`.toLocaleLowerCase('es');
+        const productFeatures = (Array.isArray(product.features) ? product.features : String(product.features || '').split(',')).map(normalize).filter(Boolean);
+        const searchable = normalize([product.brand, product.title, product.name, product.nombre, product.id, product.sku, product.color, product.shape, product.material].filter(Boolean).join(' '));
+        const brand = normalize(product.brand);
         const price = Number(product.price) || 0;
-        return (!categories.length || categories.includes(product.category))
-            && (!genders.length || genders.includes(product.gender))
-            && (!brands.length || brands.some(brand => String(product.brand || '').toLowerCase().includes(String(brand).toLowerCase())))
-            && (!shapes.length || shapes.includes(product.shape || ''))
-            && (!colors.length || colors.includes(product.color || ''))
-            && (!materials.length || materials.includes(product.material || ''))
-            && features.every(feature => productFeatures.includes(feature))
+        return (!normalized.categories.length || normalized.categories.includes(normalize(product.category)))
+            && (!normalized.genders.length || normalized.genders.includes(normalize(product.gender)))
+            && (!normalized.brands.length || normalized.brands.some(value => brand === value || brand.includes(value)))
+            && (!normalized.shapes.length || normalized.shapes.includes(normalize(product.shape)))
+            && (!normalized.colors.length || normalized.colors.includes(normalize(product.color)))
+            && (!normalized.materials.length || normalized.materials.includes(normalize(product.material)))
+            && normalized.features.every(feature => productFeatures.includes(feature))
             && (!normalizedSearch || searchable.includes(normalizedSearch))
             && price >= minPrice && price <= maxPrice;
     });
@@ -85,6 +97,120 @@ let PRODUCTOS_LOCALES = [];
 let PRODUCTOS_ACTIVOS = [];
 let catalogVisibleCount = 48;
 const catalogRandomSeed = Math.floor(Math.random() * 2147483647);
+let _catalogProductsPromise = null;
+let _catalogSource = 'uninitialized';
+let _catalogSourceError = null;
+
+function normalizarTextoCatalogo(value) {
+    if (_products.normalizeText) return _products.normalizeText(value);
+    return String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('es').replace(/\s+/g, ' ').trim();
+}
+
+function leerEstadoControlesCatalogo() {
+    const valores = selector => Array.from(document.querySelectorAll(`${selector}:checked`)).map(input => input.value);
+    const readNumber = value => {
+        const parsed = Number(value);
+        return value !== '' && Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+    };
+    return {
+        q: document.querySelector('#catalog-search')?.value?.trim() || '',
+        sort: document.querySelector('#catalog-sort')?.value || 'featured',
+        brand: valores('.filter-brand'),
+        gender: valores('.filter-gen'),
+        color: valores('.filter-color'),
+        material: valores('.filter-material'),
+        shape: valores('.filter-shape'),
+        category: valores('.filter-cat'),
+        feature: valores('.filter-feature'),
+        min: readNumber(document.querySelector('#price-min')?.value || ''),
+        max: readNumber(document.querySelector('#price-max')?.value || '')
+    };
+}
+
+function aplicarEstadoControlesCatalogo(state = {}) {
+    const selectionMap = {
+        brand: '.filter-brand',
+        gender: '.filter-gen',
+        color: '.filter-color',
+        material: '.filter-material',
+        shape: '.filter-shape',
+        category: '.filter-cat',
+        feature: '.filter-feature'
+    };
+    Object.entries(selectionMap).forEach(([key, selector]) => {
+        const selected = new Set((Array.isArray(state[key]) ? state[key] : []).map(normalizarTextoCatalogo));
+        document.querySelectorAll(selector).forEach(input => { input.checked = selected.has(normalizarTextoCatalogo(input.value)); });
+    });
+    const search = document.querySelector('#catalog-search');
+    const sort = document.querySelector('#catalog-sort');
+    const min = document.querySelector('#price-min');
+    const max = document.querySelector('#price-max');
+    if (search) search.value = state.q || '';
+    if (sort) sort.value = state.sort || 'featured';
+    if (min) min.value = state.min === null || state.min === undefined ? '' : String(state.min);
+    if (max) max.value = state.max === null || state.max === undefined ? '' : String(state.max);
+}
+
+function sincronizarURLCatalogo(options = {}) {
+    if (_catalogState.write) _catalogState.write(leerEstadoControlesCatalogo(), options);
+}
+
+function etiquetaFiltroCatalogo(value) {
+    const labels = {
+        optico: 'Ópticos',
+        sol: 'Sol',
+        mujer: 'Mujer',
+        hombre: 'Hombre',
+        infantil: 'Infantil',
+        unisex: 'Unisex',
+        nuevo: 'Novedades',
+        oferta: 'Ofertas',
+        polarizado: 'Polarizados',
+        liviano: 'Livianos'
+    };
+    const raw = String(value || '').trim();
+    return labels[normalizarTextoCatalogo(raw)] || raw.replace(/\b\w/g, letter => letter.toUpperCase());
+}
+
+function valoresRealesFiltro(productos, key) {
+    const values = new Set();
+    (Array.isArray(productos) ? productos : []).forEach(product => {
+        if (key === 'feature') {
+            const features = Array.isArray(product.features) ? product.features : String(product.features || '').split(',');
+            features.forEach(value => { if (String(value).trim()) values.add(String(value).trim()); });
+            return;
+        }
+        const value = String(product?.[key] || '').trim();
+        if (value) values.add(value);
+    });
+    return [...values].sort((a, b) => a.localeCompare(b, 'es'));
+}
+
+function renderizarOpcionesFiltroCatalogo(productos) {
+    const definitions = [
+        ['#category-filter-options', 'category', 'filter-cat'],
+        ['#gender-filter-options', 'gender', 'filter-gen'],
+        ['#color-filter-options', 'color', 'filter-color'],
+        ['#material-filter-options', 'material', 'filter-material'],
+        ['#shape-filter-options', 'shape', 'filter-shape'],
+        ['#feature-filter-options', 'feature', 'filter-feature']
+    ];
+    definitions.forEach(([selector, key, className]) => {
+        const container = document.querySelector(selector);
+        if (!container) return;
+        const estado = _catalogState.read ? _catalogState.read() : {};
+        const values = [...new Set([
+            ...valoresRealesFiltro(productos, key),
+            ...(Array.isArray(estado[key]) ? estado[key] : [])
+        ])].sort((a, b) => a.localeCompare(b, 'es'));
+        if (!values.length) {
+            container.innerHTML = '<span class="filter-empty" role="status">Sin datos disponibles</span>';
+            return;
+        }
+        container.innerHTML = values.map(value => `<label><input type="checkbox" class="${className}" value="${safe(value)}"> ${safe(etiquetaFiltroCatalogo(value))}</label>`).join('');
+    });
+    renderizarFiltroMarcas(productos);
+}
 
 async function cargarCatalogoLocal() {
     try {
@@ -92,22 +218,50 @@ async function cargarCatalogoLocal() {
         if (!respuesta.ok) throw new Error(`Catálogo local: ${respuesta.status}`);
         const datos = await respuesta.json();
         PRODUCTOS_LOCALES = Array.isArray(datos) ? datos : [];
-        renderizarFiltroMarcas();
+        renderizarFiltroMarcas(PRODUCTOS_LOCALES);
     } catch (error) {
         console.warn('No fue posible cargar el catálogo FOOSE:', error);
         PRODUCTOS_LOCALES = [];
     }
 }
 
-function renderizarFiltroMarcas() {
+function renderizarFiltroMarcas(productos = PRODUCTOS_LOCALES) {
     const container = document.querySelector('#brand-filter-options');
     if (!container) return;
-    const marcas = [...new Set(PRODUCTOS_LOCALES.map(p => String(p.brand || '').trim()).filter(Boolean))]
+    const estado = _catalogState.read ? _catalogState.read() : {};
+    const marcas = [...new Set([
+        ...(Array.isArray(productos) ? productos : []).map(p => String(p.brand || '').trim()).filter(Boolean),
+        ...(Array.isArray(estado.brand) ? estado.brand : [])
+    ])]
         .sort((a, b) => a.localeCompare(b, 'es'));
-    container.innerHTML = marcas.map(marca => {
+    container.innerHTML = marcas.length ? marcas.map(marca => {
         const escapedMarca = safe(marca);
         return `<label><input type="checkbox" class="filter-brand" value="${escapedMarca}"> ${escapedMarca}</label>`;
-    }).join('');
+    }).join('') : '<span class="filter-empty" role="status">Sin datos disponibles</span>';
+}
+
+async function cargarFuenteCatalogo() {
+    if (_catalogProductsPromise) return _catalogProductsPromise;
+    _catalogProductsPromise = (async () => {
+        _catalogSourceError = null;
+        try {
+            if (!_supabase) throw new Error('Supabase no disponible');
+            const { data, error } = await _supabase.from('optica_productos').select('*').order('created_at', { ascending: false });
+            if (error) throw error;
+            if (Array.isArray(data) && data.length) {
+                PRODUCTOS_ACTIVOS = data.filter(Boolean);
+                _catalogSource = 'supabase';
+                return PRODUCTOS_ACTIVOS;
+            }
+            throw new Error('Supabase no devolvió productos publicados');
+        } catch (error) {
+            _catalogSourceError = error;
+            PRODUCTOS_ACTIVOS = _products.resolveProducts?.([], PRODUCTOS_LOCALES, PRODUCTOS_BASE) || PRODUCTOS_LOCALES;
+            _catalogSource = PRODUCTOS_ACTIVOS.length ? 'backup' : 'empty';
+            return PRODUCTOS_ACTIVOS;
+        }
+    })();
+    return _catalogProductsPromise;
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -145,16 +299,7 @@ function initIdentidadMarca() {
 }
 
 function leerParametrosURLYMarcarCheckbox() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const cat = urlParams.get('cat');
-    const gen = urlParams.get('gen');
-    const marca = urlParams.get('marca');
-    const oferta = urlParams.get('oferta');
-
-    if (cat) document.querySelectorAll('.filter-cat').forEach(cb => { if (cb.value === cat) cb.checked = true; });
-    if (gen) document.querySelectorAll('.filter-gen').forEach(cb => { if (cb.value === gen) cb.checked = true; });
-    if (marca) document.querySelectorAll('.filter-brand').forEach(cb => { if (cb.value === marca) cb.checked = true; });
-    if (oferta) document.querySelectorAll('.filter-feature[value="oferta"]').forEach(cb => cb.checked = true);
+    aplicarEstadoControlesCatalogo(_catalogState.read ? _catalogState.read() : {});
 }
 
 let _adminStatusPromise = null;
@@ -198,18 +343,12 @@ async function cargarProductosConFiltros() {
     const grid = document.querySelector('#catalog-grid, .products-grid');
     if (!grid) return;
 
+    grid.setAttribute('aria-busy', 'true');
+    if (!grid.dataset.catalogReady) grid.innerHTML = '<div class="catalog-skeleton" aria-label="Cargando colección"><span></span><span></span><span></span><span></span></div>';
     const esAdmin = await obtenerEstadoAdmin();
-
-    let productos = [];
-    try {
-        if (!_supabase) throw new Error('Supabase no disponible');
-        const { data, error } = await _supabase.from('optica_productos').select('*').order('created_at', { ascending: false });
-        if (!error && data && data.length > 0) productos = _products.resolveProducts?.(data, PRODUCTOS_LOCALES, PRODUCTOS_BASE) || data;
-        else productos = _products.resolveProducts?.([], PRODUCTOS_LOCALES, PRODUCTOS_BASE) || PRODUCTOS_LOCALES;
-    } catch (e) {
-        productos = _products.resolveProducts?.([], PRODUCTOS_LOCALES, PRODUCTOS_BASE) || PRODUCTOS_LOCALES;
-    }
-    PRODUCTOS_ACTIVOS = productos;
+    const productos = await cargarFuenteCatalogo();
+    renderizarOpcionesFiltroCatalogo(productos);
+    aplicarEstadoControlesCatalogo(_catalogState.read ? _catalogState.read() : {});
     renderizarVitrinaMarcas(productos);
 
     const valores = selector => Array.from(document.querySelectorAll(`${selector}:checked`)).map(cb => cb.value);
@@ -221,8 +360,10 @@ async function cargarProductosConFiltros() {
     const materialsChecked = valores('.filter-material');
     const featuresChecked = valores('.filter-feature');
     const search = (document.querySelector('#catalog-search')?.value || '').trim().toLocaleLowerCase('es');
-    const minPrice = Number(document.querySelector('#price-min')?.value || 0);
-    const maxPrice = Number(document.querySelector('#price-max')?.value || Infinity);
+    const minValue = document.querySelector('#price-min')?.value || '';
+    const maxValue = document.querySelector('#price-max')?.value || '';
+    const minPrice = minValue === '' ? 0 : Math.max(0, Number(minValue) || 0);
+    const maxPrice = maxValue === '' ? Infinity : Math.max(0, Number(maxValue) || 0);
 
     let variantesFiltradas = (_products.filterProducts || filtrarProductosCompat)(productos, {
         categories: catsChecked,
@@ -262,8 +403,15 @@ async function cargarProductosConFiltros() {
     actualizarResumenFiltros();
 
     if (grupos.length === 0) {
-        grid.innerHTML = `<div class="empty-state"><h2>No encontramos coincidencias</h2><p>Prueba quitando algún filtro o usando otra búsqueda.</p><button class="btn-gold" type="button" data-clear-filters style="padding:12px 20px">LIMPIAR FILTROS</button></div>`;
+        const hasFilters = Object.values(leerEstadoControlesCatalogo()).some(value => Array.isArray(value) ? value.length : value !== '' && value !== null && value !== 'featured');
+        const sourceFailed = _catalogSource === 'empty' && _catalogSourceError;
+        grid.innerHTML = `<div class="empty-state" role="status"><span class="empty-kicker">${sourceFailed ? 'No pudimos conectar' : hasFilters ? 'Búsqueda sin coincidencias' : 'Colección temporalmente vacía'}</span><h2>${sourceFailed ? 'La colección no está disponible' : hasFilters ? 'No encontramos ese armazón' : 'Estamos preparando la colección'}</h2><p>${sourceFailed ? 'Revisa tu conexión e inténtalo nuevamente.' : hasFilters ? 'Prueba quitando algún filtro o usando otra búsqueda.' : 'Vuelve a intentarlo en unos minutos o contáctanos para ayudarte.'}</p>${sourceFailed ? '<button class="btn-gold" type="button" data-retry-catalog style="padding:12px 20px">REINTENTAR</button>' : hasFilters ? '<button class="btn-gold" type="button" data-clear-filters style="padding:12px 20px">LIMPIAR FILTROS</button>' : ''}</div>`;
         grid.querySelector('[data-clear-filters]')?.addEventListener('click', window.limpiarFiltrosCatalogo);
+        grid.querySelector('[data-retry-catalog]')?.addEventListener('click', window.reintentarCargaCatalogo);
+        const loadMore = document.querySelector('#catalog-load-more');
+        if (loadMore) loadMore.hidden = true;
+        grid.setAttribute('aria-busy', 'false');
+        grid.dataset.catalogReady = 'true';
         return;
     }
 
@@ -333,6 +481,8 @@ async function cargarProductosConFiltros() {
         loadMore.hidden = visibles.length >= grupos.length;
         loadMore.textContent = `Ver más modelos (${grupos.length - visibles.length} restantes)`;
     }
+    grid.setAttribute('aria-busy', 'false');
+    grid.dataset.catalogReady = 'true';
 }
 
 function seleccionarDestacadosMultimarca(productos, cantidad) {
@@ -385,33 +535,89 @@ window.cargarMasCatalogo = function() {
     cargarProductosConFiltros();
 };
 
+window.reintentarCargaCatalogo = function() {
+    _catalogProductsPromise = null;
+    _catalogSourceError = null;
+    const grid = document.querySelector('#catalog-grid, .products-grid');
+    if (grid) delete grid.dataset.catalogReady;
+    cargarProductosConFiltros();
+};
+
 function initCatalogoInteractivo() {
     const search = document.querySelector('#catalog-search');
     if (!search) return;
     let timer;
-    search.addEventListener('input', () => { clearTimeout(timer); catalogVisibleCount = 48; timer = setTimeout(cargarProductosConFiltros, 180); });
-    document.querySelector('#catalog-sort')?.addEventListener('change', cargarProductosConFiltros);
-    document.querySelectorAll('#drawer-filter input').forEach(input => input.addEventListener('change', cargarProductosConFiltros));
+    const schedule = (delay = 0, historyOptions = { replace: false }) => {
+        clearTimeout(timer);
+        catalogVisibleCount = 48;
+        timer = setTimeout(() => {
+            sincronizarURLCatalogo(historyOptions);
+            cargarProductosConFiltros();
+        }, delay);
+    };
+    search.addEventListener('input', () => schedule(220, { replace: true }));
+    document.querySelector('#catalog-sort')?.addEventListener('change', () => schedule(0, { replace: false }));
+    document.querySelector('#drawer-filter')?.addEventListener('change', event => {
+        if (!event.target.matches('input[type="checkbox"], input[type="number"]')) return;
+        schedule(event.target.type === 'number' ? 180 : 80, { replace: event.target.type === 'number' });
+    });
+    document.querySelector('#open-filters')?.addEventListener('click', () => toggleDrawer(true));
+    document.querySelector('#close-filters')?.addEventListener('click', () => toggleDrawer(false));
+    document.querySelector('#drawer-filter')?.addEventListener('click', event => {
+        if (event.target === event.currentTarget) toggleDrawer(false);
+    });
+    document.querySelector('#apply-filters')?.addEventListener('click', () => {
+        clearTimeout(timer);
+        sincronizarURLCatalogo({ replace: false });
+        toggleDrawer(false);
+        cargarProductosConFiltros();
+    });
+    document.querySelector('#catalog-load-more')?.addEventListener('click', window.cargarMasCatalogo);
     document.querySelector('#clear-filters')?.addEventListener('click', limpiarFiltrosCatalogo);
     document.addEventListener('keydown', event => { if (event.key === 'Escape') toggleDrawer(false); });
+    _catalogState.onPopState?.(state => {
+        aplicarEstadoControlesCatalogo(state);
+        catalogVisibleCount = 48;
+        cargarProductosConFiltros();
+    });
 }
 
 function actualizarResumenFiltros() {
     const active = Array.from(document.querySelectorAll('#drawer-filter input[type="checkbox"]:checked'));
-    const count = active.length + ['#price-min', '#price-max'].filter(selector => document.querySelector(selector)?.value).length;
+    const state = leerEstadoControlesCatalogo();
+    const rangeActive = ['#price-min', '#price-max'].filter(selector => document.querySelector(selector)?.value).length;
+    const queryActive = state.q ? 1 : 0;
+    const count = active.length + rangeActive + queryActive;
     const badge = document.querySelector('#filter-count');
     if (badge) { badge.textContent = count; badge.classList.toggle('visible', count > 0); }
     const chips = document.querySelector('#active-filters');
     if (chips) {
-        chips.innerHTML = active.map(input => `<button class="filter-chip" type="button" data-filter-class="${safe(input.className)}" data-filter-value="${safe(input.value)}">${safe(input.parentElement.textContent.trim())} ×</button>`).join('');
+        const checkboxChips = active.map(input => `<button class="filter-chip" type="button" data-filter-class="${safe(input.className)}" data-filter-value="${safe(input.value)}">${safe(input.parentElement.textContent.trim())} ×</button>`);
+        if (state.q) checkboxChips.push(`<button class="filter-chip" type="button" data-clear-catalog-key="q">Búsqueda: ${safe(state.q)} ×</button>`);
+        if (state.min !== null || state.max !== null) checkboxChips.push(`<button class="filter-chip" type="button" data-clear-catalog-key="price">Precio: ${state.min === null ? '0' : state.min.toLocaleString('es-CL')} – ${state.max === null ? 'sin límite' : state.max.toLocaleString('es-CL')} ×</button>`);
+        chips.innerHTML = checkboxChips.join('');
         chips.querySelectorAll('.filter-chip').forEach(button => button.addEventListener('click', () => {
-            window.quitarFiltro(button.dataset.filterClass, button.dataset.filterValue);
+            if (button.dataset.clearCatalogKey) window.quitarFiltroCatalogoClave(button.dataset.clearCatalogKey);
+            else window.quitarFiltro(button.dataset.filterClass, button.dataset.filterValue);
         }));
     }
 }
 
 window.quitarFiltro = function(className, value) {
     document.querySelectorAll(`.${className}`).forEach(input => { if (input.value === value) input.checked = false; });
+    sincronizarURLCatalogo({ replace: false });
+    cargarProductosConFiltros();
+};
+
+window.quitarFiltroCatalogoClave = function(key) {
+    if (key === 'q') {
+        const search = document.querySelector('#catalog-search');
+        if (search) search.value = '';
+    }
+    if (key === 'price') {
+        document.querySelectorAll('#price-min, #price-max').forEach(input => { input.value = ''; });
+    }
+    sincronizarURLCatalogo({ replace: false });
     cargarProductosConFiltros();
 };
 
@@ -419,7 +625,7 @@ window.limpiarFiltrosCatalogo = function() {
     document.querySelectorAll('#drawer-filter input').forEach(input => { input.checked = false; if (input.type === 'number') input.value = ''; });
     const search = document.querySelector('#catalog-search'); if (search) search.value = '';
     const sort = document.querySelector('#catalog-sort'); if (sort) sort.value = 'featured';
-    history.replaceState({}, '', location.pathname);
+    sincronizarURLCatalogo({ replace: false });
     cargarProductosConFiltros();
 };
 
@@ -434,90 +640,15 @@ window.toggleFavorito = function(id, button) {
 };
 
 async function cargarDetalleProducto() {
-    const id = new URLSearchParams(location.search).get('id') || '1';
-    let productosDisponibles = [...PRODUCTOS_LOCALES, ...PRODUCTOS_BASE];
-    let producto = productosDisponibles.find(p => String(p.id) === String(id));
-    if (!producto) producto = PRODUCTOS_BASE[0];
-
-    const obtenerGrupo = item => agruparVariantes(productosDisponibles).find(candidate => candidate.variants.some(variant => String(variant.id) === String(item.id)));
-    const obtenerVariantes = item => {
-        const grupo = obtenerGrupo(item);
-        return grupo?.variants || [item];
-    };
-
-    const aplicarSelectorColor = (item, variantes) => {
-        const picker = document.querySelector('#product-variants');
-        const options = picker?.querySelector('.product-variants');
-        if (!picker || !options) return;
-        if (!Array.isArray(variantes) || variantes.length < 2) {
-            picker.hidden = true;
-            options.replaceChildren();
-            return;
-        }
-        picker.hidden = false;
-        options.innerHTML = variantes.map(variant => {
-            const variantId = String(variant.id || '');
-            const selected = variantId === String(item.id);
-            const label = etiquetaVariante(variant);
-            return `<button class="color-swatch${selected ? ' selected' : ''}" type="button" data-detail-variant-id="${safe(variantId)}" aria-label="${safe(label)}" aria-pressed="${selected}"><img src="${safeURL(variant.image)}" alt="" loading="lazy" decoding="async"><span>${safe(label)}</span></button>`;
-        }).join('');
-        options.querySelectorAll('[data-detail-variant-id]').forEach(button => button.addEventListener('click', () => {
-            const selected = variantes.find(variant => String(variant.id) === String(button.dataset.detailVariantId));
-            if (!selected) return;
-            const url = new URL(window.location.href);
-            url.searchParams.set('id', String(selected.id));
-            history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
-            aplicarProducto(selected);
-        }));
-    };
-
-    const aplicarProducto = item => {
-        const image = document.querySelector('.main-img');
-        const brand = document.querySelector('.info .brand');
-        const title = document.querySelector('.info .title');
-        const price = document.querySelector('.price-box span');
-        const description = document.querySelector('.product-copy');
-        const grupo = obtenerGrupo(item);
-        const modelTitle = grupo?.title || grupoTitleForVariant(item, grupo?.groupKey);
-        if (image) { image.src = safeURL(item.image); image.alt = `${item.brand} ${modelTitle}`; }
-        if (brand) brand.textContent = item.brand;
-        if (title) title.textContent = modelTitle;
-        const productCode = document.querySelector('.product-code');
-        if (productCode) productCode.textContent = `ARMAZÓN ÓPTICO · COLOR ${etiquetaVariante(item)} · DISPONIBLE EN TIENDA Y ONLINE`;
-        if (price) price.textContent = Number(item.price) > 0 ? `$${Number(item.price).toLocaleString('es-CL')}` : 'Consultar precio';
-        if (description && item.description) description.textContent = item.description;
-        const material = document.querySelector('.spec-material');
-        if (material) material.textContent = item.material ? String(item.material).replace(/^./, c => c.toUpperCase()) : 'Material seleccionado';
-        const installments = document.querySelector('.installments');
-        if (installments && Number(item.price) > 0) installments.textContent = `Hasta 12 cuotas de $${Math.ceil(Number(item.price) / 12).toLocaleString('es-CL')}`;
-        document.querySelectorAll('.config-image').forEach(el => { el.src = safeURL(item.image); el.alt = `${item.brand} ${modelTitle}`; });
-        const configName = document.querySelector('.config-product strong');
-        if (configName) configName.textContent = `${item.brand} · ${modelTitle} · ${etiquetaVariante(item)}`;
-        document.title = `${modelTitle} | Óptica Nuevo Horizonte`;
-        const addButton = document.querySelector('.btn-add');
-        const buyButton = document.querySelector('.btn-buy-now');
-        if (addButton) {
-            addButton.disabled = !(Number(item.price) > 0);
-            addButton.textContent = Number(item.price) > 0 ? 'AÑADIR A MI BOLSA DE COMPRAS' : 'PRECIO POR CONFIRMAR';
-            addButton.onclick = () => agregarAlCarritoDirecto(String(item.id), item.title, item.brand, item.price, item.image);
-        }
-        if (buyButton) {
-            buyButton.disabled = !(Number(item.price) > 0);
-            buyButton.onclick = () => comprarAhora(String(item.id), item.title, item.brand, item.price, item.image);
-        }
-        aplicarSelectorColor(item, obtenerVariantes(item));
-        initConfiguradorCristales(item);
-    };
-    aplicarProducto(producto);
-
-    try {
-        if (!_supabase) return;
-        const { data, error } = await _supabase.from('optica_productos').select('*');
-        if (error || !Array.isArray(data) || !data.length) return;
-        productosDisponibles = data;
-        const remoto = data.find(item => String(item.id) === String(id));
-        if (remoto) { producto = remoto; aplicarProducto(producto); }
-    } catch (error) { /* La ficha base mantiene disponible la página sin conexión. */ }
+    if (!_productDetail.init) return null;
+    return _productDetail.init({
+        supabase: _supabase,
+        localProducts: PRODUCTOS_LOCALES,
+        fallbackProducts: PRODUCTOS_BASE,
+        addToCart: window.agregarAlCarritoDirecto,
+        buyNow: window.comprarAhora,
+        onConfigure: producto => initConfiguradorCristales(producto)
+    });
 }
 
 function initConfiguradorCristales(producto) {
@@ -620,14 +751,29 @@ function initConfiguradorCristales(producto) {
         if (selected[0]?.id === 'armazon' || step === steps.length - 1) return addConfigured();
         step++; render();
     };
-    modal.addEventListener('keydown', event => { if (event.key === 'Escape') close(); });
+    if (!modal.dataset.escapeBound) {
+        modal.addEventListener('keydown', event => { if (event.key === 'Escape') close(); });
+        modal.dataset.escapeBound = 'true';
+    }
 }
 
+let _lastCatalogFilterTrigger = null;
 window.toggleDrawer = function(open) {
     const drawer = document.querySelector('#drawer-filter');
     if (drawer) {
-        if (open) drawer.classList.add('active');
-        else drawer.classList.remove('active');
+        const trigger = document.querySelector('#open-filters');
+        if (open) {
+            _lastCatalogFilterTrigger = document.activeElement;
+            drawer.classList.add('active');
+            drawer.setAttribute('aria-hidden', 'false');
+            trigger?.setAttribute('aria-expanded', 'true');
+            window.requestAnimationFrame?.(() => document.querySelector('#close-filters')?.focus());
+        } else {
+            drawer.classList.remove('active');
+            drawer.setAttribute('aria-hidden', 'true');
+            trigger?.setAttribute('aria-expanded', 'false');
+            (_lastCatalogFilterTrigger || trigger)?.focus?.();
+        }
         document.body.classList.toggle('drawer-open', open);
     }
 };
@@ -704,12 +850,13 @@ function mostrarProductoAgregado(nombre, marca) {
     timeout = setTimeout(cerrar, 5000);
 }
 
-window.agregarAlCarritoDirecto = function(id, nombre, marca, precio, imagen) {
+window.agregarAlCarritoDirecto = function(id, nombre, marca, precio, imagen, sku) {
     let carrito = obtenerCarrito();
     const productId = String(id);
-    const index = carrito.findIndex(item => String(item.sku) === productId);
+    const productSku = String(sku || productId);
+    const index = carrito.findIndex(item => String(item.sku) === productSku);
     if (index !== -1) carrito[index].quantity += 1;
-    else carrito.push({ id: productId, product_id: productId, sku: productId, nombre, marca, precio: parseInt(precio), imagen, quantity: 1, cantidad: 1, crystal_config: {}, configuracion: [] });
+    else carrito.push({ id: productSku, product_id: productId, sku: productSku, nombre, marca, precio: parseInt(precio), imagen, quantity: 1, cantidad: 1, crystal_config: {}, configuracion: [] });
     guardarCarrito(carrito);
     mostrarProductoAgregado(nombre, marca);
 };
@@ -723,12 +870,13 @@ window.agregarAlCarritoConfigurado = function(productId, sku, nombre, marca, pre
     mostrarProductoAgregado(nombre, marca);
 };
 
-window.comprarAhora = function(id, nombre, marca, precio, imagen) {
+window.comprarAhora = function(id, nombre, marca, precio, imagen, sku) {
     let carrito = obtenerCarrito();
     const productId = String(id);
-    const index = carrito.findIndex(item => String(item.sku) === productId);
+    const productSku = String(sku || productId);
+    const index = carrito.findIndex(item => String(item.sku) === productSku);
     if (index !== -1) carrito[index].quantity += 1;
-    else carrito.push({ id: productId, product_id: productId, sku: productId, nombre, marca, precio: Number(precio), imagen, quantity: 1, cantidad: 1, crystal_config: {}, configuracion: [] });
+    else carrito.push({ id: productSku, product_id: productId, sku: productSku, nombre, marca, precio: Number(precio), imagen, quantity: 1, cantidad: 1, crystal_config: {}, configuracion: [] });
     guardarCarrito(carrito);
     window.location.href = 'checkout.html';
 };

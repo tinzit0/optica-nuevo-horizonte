@@ -23,29 +23,94 @@
     .option-visual.option-photo img{width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply}
     @media(max-width:900px){.option-card:has(.option-photo){grid-template-columns:82px 1fr}.option-visual.option-photo{width:72px;height:60px}}
   </style>
+  <style>
+    .gallery-stage{position:relative;outline:none}
+    .gallery-stage:focus-visible{box-shadow:0 0 0 3px rgba(185,147,80,.45)}
+    .gallery-stage.is-zoomed{cursor:zoom-out}
+    .gallery-stage.is-zoomed .main-img{transform:scale(1.65);cursor:zoom-out}
+    .main-img{cursor:zoom-in;will-change:transform;transition:transform .28s ease,opacity .18s}
+    .gallery-nav{position:absolute;z-index:2;top:50%;display:grid;place-items:center;width:46px;height:46px;border:1px solid var(--line);border-radius:50%;background:rgba(255,255,255,.92);color:var(--forest);font-size:1.65rem;line-height:1;cursor:pointer;transform:translateY(-50%);transition:background .18s,transform .18s}
+    .gallery-nav:hover{background:#fff;transform:translateY(-50%) scale(1.04)}
+    .gallery-prev{left:18px}.gallery-next{right:18px}
+    .gallery-nav[hidden],.gallery-count[hidden],.gallery-empty[hidden]{display:none}
+    .gallery-count{position:absolute;bottom:16px;left:50%;padding:6px 10px;border-radius:999px;background:rgba(16,23,19,.72);color:#fff;font-size:.65rem;letter-spacing:.08em;transform:translateX(-50%)}
+    .gallery-empty{display:grid;place-items:center;gap:7px;width:82%;height:76%;padding:28px;border:1px dashed var(--line);color:var(--muted);text-align:center}
+    .gallery-empty strong{color:var(--ink);font:500 1.15rem var(--serif)}
+    .gallery-empty span{font-size:.73rem;line-height:1.5}
+    .gallery-thumbs{display:flex;gap:10px;overflow-x:auto;margin-top:12px;padding:2px 2px 6px;scrollbar-width:thin}
+    .gallery-thumb{flex:0 0 auto;width:82px;height:68px;padding:4px;border:1px solid var(--line);background:#fff;cursor:pointer;transition:border-color .18s,box-shadow .18s}
+    .gallery-thumb:hover,.gallery-thumb.selected{border-color:var(--forest);box-shadow:inset 0 0 0 1px var(--forest)}
+    .gallery-thumb-image,.variant-thumb{display:block;width:100%;height:100%;object-fit:contain}
+    .variant-thumb-empty{background:linear-gradient(135deg,#f4f1eb,#e4e9e5)}
+    .product-identity{display:flex;align-items:center;gap:10px;margin-top:10px;color:var(--muted);font-size:.68rem}
+    .product-identity span,.product-attributes span{font-size:.62rem;letter-spacing:.08em;text-transform:uppercase}
+    .product-identity strong,.product-attributes strong{color:var(--ink);font-weight:600}
+    .product-attributes{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:20px 0;color:var(--muted);font-size:.72rem}
+    .product-attributes>div{display:grid;gap:4px;padding:13px;background:var(--cream)}
+    .availability{display:flex;align-items:center;gap:8px;margin:18px 0 10px;color:var(--forest);font-size:.72rem;font-weight:700}
+    .availability:before{content:'';width:8px;height:8px;border-radius:50%;background:currentColor}
+    .availability.is-unavailable{color:#a43d3d}
+    .product-features{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 20px;list-style:none}
+    .product-features[hidden]{display:none}
+    .product-features li{padding:7px 10px;border:1px solid var(--line);color:var(--muted);font-size:.68rem}
+    .product-features li:before{content:'✓';margin-right:6px;color:var(--gold);font-weight:700}
+    .btn-configure:disabled,.btn-add:disabled,.mobile-buy-bar button:disabled{opacity:.45;cursor:not-allowed}
+    .premium-trust{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;margin-top:20px;background:var(--line)}
+    .premium-trust span{padding:10px 8px;background:var(--cream);color:var(--muted);font-size:.6rem;text-align:center}
+    .mobile-buy-bar{display:none}
+    @media(max-width:560px){
+      .gallery-stage{height:330px}
+      .gallery-thumbs{margin-bottom:18px}
+      .gallery-nav{width:42px;height:42px}
+      .mobile-buy-bar{position:fixed;right:0;bottom:0;left:0;z-index:2000;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:11px 14px;background:rgba(251,250,247,.96);border-top:1px solid var(--line);box-shadow:0 -10px 30px rgba(16,23,19,.14)}
+      .mobile-buy-bar span{font-size:.82rem;font-weight:700}
+      .mobile-buy-bar button{min-height:45px;padding:0 15px;border:0;background:var(--forest);color:#fff;font-size:.62rem;font-weight:700;letter-spacing:.06em}
+      .mobile-buy-bar button:disabled{opacity:.45}
+      body{padding-bottom:76px}
+      .premium-trust{grid-template-columns:repeat(2,1fr)}
+    }
+  </style>
 </head>
 <body>
   <div class="announcement">Atención personalizada · Envíos a todo Chile · Garantía óptica</div>
   <header class="header"><div class="header-inner"><a href="index.html" class="logo-text">Nuevo Horizonte</a><nav class="header-actions"><a href="catalogo.html">← Catálogo</a><a class="bag-link" href="carrito.html">Mi bolsa <span class="badge-count">0</span></a></nav></div></header>
   <main class="product-detail">
-    <section class="gallery"><div class="gallery-stage"><img class="main-img" src="" alt=""><span class="zoom-note">Vista ampliada</span></div></section>
+    <section class="gallery" aria-label="Galería del producto">
+      <div class="gallery-stage" tabindex="0" aria-label="Imagen del producto">
+        <button class="gallery-nav gallery-prev" type="button" data-gallery-prev aria-label="Imagen anterior">‹</button>
+        <img class="main-img" src="" alt="" hidden>
+        <button class="gallery-nav gallery-next" type="button" data-gallery-next aria-label="Imagen siguiente">›</button>
+        <span class="zoom-note">Haz clic para ampliar</span>
+        <span class="gallery-count" data-gallery-count hidden aria-live="polite"></span>
+        <div class="gallery-empty" data-gallery-empty hidden role="status"><strong>Imagen no disponible</strong><span>Consulta este modelo con nuestro equipo.</span></div>
+      </div>
+      <div class="gallery-thumbs" role="tablist" aria-label="Imágenes del producto"></div>
+    </section>
     <section class="info">
-      <div class="brand"></div><h1 class="title"></h1><div class="product-code">ARMAZÓN ÓPTICO · DISPONIBLE EN TIENDA Y ONLINE</div><div class="product-variant-picker" id="product-variants" hidden aria-label="Seleccionar color del armazón"><h2>Color del armazón</h2><div class="product-variants"></div></div>
+      <div class="brand"></div><h1 class="title"></h1><div class="product-code">ARMAZÓN ÓPTICO · DISPONIBLE EN TIENDA Y ONLINE</div>
+      <div class="product-identity"><span>Código</span><strong data-product-sku>Consultar código</strong></div>
+      <div class="product-variant-picker" id="product-variants" hidden aria-label="Seleccionar color del armazón"><h2>Color del armazón</h2><div class="product-variants"></div></div>
+      <div class="product-attributes" aria-label="Características del producto"><div><span>Color</span><strong data-product-color>Consultar color</strong></div><div><span>Material</span><strong data-product-material>Consultar material</strong></div></div>
+      <div class="availability" data-product-availability role="status" aria-live="polite">Consultar disponibilidad</div>
+      <ul class="product-features" id="product-features" hidden aria-label="Características"></ul>
       <div class="price-row"><span class="price-label">Precio armazón</span><div class="price-box"><span></span></div></div><div class="installments"></div>
       <p class="product-copy">Armazón óptico de diseño contemporáneo para uso diario.</p>
       <button class="btn-configure" type="button">Seleccionar cristales <small>Con receta, descanso o solo armazón</small></button>
       <button class="btn-add" data-id="">Añadir solo armazón a mi bolsa</button><button class="btn-buy-now" type="button">Comprar ahora</button>
       <div class="benefits"><div class="benefit"><span class="benefit-icon">♢</span><div><strong>Garantía óptica y estética</strong><span>Respaldo y ajuste profesional en nuestra óptica.</span></div></div><div class="benefit"><span class="benefit-icon">▣</span><div><strong>Despacho a todo Chile</strong><span>Seguimiento del pedido o retiro gratuito en Concepción.</span></div></div><div class="benefit"><span class="benefit-icon">✓</span><div><strong>Compra segura</strong><span>Pago protegido y atención antes y después de tu compra.</span></div></div></div>
       <div class="specs"><div class="spec"><span>Material</span><strong class="spec-material">Acetato</strong></div><div class="spec"><span>Incluye</span><strong>Estuche + paño</strong></div><div class="spec"><span>Ajuste</span><strong>Sin costo</strong></div></div>
+      <div class="premium-trust" aria-label="Servicios de la óptica"><span>Garantía óptica</span><span>Despacho nacional</span><span>Retiro en tienda</span><span>Asesoría personalizada</span></div>
     </section>
   </main>
-  <section class="configurator" id="lens-configurator" aria-hidden="true" aria-label="Configurar cristales">
+  <div class="mobile-buy-bar" aria-label="Compra rápida"><span data-mobile-price>Consultar precio</span><button type="button" data-mobile-add>AÑADIR A LA BOLSA</button></div>
+  <section class="configurator" id="lens-configurator" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Configurar cristales">
     <div class="config-preview"><div class="config-brand">Óptica Nuevo Horizonte</div><button class="selection-toggle" type="button">☷ &nbsp; TU SELECCIÓN</button><img class="config-image" src="" alt=""><div class="config-product"><strong></strong><span>Los colores del armazón y cristal son referenciales.</span></div><aside class="selection-summary"><h3>Tu selección</h3><div id="selection-lines"></div></aside></div>
     <div class="config-panel"><div class="config-top"><button class="config-back" type="button" aria-label="Volver">‹</button><button class="config-close" type="button" aria-label="Cerrar">×</button><div class="progress-track"><div class="progress-fill"></div></div></div><div class="step-body"></div><footer class="config-footer"><div class="subtotal"><small>Subtotal</small><strong>$0</strong></div><button class="next-step" type="button" disabled>Continuar</button></footer></div>
   </section>
   <script src="js/supabase-client.js" defer></script>
   <script src="js/modules/ui.js" defer></script>
   <script src="js/modules/products.js" defer></script>
+  <script src="js/modules/product-detail.js" defer></script>
   <script src="js/modules/cart.js" defer></script>
   <script src="js/modules/checkout.js" defer></script>
   <script src="js/modules/navigation.js" defer></script>

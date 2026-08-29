@@ -64,6 +64,40 @@
         });
     }
 
+    function normalizeText(value) {
+        return String(value ?? '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLocaleLowerCase('es')
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+
+    function asList(value) {
+        const values = Array.isArray(value) ? value : [value];
+        return values.flatMap(item => String(item ?? '').split(',')).map(normalizeText).filter(Boolean);
+    }
+
+    function getProductFeatures(product) {
+        return asList(Array.isArray(product?.features)
+            ? product.features
+            : String(product?.features || '').split(','));
+    }
+
+    function getProductSearchText(product) {
+        return normalizeText([
+            product?.brand,
+            product?.title,
+            product?.name,
+            product?.nombre,
+            product?.id,
+            product?.sku,
+            product?.color,
+            product?.material,
+            product?.shape
+        ].filter(Boolean).join(' '));
+    }
+
     function filterProducts(products, criteria = {}) {
         const {
             categories = [],
@@ -77,20 +111,26 @@
             minPrice = 0,
             maxPrice = Infinity
         } = criteria;
-        const normalizedSearch = String(search).trim().toLocaleLowerCase('es');
+        const normalizedSearch = normalizeText(search);
+        const normalizedCategories = asList(categories);
+        const normalizedGenders = asList(genders);
+        const normalizedBrands = asList(brands);
+        const normalizedShapes = asList(shapes);
+        const normalizedColors = asList(colors);
+        const normalizedMaterials = asList(materials);
+        const normalizedFeatures = asList(features);
 
         return (Array.isArray(products) ? products : []).filter(product => {
-            const matchCategory = !categories.length || categories.includes(product.category);
-            const matchGender = !genders.length || genders.includes(product.gender);
-            const matchBrand = !brands.length || brands.some(brand => String(product.brand || '').toLowerCase().includes(String(brand).toLowerCase()));
-            const matchShape = !shapes.length || shapes.includes(product.shape || '');
-            const matchColor = !colors.length || colors.includes(product.color || '');
-            const matchMaterial = !materials.length || materials.includes(product.material || '');
-            const productFeatures = Array.isArray(product.features)
-                ? product.features
-                : String(product.features || '').split(',').map(value => value.trim()).filter(Boolean);
-            const matchFeatures = features.every(feature => productFeatures.includes(feature));
-            const searchable = `${product.brand || ''} ${product.title || ''} ${product.color || ''} ${product.shape || ''} ${product.material || ''}`.toLocaleLowerCase('es');
+            const matchCategory = !normalizedCategories.length || normalizedCategories.includes(normalizeText(product.category));
+            const matchGender = !normalizedGenders.length || normalizedGenders.includes(normalizeText(product.gender));
+            const normalizedBrand = normalizeText(product.brand);
+            const matchBrand = !normalizedBrands.length || normalizedBrands.some(brand => normalizedBrand === brand || normalizedBrand.includes(brand));
+            const matchShape = !normalizedShapes.length || normalizedShapes.includes(normalizeText(product.shape));
+            const matchColor = !normalizedColors.length || normalizedColors.includes(normalizeText(product.color));
+            const matchMaterial = !normalizedMaterials.length || normalizedMaterials.includes(normalizeText(product.material));
+            const productFeatures = getProductFeatures(product);
+            const matchFeatures = normalizedFeatures.every(feature => productFeatures.includes(feature));
+            const searchable = getProductSearchText(product);
             const price = Number(product.price) || 0;
             return matchCategory && matchGender && matchBrand && matchShape && matchColor && matchMaterial && matchFeatures
                 && (!normalizedSearch || searchable.includes(normalizedSearch))
@@ -101,10 +141,12 @@
     root.products = Object.freeze({
         resolveProducts,
         findById,
-        filterProducts,
         getVariantGroupKey,
         getVariantLabel,
         getModelTitle,
-        groupVariants
+        groupVariants,
+        normalizeText,
+        getProductSearchText,
+        filterProducts
     });
 })(window);
